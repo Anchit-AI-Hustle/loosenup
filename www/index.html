@@ -18,6 +18,13 @@
   <link rel="preload" href="/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
+  <script>
+    /* Apply the theme before first paint so there is no flash at night. */
+    (function () { try { var t = localStorage.getItem('loosenup.theme') || 'auto';
+      var d = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light'); } catch (e) {} })();
+  </script>
+  <script src="/i18n.js" defer></script>
   <script src="/app.js" defer></script>
 </head>
 <body>
@@ -85,6 +92,10 @@
           </svg>
         </div>
         <p class="eyebrow">Two calm minutes</p>
+        <div class="chips lang-switch" role="group" aria-label="Language" data-no-tr>
+          <button class="chip" type="button" data-lang-choice="en" aria-pressed="true" lang="en">English</button>
+          <button class="chip" type="button" data-lang-choice="hi" aria-pressed="false" lang="hi">हिन्दी</button>
+        </div>
         <h1 id="welcome-title" class="display">Welcome. Take a breath.</h1>
         <p class="lead">Two calm minutes to loosen up and feel lighter. Ease a tense workday, soften a heavy mood, and watch your Calm gain grow into a garden.</p>
         <form id="welcome-form" class="stack" novalidate>
@@ -159,6 +170,20 @@
         </article>
         <h2 class="subtitle">Or choose another</h2>
         <div id="pick-chips" class="chips"></div>
+        <article class="card guide-card">
+          <h2 class="subtitle">Audio guide</h2>
+          <div class="chips" role="group" aria-label="Audio guide">
+            <button class="chip" type="button" data-guide="voice" aria-pressed="false">Voice</button>
+            <button class="chip" type="button" data-guide="chime" aria-pressed="true">Chimes</button>
+          </div>
+          <p class="field-label">Background sound</p>
+          <div class="chips" role="group" aria-label="Background sound">
+            <button class="chip" type="button" data-bed="none" aria-pressed="true">None</button>
+            <button class="chip" type="button" data-bed="rain" aria-pressed="false">Rain</button>
+            <button class="chip" type="button" data-bed="ocean" aria-pressed="false">Ocean</button>
+            <button class="chip" type="button" data-bed="brown" aria-pressed="false">Deep hush</button>
+          </div>
+        </article>
         <button id="pick-begin" class="btn btn-sun" type="button">Begin</button>
         <button id="pick-quick" class="btn btn-ghost" type="button">Quick breeze instead, 60s, always free</button>
       </section>
@@ -340,6 +365,7 @@
             <button class="tool tool-safety" type="button" data-tool="safety"><span class="tool-ic" aria-hidden="true">&#9729;</span><strong>Safety plan</strong><span>Your steps for hard moments</span></button>
             <button class="tool tool-reframe" type="button" data-tool="reframe"><span class="tool-ic" aria-hidden="true">&#10227;</span><strong>Reframe a thought</strong><span>Find a kinder, truer view</span></button>
             <button class="tool tool-sounds" type="button" data-tool="sounds"><span class="tool-ic" aria-hidden="true">&#9835;</span><strong>Calm sounds</strong><span>Rain, ocean, sleep timer</span></button>
+            <button class="tool tool-learn" type="button" data-tool="learn"><span class="tool-ic" aria-hidden="true">&#10070;</span><strong>Learn</strong><span>One-minute lessons</span></button>
             <button class="tool tool-check" type="button" data-tool="wellbeing"><span class="tool-ic" aria-hidden="true">&#9728;</span><strong>Wellbeing check</strong><span>Track how you are really doing</span></button>
           </div>
         </section>
@@ -515,6 +541,26 @@
         <p class="fine">Uses the WHO-5 Wellbeing Index (World Health Organization).</p>
       </section>
 
+      <!-- Learn -->
+      <section id="screen-learn" class="screen tool-screen" data-screen="learn" hidden aria-labelledby="learn-title">
+        <button class="btn btn-ghost back-btn" type="button" data-back>Back</button>
+        <p class="eyebrow">One minute each</p>
+        <h1 id="learn-title" class="title">Learn</h1>
+        <p class="muted">Short, kind lessons on why the breaks work, and what helps on heavy days.</p>
+        <ul id="lesson-list" class="lesson-list"></ul>
+      </section>
+
+      <!-- Lesson -->
+      <section id="screen-lesson" class="screen tool-screen" data-screen="lesson" hidden aria-labelledby="lesson-title">
+        <button class="btn btn-ghost back-btn" type="button" id="lesson-back">Back to lessons</button>
+        <p class="eyebrow" id="lesson-meta"></p>
+        <h1 id="lesson-title" class="title"></h1>
+        <article class="card lesson-body" id="lesson-body"></article>
+        <article class="card takeaway"><p class="tag">Take this with you</p><p id="lesson-takeaway" class="kind-note"></p></article>
+        <button id="lesson-try" class="btn btn-sun" type="button"></button>
+        <p class="fine">LoosenUp is a wellbeing companion, not medical care.</p>
+      </section>
+
       <!-- Play -->
       <section id="screen-play" class="screen" data-screen="play" hidden aria-labelledby="play-title">
         <p class="eyebrow">Calm little games</p>
@@ -603,6 +649,41 @@
             <button id="golden-save" class="btn btn-soft" type="button">Save</button>
           </div>
           <button id="golden-clear" class="btn btn-ghost" type="button" hidden>Turn off Golden hour</button>
+        </article>
+        <article class="card" id="lock-card">
+          <h2 class="subtitle">App lock</h2>
+          <p class="muted" id="lock-status">Keep your notes private with a PIN.</p>
+          <div id="lock-setup" class="stack" hidden>
+            <label class="field-label" for="pin-new">New PIN (4 to 6 digits)</label>
+            <input id="pin-new" class="text-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off">
+            <label class="field-label" for="pin-confirm">Type it again</label>
+            <input id="pin-confirm" class="text-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off">
+            <button id="pin-save" class="btn btn-sun" type="button">Turn on app lock</button>
+          </div>
+          <div id="lock-off-form" class="stack" hidden>
+            <label class="field-label" for="pin-current">Current PIN</label>
+            <input id="pin-current" class="text-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off">
+            <button id="pin-off" class="btn btn-soft" type="button">Turn off app lock</button>
+          </div>
+          <button id="lock-toggle" class="btn btn-soft" type="button">Set a PIN</button>
+          <button id="bio-toggle" class="btn btn-ghost" type="button" aria-pressed="false" hidden>Use Face ID or fingerprint: off</button>
+        </article>
+        <article class="card">
+          <h2 class="subtitle">Appearance</h2>
+          <div class="chips" role="group" aria-label="Theme">
+            <button class="chip" type="button" data-theme-choice="auto" aria-pressed="true">Auto</button>
+            <button class="chip" type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+            <button class="chip" type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+          </div>
+          <p class="fine">Auto follows your phone, so LoosenUp turns gentle and dark at night.</p>
+        </article>
+        <article class="card">
+          <h2 class="subtitle">Language</h2>
+          <div class="chips" role="group" aria-label="Language" data-no-tr>
+            <button class="chip" type="button" data-lang-choice="en" aria-pressed="true" lang="en">English</button>
+            <button class="chip" type="button" data-lang-choice="hi" aria-pressed="false" lang="hi">हिन्दी</button>
+          </div>
+          <p class="fine">Hindi voice uses your phone's Hindi voice when it has one.</p>
         </article>
         <article class="card">
           <h2 class="subtitle">Voice guide</h2>
@@ -748,6 +829,25 @@
     <button id="reset-confirm" class="btn btn-soft" type="button">Yes, start fresh</button>
     <button id="reset-cancel" class="btn btn-ghost" type="button">Keep my garden</button>
   </section>
+
+  <div id="lock-screen" class="lock" role="dialog" aria-modal="true" aria-labelledby="lock-title" hidden>
+    <div class="lock-inner">
+      <svg class="lock-logo" viewBox="0 0 40 40" aria-hidden="true"><use href="#lift-logo" width="40" height="40"/></svg>
+      <h2 id="lock-title" class="title">Welcome back</h2>
+      <p class="muted">Enter your PIN to open LoosenUp.</p>
+      <label class="sr-only" for="lock-pin">PIN</label>
+      <input id="lock-pin" class="text-input pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="PIN">
+      <button id="lock-unlock" class="btn btn-sun" type="button">Unlock</button>
+      <button id="lock-bio" class="btn btn-soft" type="button" hidden>Use Face ID or fingerprint</button>
+      <p id="lock-msg" class="fine" aria-live="polite"></p>
+      <button id="lock-sos" class="btn btn-sos" type="button">SOS: get support now</button>
+      <button id="lock-forgot" class="btn btn-ghost" type="button">Forgot PIN?</button>
+      <div id="lock-reset" class="card" hidden>
+        <p class="muted">For your privacy, the PIN cannot be recovered. You can restore a backup after starting fresh.</p>
+        <button id="lock-erase" class="btn btn-soft" type="button">Erase and start fresh</button>
+      </div>
+    </div>
+  </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </body>

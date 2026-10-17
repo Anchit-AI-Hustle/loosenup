@@ -11,7 +11,7 @@ The brand mark is a petal sun that opens on every in-breath, unfurls on the resu
 - **Live app:** https://loosenup-ios.anchit-tandon.com (iPhone and web), https://loosenup-android.anchit-tandon.com (Android install page), also https://loosenup.vercel.app
 - **QR codes:** [loosenup-android-qr.png](loosenup-android-qr.png), [loosenup-ios-qr.png](loosenup-ios-qr.png)
 - **Android APK:** `downloads/loosenup-android.apk` (served at `/download/loosenup-android.apk`; also `dist/loosenup-android-debug-v1.3.1.apk`)
-- **Repository:** https://github.com/Anchit-AI-Hustle/loosenup (private)
+- **Repository:** https://github.com/Anchit-AI-Hustle/loosenup (public)
 
 ## Install on your phone
 
@@ -38,6 +38,11 @@ Both domains (and https://loosenup.vercel.app) serve the same Vercel project. `a
 | Reframe a thought | A five-step CBT thought record with before and after ratings. Only the kinder thought can be kept (in the Good things jar); everything else is cleared. Crisis phrases open SOS. |
 | Calm sounds | Rain, ocean, deep hush (brown noise) and breeze generated on the device with Web Audio, volume and a 15, 30 or 60 minute sleep timer. Works offline. |
 | Wellbeing check | The WHO-5 Wellbeing Index every two weeks (0 to 100) with a trend. Lower scores point to Find support; very low scores open SOS. A check-in, not a diagnosis. |
+| Hindi (हिन्दी) | Choose English or हिन्दी on Welcome or in Me. Every screen, tool, lesson, game, sheet, toast and notification switches to Hindi (www/i18n.js, about 700 entries plus sentence patterns for names and counts); brand words such as LoosenUp, Seeds, Calm gain and technique names stay in English. The voice guide speaks Hindi with the phone's hi-IN voice, dates use Hindi month names, and the SOS text to a trusted person is written in Hindi. Hindi and Hinglish crisis phrases (for example आत्महत्या, मरना चाहता, जीना नहीं चाहती, khudkushi, marna chahta) open SOS. Switching back restores the English exactly. |
+| App lock | An optional 4 to 6 digit PIN (stored only as a salted SHA-256 hash) with Face ID or fingerprint on the phone apps. LoosenUp asks again after a minute in the background. A forgotten PIN can only be cleared by starting fresh, then restoring a backup. |
+| Dark mode | Auto (follows the phone), Light or Dark, applied before the first paint so there is no flash. |
+| Learn | Nine one-minute lessons: long breath out, thoughts are guesses, action first on heavy days, sleep, self-kindness, boundaries at work, repair after a disagreement, supporting a friend, and when to talk to a professional. Each ends with a takeaway and a Try it button that opens the matching break or tool. |
+| Audio-guided breaks | Optional voice narration (intro, each cue, a kind close), soft chimes when the breath changes, and a background bed of rain, ocean or brown noise, all remembered for next time. |
 | Backup and restore | Save a JSON backup file and restore it on a new phone. The previous data is kept for undo. |
 | Live updates | The iPhone and Android apps check /updates/latest.json on loosenup-ios.anchit-tandon.com, download the checksum-verified bundle and apply it next launch (@capgo/capacitor-updater in self-hosted mode, no third-party servers). Run scripts/build-web-update.sh before each deploy. |
 | First open | Welcome (first name), welcome gift of 5 Seeds and 25 XP (Seedling bar starts at 50 percent), then straight into the first break. No paywall. |

@@ -26,7 +26,8 @@ test('AT21 the update bundle matches this release exactly', () => {
   assert.equal(m.url, `https://loosenup-ios.anchit-tandon.com/updates/loosenup-web-${m.version}.zip`);
   assert.equal(createHash('sha256').update(readFileSync(zip)).digest('hex'), m.checksum, 'checksum matches');
   const zipped = execFileSync('unzip', ['-p', zip, 'app.js']).toString();
-  assert.equal(zipped, read('www/app.js'), 'bundle app.js is the current source (rebuild with scripts/build-web-update.sh)');
+  const h = (x) => createHash('sha256').update(x).digest('hex');
+  assert.equal(h(zipped), h(read('www/app.js')), 'bundle app.js is the current source (rebuild with scripts/build-web-update.sh)');
   assert.ok(execFileSync('unzip', ['-l', zip]).toString().includes('index.html'), 'index.html at bundle root');
 });
 

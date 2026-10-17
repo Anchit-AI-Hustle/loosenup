@@ -87,7 +87,7 @@ async function walkScreens(page, width, label) {
   await check('jar');
   await page.click('#good-close');
   await page.click('[data-tab="today"]');
-  for (const tool of ['support', 'safety', 'reframe', 'sounds', 'wellbeing']) {
+  for (const tool of ['support', 'safety', 'reframe', 'sounds', 'learn', 'wellbeing']) {
     await page.click(`#screen-today .toolkit [data-tool="${tool}"]`);
     await check('tool-' + tool);
     await page.click(`#screen-${tool} [data-back]`);
@@ -155,7 +155,7 @@ test('AT13 every visible button and tab is at least 48px tall and wide', async (
   for (const g of ['pairs', 'catch', 'bloom']) { await page.click('[data-tab="play"]'); await page.click(`[data-game="${g}"]`); await measure('game-' + g); await page.click('#game-back'); }
   await page.click('[data-tab="today"]'); await page.click('[data-mood="3"]'); await measure('today-mood');
   await page.click('[data-tab="today"]');
-  for (const tool of ['support', 'safety', 'reframe', 'sounds', 'wellbeing']) { await page.click(`#screen-today .toolkit [data-tool="${tool}"]`); await measure('tool-' + tool); await page.click(`#screen-${tool} [data-back]`); }
+  for (const tool of ['support', 'safety', 'reframe', 'sounds', 'learn', 'wellbeing']) { await page.click(`#screen-today .toolkit [data-tool="${tool}"]`); await measure('tool-' + tool); await page.click(`#screen-${tool} [data-back]`); }
   await page.click('#sos-btn'); await measure('sos'); await page.click('#support-close');
   await page.click('#jar-add'); await measure('jar'); await page.click('#good-close');
   await page.click('[data-space="relationships"]'); await measure('space-relationships'); await page.click('#checkin-back');
@@ -221,6 +221,32 @@ test('AT19 with the service worker active, /install.html still shows the install
   assert.equal(await page.title(), 'Install LoosenUp');
   await page.goto(server.url + '/');
   assert.equal(await page.title(), 'LoosenUp');
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
+test('AT26 Hindi in a real browser: Welcome to Today in Hindi, no errors, no horizontal scroll', async () => {
+  const { ctx, page, errors } = await newPage(360);
+  await page.goto(server.url + '/');
+  await page.click('#screen-welcome [data-lang-choice="hi"]');
+  await page.waitForTimeout(150);
+  assert.equal((await page.textContent('#welcome-title')).trim(), 'स्वागत है। एक साँस लें।');
+  assert.equal(await page.getAttribute('html', 'lang'), 'hi');
+  await page.fill('#name-input', 'Asha');
+  await page.click('#welcome-go');
+  await page.click('#gift-go');
+  await page.click('[data-context="Busy mind"]');
+  await page.click('#checkin-next');
+  await page.waitForTimeout(200);
+  const reason = await page.textContent('#screen-pick');
+  assert.match(reason, /[ऀ-ॿ]{3}/, 'pick screen in Hindi');
+  await page.evaluate(() => window.LoosenUp.go('today'));
+  await page.waitForTimeout(450);
+  const today = await page.textContent('#screen-today');
+  assert.match(today, /शांत ब्रेक/);
+  const { sw, cw } = await noHScroll(page);
+  assert.ok(sw <= cw, `no horizontal scroll (${sw} > ${cw})`);
+  await page.screenshot({ path: path.join(SHOTS, 'hindi-today-360.png'), fullPage: true });
   assert.deepEqual(errors, []);
   await ctx.close();
 });

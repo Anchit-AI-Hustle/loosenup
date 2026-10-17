@@ -21,6 +21,13 @@ XML
   [ -n "${ANDROID_HOME:-}" ] && echo "sdk.dir=$ANDROID_HOME" > android/local.properties
 fi
 
+# iOS: Face ID permission text for the app lock.
+PLIST=ios/App/App/Info.plist
+if [ -f "$PLIST" ]; then
+  /usr/libexec/PlistBuddy -c "Delete :NSFaceIDUsageDescription" "$PLIST" 2>/dev/null || true
+  /usr/libexec/PlistBuddy -c "Add :NSFaceIDUsageDescription string 'LoosenUp uses Face ID to unlock the app and keep your notes private.'" "$PLIST"
+fi
+
 PY=.venv/bin/python
 [ -x "$PY" ] || PY=python3
 "$PY" scripts/make_icons.py --native

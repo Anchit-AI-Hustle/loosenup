@@ -1,101 +1,153 @@
 LoosenUp acceptance test log
-Run at: 2026-10-17 20:21 UTC   Node v26.8.2   Live URL: https://loosenup.vercel.app
+Run at: 2026-10-17 21:11 UTC   Node v26.8.2   Live URL: https://loosenup.vercel.app
 
 == Unit, flow, copy and safety tests (jsdom) ==
-✔ AT1 manifest has the required PWA fields (1.162417ms)
-✔ AT1 every manifest icon exists with the declared pixel size (1.891042ms)
-✔ AT1 service worker is registered and precaches the shell (1.248167ms)
-✔ AT1 vercel.json sets sw.js no-cache and the manifest content type (0.47475ms)
-✔ AT2 iOS meta tags and viewport-fit=cover are present (0.593459ms)
-✔ AT2 safe-area insets are applied to nav, sheets and toast (0.7155ms)
-✔ AT3 first open shows welcome and asks for a first name (183.88625ms)
-✔ AT3 gift grants 5 Seeds and 25 XP, Seedling bar at 50 percent, then straight into the first break (56.811375ms)
-✔ AT3 gift is only granted once, even after a reload (98.137208ms)
-✔ AT4 full loop: Seed decrements, Calm gain is correct, streak 1, XP 45 (48.187125ms)
-✔ AT4 a lower after score is framed positively and earns a Seed (42.866959ms)
-✔ AT4 the garden grows by one flower per break and never shrinks (69.152125ms)
-✔ AT5 Sunny days count once per calendar day (142.714958ms)
-✔ AT5 a Rain day bridges a 2-day gap once per week and the 3-day milestone grants a Seed (43.425584ms)
-✔ AT5 a gap longer than one day starts a fresh run (37.496542ms)
-✔ AT5 milestone Seed respects the weekly free Seed cap of 2 (27.557042ms)
-✔ AT5 free reward Seeds never exceed 2 in a week across all sources (53.428833ms)
-✔ AT5 Sunbeam surprise rolls at most once per day (40.299416ms)
-✔ AT6 day one recommendation is rule based by context (33.727208ms)
-✔ AT6 switches to the best average gain after 2 or more tries in that context (39.830292ms)
-✔ AT6 locked techniques are excluded even with great history (29.900625ms)
-✔ AT6 unlock thresholds: Soft release after 3 breaks, Let it out after 5 (36.4235ms)
-✔ AT5 XP rule: 10 + 2 x positive gain (27.273667ms)
-✔ AT7 zero Seeds on the free plan opens the Seed shop instead of a guided break (190.573ms)
-✔ AT7 shop lists Full Bloom and Seed packs in INR and USD (41.121333ms)
-✔ AT7 demo purchase adds Seeds after a clearly labelled demo confirmation (42.846667ms)
-✔ AT7 Full Bloom guided breaks do not consume Seeds (46.137542ms)
-✔ AT7 Quick breeze is always free, even at zero Seeds (54.536458ms)
-✔ AT8 no banned words (whole-word) in any UI copy file (6.778167ms)
-✔ AT8 rendered UI text on every screen has no banned words (249.246ms)
-✔ AT8 no em or en dashes in any repo file (336.022542ms)
-✔ AT8 locked vocabulary and footer note are present (0.574666ms)
-✔ AT11 crisis phrases are detected (109.695209ms)
-✔ AT11 typing a crisis phrase in Let it out opens the support sheet with helplines (108.562833ms)
-✔ AT11 journal text is never stored (62.451125ms)
-✔ AT11 support lines are always reachable from Me (75.244375ms)
-✔ AT13 reduced motion, focus ring and 48px targets are defined in CSS (0.547291ms)
-✔ AT13 app honours reduced motion in JS (no orb animation loop) (27.986625ms)
-✔ AT14 Play tab lists three calm games (166.209667ms)
-✔ AT14 Petal Pairs: 12 cards, matching all pairs finishes kindly and grants game XP (158.193292ms)
-✔ AT14 a mismatched pair turns back over without any penalty (1054.914083ms)
-✔ AT14 game XP is capped at 3 rewarded games a day (198.02875ms)
-✔ AT14 Sunbeam Catch: tapping a sunbeam fills the jar (32.925792ms)
-✔ AT14 Breath Bloom: holding starts the breath guide and finishing blooms kindly (29.199542ms)
-✔ AT15 SOS button is reachable from every screen, even before onboarding (201.748875ms)
-✔ AT15 SOS sheet offers helplines, a breather and trusted-person setup (45.312083ms)
-✔ AT15 trusted person is saved on device and the alert pre-fills a message (30.109125ms)
-✔ AT15 SOS alert can include a location link only when asked (34.664542ms)
-✔ AT15 crisis phrases in the Good things jar open the support sheet and are not saved (35.354208ms)
-✔ AT15 lowest mood asks a direct, gentle safety question (38.168625ms)
-✔ AT15 answering no to the safety question offers gentle next steps (33.384875ms)
-✔ AT15 three heavy days in a row surface a support card (38.372ms)
-✔ AT15 lighter days do not show the support card (46.887542ms)
-✔ AT16 mood check-in saves one mood per day and gives a little XP once (208.6175ms)
-✔ AT16 mood trend appears on the Sunny week with a kind insight (67.001ms)
-✔ AT16 Small steps: completing one grows a sprout and gives XP, capped at 3 a day (64.021458ms)
-✔ AT16 Good things jar saves only when asked and resurfaces on heavy days (171.200167ms)
-✔ AT16 Kind words is a guided break recommended for low days (80.73275ms)
-✔ AT17 Work space: contexts and breaks for the workday (100.755791ms)
-✔ AT17 Relationships space: pause, cool down and warm wishes (67.075709ms)
-✔ AT17 a full Relationships break completes and counts toward the garden (71.480625ms)
-✔ AT17 Low days and Sleep spaces exist with their own feelings (56.038125ms)
-✔ AT18 install page offers a direct Android download and iPhone home screen steps (1.269792ms)
-✔ AT18 the Android APK shipped for download is a real LoosenUp package (8.24625ms)
-✔ AT18 the APK is served as an Android package download (0.876333ms)
-✔ AT18 Me links to the install page on the web (0.589167ms)
-✔ AT19 the Android domain opens on the install page, the app stays one link away (1.525708ms)
-✔ AT19 the service worker serves the app shell only for the app URL (0.494ms)
-✔ AT19 Sunbeam shares carry both platform links (272.131041ms)
-✔ AT19 iPhone Safari visitors see the Add to Home Screen tip, others do not (103.754333ms)
-✔ AT19 install page names both platform domains (0.473125ms)
-✔ AT20 several feelings can be picked at once, and tapping again unpicks (195.404667ms)
-✔ AT20 the recommendation weighs every picked feeling (50.796334ms)
-✔ AT20 picks from every space are offered when feelings span spaces (43.242708ms)
-✔ AT20 a break remembers every feeling and learning counts it for each (63.697875ms)
-ℹ tests 75
+✔ AT1 manifest has the required PWA fields (6.833875ms)
+✔ AT1 every manifest icon exists with the declared pixel size (9.071666ms)
+✔ AT1 service worker is registered and precaches the shell (7.7085ms)
+✔ AT1 vercel.json sets sw.js no-cache and the manifest content type (1.926667ms)
+✔ AT2 iOS meta tags and viewport-fit=cover are present (1.282167ms)
+✔ AT2 safe-area insets are applied to nav, sheets and toast (4.407708ms)
+✔ AT3 first open shows welcome and asks for a first name (894.814125ms)
+✔ AT3 gift grants 5 Seeds and 25 XP, Seedling bar at 50 percent, then straight into the first break (437.941041ms)
+✔ AT3 gift is only granted once, even after a reload (514.121333ms)
+✔ AT4 full loop: Seed decrements, Calm gain is correct, streak 1, XP 45 (526.492667ms)
+✔ AT4 a lower after score is framed positively and earns a Seed (771.905167ms)
+✔ AT4 the garden grows by one flower per break and never shrinks (766.2825ms)
+✔ AT5 Sunny days count once per calendar day (753.752542ms)
+✔ AT5 a Rain day bridges a 2-day gap once per week and the 3-day milestone grants a Seed (306.688959ms)
+✔ AT5 a gap longer than one day starts a fresh run (193.139417ms)
+✔ AT5 milestone Seed respects the weekly free Seed cap of 2 (374.281083ms)
+✔ AT5 free reward Seeds never exceed 2 in a week across all sources (220.513959ms)
+✔ AT5 Sunbeam surprise rolls at most once per day (184.546084ms)
+✔ AT6 day one recommendation is rule based by context (172.083375ms)
+✔ AT6 switches to the best average gain after 2 or more tries in that context (179.243708ms)
+✔ AT6 locked techniques are excluded even with great history (192.668666ms)
+✔ AT6 unlock thresholds: Soft release after 3 breaks, Let it out after 5 (290.239542ms)
+✔ AT5 XP rule: 10 + 2 x positive gain (166.223459ms)
+✔ AT7 zero Seeds on the free plan opens the Seed shop instead of a guided break (3711.956417ms)
+✔ AT7 shop lists Full Bloom and Seed packs in INR and USD (551.52ms)
+✔ AT7 demo purchase adds Seeds after a clearly labelled demo confirmation (536.308125ms)
+✔ AT7 Full Bloom guided breaks do not consume Seeds (634.479041ms)
+✔ AT7 Quick breeze is always free, even at zero Seeds (377.940375ms)
+✔ AT8 no banned words (whole-word) in any UI copy file (20.655208ms)
+✔ AT8 rendered UI text on every screen has no banned words (1398.314416ms)
+✔ AT8 no em or en dashes in any repo file (1451.32925ms)
+✔ AT8 locked vocabulary and footer note are present (2.753916ms)
+✔ AT11 crisis phrases are detected (730.345542ms)
+✔ AT11 typing a crisis phrase in Let it out opens the support sheet with helplines (1035.777709ms)
+✔ AT11 journal text is never stored (795.215ms)
+✔ AT11 support lines are always reachable from Me (435.06025ms)
+✔ AT13 reduced motion, focus ring and 48px targets are defined in CSS (4.774083ms)
+✔ AT13 app honours reduced motion in JS (no orb animation loop) (181.862084ms)
+✔ AT14 Play tab lists three calm games (689.645083ms)
+✔ AT14 Petal Pairs: 12 cards, matching all pairs finishes kindly and grants game XP (857.981167ms)
+✔ AT14 a mismatched pair turns back over without any penalty (1352.371541ms)
+✔ AT14 game XP is capped at 3 rewarded games a day (2939.802167ms)
+✔ AT14 Sunbeam Catch: tapping a sunbeam fills the jar (338.574792ms)
+✔ AT14 Breath Bloom: holding starts the breath guide and finishing blooms kindly (632.029125ms)
+✔ AT15 SOS button is reachable from every screen, even before onboarding (956.729792ms)
+✔ AT15 SOS sheet offers helplines, a breather and trusted-person setup (309.172667ms)
+✔ AT15 trusted person is saved on device and the alert pre-fills a message (200.684791ms)
+✔ AT15 SOS alert can include a location link only when asked (232.703834ms)
+✔ AT15 crisis phrases in the Good things jar open the support sheet and are not saved (257.4325ms)
+✔ AT15 lowest mood asks a direct, gentle safety question (210.374792ms)
+✔ AT15 answering no to the safety question offers gentle next steps (279.808833ms)
+✔ AT15 three heavy days in a row surface a support card (264.23ms)
+✔ AT15 lighter days do not show the support card (310.595417ms)
+✔ AT16 mood check-in saves one mood per day and gives a little XP once (832.12725ms)
+✔ AT16 mood trend appears on the Sunny week with a kind insight (306.085791ms)
+✔ AT16 Small steps: completing one grows a sprout and gives XP, capped at 3 a day (532.145833ms)
+✔ AT16 Good things jar saves only when asked and resurfaces on heavy days (661.8185ms)
+✔ AT16 Kind words is a guided break recommended for low days (390.887208ms)
+✔ AT17 Work space: contexts and breaks for the workday (842.847084ms)
+✔ AT17 Relationships space: pause, cool down and warm wishes (524.721625ms)
+✔ AT17 a full Relationships break completes and counts toward the garden (601.690042ms)
+✔ AT17 Low days and Sleep spaces exist with their own feelings (414.169416ms)
+✔ AT18 install page offers a direct Android download and iPhone home screen steps (2.738917ms)
+✔ AT18 the Android APK shipped for download is a real LoosenUp package (11.25075ms)
+✔ AT18 the APK is served as an Android package download (1.268875ms)
+✔ AT18 Me links to the install page on the web (0.8795ms)
+✔ AT19 the Android domain opens on the install page, the app stays one link away (9.582042ms)
+✔ AT19 the service worker serves the app shell only for the app URL (6.423ms)
+✔ AT19 Sunbeam shares carry both platform links (1007.972167ms)
+✔ AT19 iPhone Safari visitors see the Add to Home Screen tip, others do not (537.349667ms)
+✔ AT19 install page names both platform domains (0.899125ms)
+✔ AT20 several feelings can be picked at once, and tapping again unpicks (795.002375ms)
+✔ AT20 the recommendation weighs every picked feeling (318.154708ms)
+✔ AT20 picks from every space are offered when feelings span spaces (375.097ms)
+✔ AT20 a break remembers every feeling and learning counts it for each (562.396959ms)
+✔ AT21 version compare picks only newer releases (529.157583ms)
+✖ AT21 the update bundle matches this release exactly (37.465542ms)
+✔ AT21 the updater stays on our own server and the manifest is fetchable from the apps (255.888208ms)
+✔ AT21 in a browser (not the phone apps) live updates stay off (153.4455ms)
+✔ AT22 Today shows the toolkit and each tool opens its screen with a way back (1489.555333ms)
+✔ AT22 Find support lists verified helplines with working links (480.657875ms)
+✔ AT22 near-me finder opens Apple Maps on iPhone and Google Maps elsewhere (547.258042ms)
+✔ AT22 my care team is saved on device with a call button (261.216125ms)
+✔ AT22 safety plan: prefilled helplines, saved on device, reachable from SOS (422.882916ms)
+✔ AT22 reframe: five steps, only the kinder thought can be kept (218.021333ms)
+✔ AT22 reframe checks for crisis phrases and opens SOS (224.63925ms)
+✔ AT22 wellbeing check scores WHO-5 out of 100 and points to support when low (600.626291ms)
+✔ AT22 a very low wellbeing score opens SOS; a bright one does not (1431.408084ms)
+✔ AT22 the two-week check card shows when due (428.095333ms)
+✔ AT22 backup restores a LoosenUp file and rejects anything else (232.153ms)
+✔ AT22 sounds degrade kindly when audio is unavailable (169.42775ms)
+✔ AT23 SHA-256 matches the standard test vector (668.127875ms)
+✔ AT23 a PIN is stored only as a salted hash (452.229916ms)
+✔ AT23 the app opens locked, unlocks with the right PIN, pauses after 5 wrong tries (848.398416ms)
+✔ AT23 the right PIN unlocks (649.965459ms)
+✔ AT23 SOS stays reachable on the lock screen, private tools stay hidden (648.094792ms)
+✔ AT23 turning the lock off needs the current PIN (225.829375ms)
+✔ AT23 theme: Auto, Light and Dark, applied to the page and remembered (323.373208ms)
+✔ AT24 Learn lists nine one-minute lessons from the toolkit (784.80125ms)
+✔ AT24 lesson copy is kind, free of banned words and makes no medical promises (351.410542ms)
+✔ AT24 reading a lesson marks it read once and gives XP once (397.327333ms)
+✔ AT24 Try it opens the matching break, tool or space (488.988209ms)
+ℹ tests 102
 ℹ suites 0
-ℹ pass 75
-ℹ fail 0
+ℹ pass 101
+ℹ fail 1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 12603.622792
+ℹ duration_ms 88458.874
+
+✖ failing tests:
+
+test at tests/unit/at21-live-updates.test.mjs:19:1
+✖ AT21 the update bundle matches this release exactly (37.465542ms)
+  AssertionError [ERR_ASSERTION]: bundle app.js is the current source (rebuild with scripts/build-web-update.sh)
+  + actual - expected
+  
+  + '1abbbacd9274d38d8a7722e6b3154ce02f0d79e7d11b45b83ec5ba942960f34d'
+  - '7a35794ca48af190b86944aa8c890feb8a96a94a26b1f803c93bbd1dc81e832d'
+  
+      at TestContext.<anonymous> (file:///Users/anchittandon/Brightside/tests/unit/at21-live-updates.test.mjs:30:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '1abbbacd9274d38d8a7722e6b3154ce02f0d79e7d11b45b83ec5ba942960f34d',
+    expected: '7a35794ca48af190b86944aa8c890feb8a96a94a26b1f803c93bbd1dc81e832d',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
 
 == Real browser tests (Playwright Chromium) ==
-✔ AT9 no console errors and no horizontal scroll at 390px (24853.928958ms)
-✔ AT9 no console errors and no horizontal scroll at 820px (20883.104875ms)
-✔ AT9 no console errors and no horizontal scroll at 1440px (19694.159042ms)
-✔ AT10 offline shell works after first load (260.932958ms)
-✔ AT13 every visible button and tab is at least 48px tall and wide (6814.335958ms)
-✔ AT13 visible focus ring on keyboard focus (98.545834ms)
-✔ AT13 prefers-reduced-motion stops the breathing orb animation (952.529417ms)
-✔ AT18 install page fits a phone screen with 48px targets (201.149667ms)
-✔ AT19 with the service worker active, /install.html still shows the install page (168.0545ms)
+✔ AT9 no console errors and no horizontal scroll at 390px (47874.605917ms)
+✔ AT9 no console errors and no horizontal scroll at 820px (33520.045166ms)
+✔ AT9 no console errors and no horizontal scroll at 1440px (38034.81225ms)
+✔ AT10 offline shell works after first load (1382.9975ms)
+✔ AT13 every visible button and tab is at least 48px tall and wide (15167.069875ms)
+✔ AT13 visible focus ring on keyboard focus (322.194833ms)
+✔ AT13 prefers-reduced-motion stops the breathing orb animation (1201.752208ms)
+✔ AT18 install page fits a phone screen with 48px targets (732.323917ms)
+✔ AT19 with the service worker active, /install.html still shows the install page (618.496208ms)
 ℹ tests 9
 ℹ suites 0
 ℹ pass 9
@@ -103,22 +155,43 @@ Run at: 2026-10-17 20:21 UTC   Node v26.8.2   Live URL: https://loosenup.vercel.
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 74636.343875
+ℹ duration_ms 142766.541042
 
 == Live deployment tests ==
-✔ AT1 live: every shell file returns 200 (4638.66675ms)
-✔ AT1 live: manifest is served with the manifest content type and matches the repo (36.5ms)
-✔ AT1 live: sw.js is served no-cache and matches the repo (33.190583ms)
-✔ AT12 live: production URL loads the app over HTTPS from Vercel (39.501292ms)
-✔ AT18 live: the Android APK downloads as an Android package (1806.911625ms)
-✔ AT19 live: Android domain opens on the install page over HTTPS (214.353084ms)
-✔ AT19 live: Android domain serves the APK as an Android package (41.443667ms)
-✔ AT19 live: iOS domain serves the full app with its manifest and service worker (193.355334ms)
-ℹ tests 8
+✔ AT1 live: every shell file returns 200 (5712.659292ms)
+✔ AT1 live: manifest is served with the manifest content type and matches the repo (38.100375ms)
+✔ AT1 live: sw.js is served no-cache and matches the repo (277.565417ms)
+✔ AT12 live: production URL loads the app over HTTPS from Vercel (37.864666ms)
+✔ AT18 live: the Android APK downloads as an Android package (1388.27325ms)
+✔ AT19 live: Android domain opens on the install page over HTTPS (742.72225ms)
+✔ AT19 live: Android domain serves the APK as an Android package (35.776208ms)
+✔ AT19 live: iOS domain serves the full app with its manifest and service worker (255.367958ms)
+✖ AT21 live: the update manifest and bundle are served to the apps (292.628916ms)
+ℹ tests 9
 ℹ suites 0
 ℹ pass 8
-ℹ fail 0
+ℹ fail 1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 7915.197833
+ℹ duration_ms 16436.265
+
+✖ failing tests:
+
+test at tests/live/at19-domains-live.test.mjs:30:1
+✖ AT21 live: the update manifest and bundle are served to the apps (292.628916ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  404 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/anchittandon/Brightside/tests/live/at19-domains-live.test.mjs:36:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 404,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

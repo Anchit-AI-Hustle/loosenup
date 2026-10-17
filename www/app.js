@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.7.0';
+  var VERSION = '1.8.0';
   var KEY = 'loosenup.v1';
   var PUBLIC_URL = 'https://loosenup-ios.anchit-tandon.com';
   var ANDROID_URL = 'https://loosenup-android.anchit-tandon.com';
@@ -89,6 +89,12 @@
       pattern: [['Breathe in', 4, 1], ['Breathe out', 6, 0.6]]
     }
   };
+  var INTRO = {
+    breath: 'Let us begin. Sit comfortably, let your shoulders drop, and follow the sun as it opens and closes.',
+    steps: 'Let us begin. Take your time with each step. There is no rush.',
+    journal: 'Let us begin. Type whatever is on your mind. Nothing is saved.'
+  };
+  var OUTRO = 'Lovely. Take a moment to notice how you feel now.';
   var CHOOSABLE = ['sigh', 'breeze', 'here', 'release', 'letitout', 'kind', 'desk', 'square', 'pause', 'cooldown', 'warmth'];
 
   // Spaces group feelings by what people are carrying: everyday, work, relationships, low days and sleep.
@@ -192,6 +198,8 @@
   function isCrisis(text) {
     var t = String(text || '');
     for (var i = 0; i < CRISIS.length; i++) if (CRISIS[i].test(t)) return true;
+    var hi = (window.LoosenUpI18n && window.LoosenUpI18n.crisis) || [];
+    for (var j = 0; j < hi.length; j++) if (hi[j].test(t)) return true;
     return false;
   }
 
@@ -228,7 +236,8 @@
       nudges: { day: null, count: 0, shown: [] }, goldenHour: null, voice: false, badges: [], purchases: [],
       games: { day: null, count: 0 }, gameBest: { pairs: null, catch: 0, bloom: 0 },
       moods: [], smallSteps: [], goodThings: [], trusted: null, sosLocation: false, jarXp: { day: null, count: 0 },
-      careTeam: null, safetyPlan: null, wellbeing: [], toolXp: { day: null, count: 0 }, reframes: 0
+      careTeam: null, safetyPlan: null, wellbeing: [], toolXp: { day: null, count: 0 }, reframes: 0, theme: 'auto', lang: 'en', lessonsDone: [], chime: true, bed: 'none',
+      lock: { enabled: false, salt: '', hash: '', bio: false }
     };
   }
   function load() {
@@ -407,7 +416,7 @@
   /* ---------- DOM helpers ---------- */
 
   var $ = function (id) { return document.getElementById(id); };
-  function setText(id, t) { var el = $(id); if (el) el.textContent = t; }
+  function setText(id, t) { var el = $(id); if (el) { el.textContent = t; if (isHindi()) translateDom(el); } }
   function mm(q) { try { return !!(window.matchMedia && window.matchMedia(q).matches); } catch (e) { return false; } }
   function prefersReducedMotion() { return mm('(prefers-reduced-motion: reduce)'); }
   function isNative() { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
@@ -424,7 +433,7 @@
   var toastTimer = null;
   function toast(msg) {
     var t = $('toast');
-    t.textContent = msg;
+    t.textContent = tr(msg);
     t.hidden = false;
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.hidden = true; }, 2800);
@@ -450,6 +459,7 @@
     $('seed-pill').hidden = !state.onboarded;
     renderSeedPill();
     if (RENDER[name]) RENDER[name]();
+    if (isHindi()) translateDom(document.body);
     if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
   }
 
@@ -467,6 +477,7 @@
     $('scrim').hidden = false;
     var sh = $(id);
     sh.hidden = false;
+    if (isHindi()) translateDom(sh);
     var f = sh.querySelector('button, a');
     if (f && f.focus) f.focus();
   }
@@ -655,6 +666,7 @@
     else if (state.seeds > 0) label = 'Begin (uses 1 of ' + plural(state.seeds, 'Seed', 'Seeds') + ')';
     else label = 'Begin (add Seeds)';
     setText('pick-begin', label);
+    renderGuide();
   }
 
   function beginBreak(id) {
@@ -696,6 +708,8 @@
     $('orb-petals').style.transitionDuration = '0s';
     $('orb-petals').style.transform = 'scale(0.55)';
     setText('session-kicker', t.free ? 'Always free' : 'Guided break');
+    speak(INTRO[t.kind] || INTRO.breath);
+    if (state.bed && state.bed !== 'none' && !audio) { sessionBed = playSound(state.bed, 0.35); }
     if (t.kind === 'steps') { run.stepLeft = Math.floor(t.seconds / t.steps.length); showStep(0); }
     if (t.kind === 'journal') { setText('cue', ''); }
     if (t.kind === 'breath') nextPhase();
@@ -709,7 +723,8 @@
     var ph = t.pattern[run.phase];
     run.phaseLeft = ph[1];
     setText('cue', ph[0]);
-    speak(ph[0]);
+    speak(ph[0], true);
+    chime();
     var orb = $('orb');
     var pet = $('orb-petals');
     if (prefersReducedMotion()) { orb.style.transform = ''; pet.style.transform = ''; return; }
@@ -728,7 +743,8 @@
     run.step = i;
     setText('step-count', 'Step ' + (i + 1) + ' of ' + t.steps.length);
     setText('step-text', t.steps[i]);
-    speak(t.steps[i]);
+    speak(t.steps[i], true);
+    if (i > 0) chime();
     $('step-next').hidden = i >= t.steps.length - 1;
     var orb = $('orb');
     if (!prefersReducedMotion()) {
@@ -770,7 +786,8 @@
     after.value = String(flow.before);
     after.dispatchEvent(new Event('input'));
     go('after');
-    if (complete) speak('Lovely. How do you feel now?');
+    if (sessionBed) { stopSound(false); sessionBed = false; }
+    speak(OUTRO);
   }
 
   function togglePause() {
@@ -781,13 +798,47 @@
     if (run.paused && window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch (e) { /* no voice */ } }
   }
 
+  var chimeCtx = null;
+  var chimesPlayed = 0;
+  function chime() {
+    if (!state.chime) return false;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    chimesPlayed++;
+    if (!AC) return false;
+    try {
+      chimeCtx = chimeCtx || new AC();
+      var t0 = chimeCtx.currentTime;
+      [528, 792].forEach(function (f, i) {
+        var o = chimeCtx.createOscillator(), g = chimeCtx.createGain();
+        o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(i ? 0.025 : 0.05, t0 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.6);
+        o.connect(g); g.connect(chimeCtx.destination);
+        o.start(t0); o.stop(t0 + 1.7);
+      });
+      return true;
+    } catch (e) { return false; }
+  }
+  var sessionBed = false;
+  function renderGuide() {
+    var g = document.querySelectorAll('[data-guide]');
+    for (var i = 0; i < g.length; i++) {
+      var k = g[i].getAttribute('data-guide');
+      g[i].setAttribute('aria-pressed', String(k === 'voice' ? !!state.voice : !!state.chime));
+    }
+    var b = document.querySelectorAll('[data-bed]');
+    for (var j = 0; j < b.length; j++) b[j].setAttribute('aria-pressed', String(b[j].getAttribute('data-bed') === (state.bed || 'none')));
+  }
+
   function canSpeak() { return 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function'; }
-  function speak(text) {
+  function speak(text, queue) {
     if (!state.voice || !canSpeak()) return;
     try {
-      window.speechSynthesis.cancel();
-      var u = new window.SpeechSynthesisUtterance(text);
+      if (!queue) window.speechSynthesis.cancel();
+      var u = new window.SpeechSynthesisUtterance(tr(text));
       u.rate = 0.9; u.pitch = 1.05;
+      u.lang = state.lang === 'hi' ? 'hi-IN' : 'en-IN';
       window.speechSynthesis.speak(u);
     } catch (e) { /* voice not available */ }
   }
@@ -881,7 +932,7 @@
     var t = Math.max(0, Math.min(1, (hrs - 6) / 14));
     card.style.setProperty('--sx', (16 + t * 68).toFixed(1) + '%');
     card.style.setProperty('--sy', (62 - Math.sin(t * Math.PI) * 44).toFixed(1) + '%');
-    setText('today-date', d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
+    setText('today-date', d.toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' }));
     setText('today-sky-streak', state.sessions.length
       ? plural(state.streak.count, 'Sunny day', 'Sunny days') + ' · ' + plural(state.sessions.length, 'flower', 'flowers')
       : 'Your first flower is one break away');
@@ -1030,6 +1081,7 @@
     var body = 'Hi ' + t.name + ', it is ' + (state.name && state.name !== 'friend' ? state.name : 'me') +
       '. I am having a really hard time and could really use you right now. Can you call me or come be with me?';
     if (loc) body += ' I am here: https://maps.google.com/?q=' + loc.lat.toFixed(5) + ',' + loc.lon.toFixed(5);
+    body = tr(body);
     return 'sms:' + t.phone + '?&body=' + encodeURIComponent(body);
   }
   function renderSos(editing) {
@@ -1259,12 +1311,13 @@
       : (isNative() ? 'Pick a daily time for one gentle reminder.' : 'Pick a daily time and a gentle note will appear in the app. The phone apps can send one daily reminder.'));
     renderVoiceButtons();
     renderInstall();
+    renderLockCard();
     setText('me-trusted', state.trusted ? 'Trusted person: ' + state.trusted.name + ' (' + state.trusted.phone + '). SOS can message them in one tap.'
       : 'Add a trusted person so SOS can message them in one tap.');
     setText('open-trusted', state.trusted ? 'Change my trusted person' : 'Set up my trusted person');
   }
 
-  var RENDER = { support: renderSupport, safety: renderSafety, reframe: startReframe, sounds: function () {}, wellbeing: renderWellbeing,
+  var RENDER = { learn: renderLearn, support: renderSupport, safety: renderSafety, reframe: startReframe, sounds: function () {}, wellbeing: renderWellbeing,
     today: renderToday, play: renderPlay, garden: renderGarden, week: renderWeek, me: renderMe, pick: renderPick, checkin: renderContextChips };
 
   /* ---------- Golden hour, sharing, install ---------- */
@@ -1281,7 +1334,7 @@
         if (p && p.display && p.display !== 'granted') { toast('Reminders are off in your settings. The in-app note still works.'); return false; }
         var hm = state.goldenHour.split(':');
         return LN.schedule({ notifications: [{
-          id: 1, title: 'Golden hour', body: 'Two calm minutes are here for you whenever you like.',
+          id: 1, title: 'Golden hour', body: tr('Two calm minutes are here for you whenever you like.'),
           schedule: { on: { hour: +hm[0], minute: +hm[1] }, allowWhileIdle: true }
         }] }).then(function () { return true; });
       });
@@ -1736,7 +1789,7 @@
       $('care-call').setAttribute('href', 'tel:' + c.phone);
       $('care-call').hidden = !c.phone;
       var when = c.next ? new Date(c.next) : null;
-      setText('care-next', when && !isNaN(when) ? 'Next session: ' + when.toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'No session booked yet.');
+      setText('care-next', when && !isNaN(when) ? 'Next session: ' + when.toLocaleString(locale(), { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'No session booked yet.');
       if (editing) {
         $('care-name-input').value = c.name; $('care-role-input').value = c.role;
         $('care-phone-input').value = c.phone; $('care-next-input').value = c.next || '';
@@ -1760,7 +1813,7 @@
     var at = new Date(new Date(c.next).getTime() - 60 * 60 * 1000);
     if (isNaN(at) || at <= now()) return;
     LN.cancel({ notifications: [{ id: 2 }] }).catch(function () {}).then(function () {
-      return LN.schedule({ notifications: [{ id: 2, title: 'Your session is in an hour', body: c.name + ' at ' + new Date(c.next).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '. You are doing something kind for yourself.', schedule: { at: at } }] });
+      return LN.schedule({ notifications: [{ id: 2, title: tr('Your session is in an hour'), body: tr(c.name + ' at ' + new Date(c.next).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '. You are doing something kind for yourself.'), schedule: { at: at } }] });
     }).catch(function () {});
   }
   function copyScript() {
@@ -1855,7 +1908,7 @@
     return buf;
   }
   function soundVolume() { return Math.max(0, Math.min(1, +$('sound-volume').value / 100)) * 0.6; }
-  function playSound(kind) {
+  function playSound(kind, vol) {
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) { setText('sound-status', 'Sounds are not available on this device.'); return false; }
     stopSound(true);
@@ -1885,7 +1938,7 @@
     }
     node.connect(swell); swell.connect(out); out.connect(ctx.destination);
     src.start();
-    out.gain.linearRampToValueAtTime(soundVolume(), ctx.currentTime + 2.5);
+    out.gain.linearRampToValueAtTime(vol != null ? vol * 0.6 : soundVolume(), ctx.currentTime + 2.5);
     audio = { ctx: ctx, out: out, kind: kind, timer: null };
     var btns = document.querySelectorAll('[data-sound]');
     for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', String(btns[i].getAttribute('data-sound') === kind));
@@ -1992,7 +2045,7 @@
     if (!list.length) { var li0 = document.createElement('li'); li0.textContent = 'Your first check will appear here.'; ul.appendChild(li0); return; }
     list.forEach(function (w) {
       var li = document.createElement('li');
-      var a = document.createElement('span'); a.textContent = new Date(w.day + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      var a = document.createElement('span'); a.textContent = new Date(w.day + 'T12:00:00').toLocaleDateString(locale(), { day: 'numeric', month: 'short' });
       var g = document.createElement('span'); g.className = 'g'; g.textContent = w.score + ' / 100';
       li.appendChild(a); li.appendChild(g); ul.appendChild(li);
     });
@@ -2044,6 +2097,298 @@
     r.readAsText(f);
   }
 
+  /* ---------- App lock ---------- */
+  // Compact SHA-256 so the PIN is only ever stored as a salted hash.
+  function sha256(msg) {
+    function rr(n, x) { return (x >>> n) | (x << (32 - n)); }
+    var K = [], H = [], primes = 0, cand = 2;
+    var isPrime = function (n) { for (var f = 2; f * f <= n; f++) if (n % f === 0) return false; return true; };
+    while (primes < 64) { if (isPrime(cand)) { if (primes < 8) H[primes] = (Math.pow(cand, 1 / 2) * 4294967296) | 0; K[primes] = (Math.pow(cand, 1 / 3) * 4294967296) | 0; primes++; } cand++; }
+    var bytes = unescape(encodeURIComponent(msg)), l = bytes.length, words = [];
+    for (var i = 0; i < l; i++) words[i >> 2] |= bytes.charCodeAt(i) << ((3 - i % 4) * 8);
+    words[l >> 2] |= 0x80 << ((3 - l % 4) * 8);
+    words[((l + 8) >> 6 << 4) + 15] = l * 8;
+    for (var j = 0; j < words.length; j += 16) {
+      var w = words.slice(j, j + 16), o = H.slice(0);
+      for (var t = 0; t < 64; t++) {
+        if (t >= 16) {
+          var w15 = w[t - 15] | 0, w2 = w[t - 2] | 0;
+          w[t] = ((w[t - 16] | 0) + (rr(7, w15) ^ rr(18, w15) ^ (w15 >>> 3)) + (w[t - 7] | 0) + (rr(17, w2) ^ rr(19, w2) ^ (w2 >>> 10))) | 0;
+        }
+        var e = H[4], t1 = H[7] + (rr(6, e) ^ rr(11, e) ^ rr(25, e)) + ((e & H[5]) ^ (~e & H[6])) + K[t] + (w[t] | 0);
+        var a0 = H[0], t2 = (rr(2, a0) ^ rr(13, a0) ^ rr(22, a0)) + ((a0 & H[1]) ^ (a0 & H[2]) ^ (H[1] & H[2]));
+        H = [(t1 + t2) | 0].concat(H); H[4] = (H[4] + t1) | 0; H.pop();
+      }
+      for (var q = 0; q < 8; q++) H[q] = (H[q] + o[q]) | 0;
+    }
+    var hex = '';
+    for (var z = 0; z < 8; z++) for (var y = 3; y >= 0; y--) { var b = (H[z] >>> (y * 8)) & 255; hex += (b < 16 ? '0' : '') + b.toString(16); }
+    return hex;
+  }
+  function randomSalt() {
+    var arr = new Uint8Array(16);
+    try { window.crypto.getRandomValues(arr); } catch (e) { for (var i = 0; i < 16; i++) arr[i] = Math.floor(Math.random() * 256); }
+    return Array.prototype.map.call(arr, function (x) { return (x < 16 ? '0' : '') + x.toString(16); }).join('');
+  }
+  function pinHash(pin, salt) { return sha256(salt + ':' + pin); }
+  function lockEnabled() { return !!(state.lock && state.lock.enabled && state.lock.hash); }
+  var lockFails = 0, lockUntil = 0, hiddenAt = 0;
+  function bioPlugin() { return isNative() && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeBiometric; }
+  function showLock() {
+    if (!lockEnabled()) return;
+    $('lock-screen').hidden = false;
+    document.body.classList.add('locked');
+    $('lock-pin').value = '';
+    setText('lock-msg', '');
+    $('lock-reset').hidden = true;
+    var B = bioPlugin();
+    $('lock-bio').hidden = !(B && state.lock.bio);
+    if (B && state.lock.bio) tryBio();
+  }
+  function hideLock() {
+    $('lock-screen').hidden = true;
+    document.body.classList.remove('locked');
+    document.body.classList.remove('lock-sos');
+    lockFails = 0;
+  }
+  function isLocked() { return !$('lock-screen').hidden; }
+  function tryUnlock() {
+    var pin = ($('lock-pin').value || '').trim();
+    if (Date.now() < lockUntil) { setText('lock-msg', 'Take a breath. You can try again in a few seconds.'); return false; }
+    if (pinHash(pin, state.lock.salt) === state.lock.hash) { hideLock(); haptic('success'); return true; }
+    lockFails++;
+    $('lock-pin').value = '';
+    if (lockFails >= 5) { lockUntil = Date.now() + 30000; lockFails = 0; setText('lock-msg', 'Too many tries. Pause for 30 seconds, then try again.'); }
+    else setText('lock-msg', 'That PIN did not match. Try again.');
+    return false;
+  }
+  function tryBio() {
+    var B = bioPlugin();
+    if (!B) return;
+    B.verifyIdentity({ reason: 'Unlock LoosenUp', title: 'Unlock LoosenUp', subtitle: 'Your notes stay private' })
+      .then(function () { hideLock(); haptic('success'); }, function () { setText('lock-msg', 'Use your PIN instead.'); });
+  }
+  function renderLockCard() {
+    var on = lockEnabled();
+    setText('lock-status', on ? 'App lock is on. LoosenUp asks for your PIN when it opens.' : 'Keep your notes private with a PIN.');
+    setText('lock-toggle', on ? 'Turn off app lock' : 'Set a PIN');
+    $('lock-setup').hidden = true;
+    $('lock-off-form').hidden = true;
+    var B = bioPlugin();
+    $('bio-toggle').hidden = !(on && B);
+    setText('bio-toggle', 'Use Face ID or fingerprint: ' + (state.lock.bio ? 'on' : 'off'));
+    $('bio-toggle').setAttribute('aria-pressed', String(!!state.lock.bio));
+  }
+  function savePin() {
+    var a1 = ($('pin-new').value || '').trim(), a2 = ($('pin-confirm').value || '').trim();
+    if (!/^\d{4,6}$/.test(a1)) { toast('Use 4 to 6 digits.'); return false; }
+    if (a1 !== a2) { toast('The two PINs did not match.'); return false; }
+    var salt = randomSalt();
+    state.lock = { enabled: true, salt: salt, hash: pinHash(a1, salt), bio: false };
+    save();
+    $('pin-new').value = ''; $('pin-confirm').value = '';
+    renderLockCard();
+    toast('App lock is on.');
+    return true;
+  }
+  function turnOffLock() {
+    var pin = ($('pin-current').value || '').trim();
+    if (pinHash(pin, state.lock.salt) !== state.lock.hash) { toast('That PIN did not match.'); return false; }
+    state.lock = { enabled: false, salt: '', hash: '', bio: false };
+    save();
+    $('pin-current').value = '';
+    renderLockCard();
+    toast('App lock is off.');
+    return true;
+  }
+
+
+  /* ---------- Language: English and Hindi ---------- */
+  // English is written in the page and the code. In Hindi, every rendered English text node
+  // and label is swapped for its Hindi version (www/i18n.js). The English original is kept
+  // so switching back restores it exactly. Names and anything the user types are left alone.
+  var TR_ATTRS = ['placeholder', 'aria-label', 'title', 'alt'];
+  var trText = typeof WeakMap === 'function' ? new WeakMap() : null;
+  var trAttr = typeof WeakMap === 'function' ? new WeakMap() : null;
+  function isHindi() { return state.lang === 'hi' && !!window.LoosenUpI18n && !!trText; }
+  function tr(s) { return isHindi() ? window.LoosenUpI18n.tr(s) : s; }
+  function locale() { return state.lang === 'hi' ? 'hi-IN' : 'en-GB'; }
+  function skipNode(el) { return !el || !!el.closest('script, style, textarea, [data-no-tr]'); }
+  function trTextNode(n, hindi) {
+    var rec = trText.get(n);
+    if (hindi) {
+      if (rec && n.data === rec.hi) return;
+      if (!/[A-Za-z]/.test(n.data) || skipNode(n.parentElement)) return;
+      var hi = window.LoosenUpI18n.tr(n.data);
+      if (hi !== n.data) { trText.set(n, { en: n.data, hi: hi }); n.data = hi; }
+    } else if (rec && n.data === rec.hi) n.data = rec.en;
+  }
+  function trElAttrs(el, hindi) {
+    if (!el || el.closest('[data-no-tr]')) return;
+    var recs = trAttr.get(el) || {};
+    for (var i = 0; i < TR_ATTRS.length; i++) {
+      var a = TR_ATTRS[i], v = el.getAttribute(a);
+      if (v == null) continue;
+      var rec = recs[a];
+      if (hindi) {
+        if (rec && v === rec.hi) continue;
+        var hi = window.LoosenUpI18n.tr(v);
+        if (hi !== v) { recs[a] = { en: v, hi: hi }; el.setAttribute(a, hi); }
+      } else if (rec && v === rec.hi) el.setAttribute(a, rec.en);
+    }
+    trAttr.set(el, recs);
+  }
+  function translateDom(root, toEnglish) {
+    if (!trText || !window.LoosenUpI18n) return;
+    root = root || document.body;
+    var hindi = !toEnglish && state.lang === 'hi';
+    if (root.nodeType === 3) { trTextNode(root, hindi); return; }
+    var w = document.createTreeWalker(root, 4, null, false), n;
+    var texts = [];
+    while ((n = w.nextNode())) texts.push(n);
+    texts.forEach(function (t) { trTextNode(t, hindi); });
+    if (root.nodeType === 1) {
+      trElAttrs(root, hindi);
+      var els = root.querySelectorAll('[' + TR_ATTRS.join('], [') + ']');
+      for (var i = 0; i < els.length; i++) trElAttrs(els[i], hindi);
+    }
+  }
+  var trObserver = null;
+  function watchDom() {
+    if (trObserver || typeof MutationObserver !== 'function') return;
+    trObserver = new MutationObserver(function (list) {
+      if (!isHindi()) return;
+      list.forEach(function (m) {
+        if (m.type === 'characterData') trTextNode(m.target, true);
+        else if (m.type === 'attributes') trElAttrs(m.target, true);
+        else for (var i = 0; i < m.addedNodes.length; i++) translateDom(m.addedNodes[i]);
+      });
+    });
+    trObserver.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: TR_ATTRS });
+  }
+  function applyLang() {
+    var hindi = isHindi();
+    document.documentElement.setAttribute('lang', hindi ? 'hi' : 'en');
+    var btns = document.querySelectorAll('[data-lang-choice]');
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', String(btns[i].getAttribute('data-lang-choice') === (state.lang || 'en')));
+    if (hindi) { watchDom(); translateDom(document.body); }
+    else translateDom(document.body, true);
+  }
+  function setLang(l) {
+    state.lang = l === 'hi' ? 'hi' : 'en';
+    save();
+    applyLang();
+    if (current) go(current);
+    if (state.goldenHour) scheduleGoldenHour();
+    toast(state.lang === 'hi' ? 'अब LoosenUp हिन्दी में है।' : 'LoosenUp is now in English.');
+  }
+
+  /* ---------- Learn: one-minute lessons ---------- */
+  var LESSONS = [
+    { id: 'breath', title: 'Why a long breath out helps', min: 1,
+      body: ['When your breath out is slower than your breath in, your body gets a quiet signal that it is safe to slow down.',
+        'Many people notice their heartbeat ease a little and their shoulders drop after a few long breaths out. That is why Sigh of relief and Cool down stretch the out-breath.',
+        'You can use this anywhere: in a meeting, in traffic, before a hard talk. Nobody needs to know.'],
+      takeaway: 'Make the out-breath longer than the in-breath.', tryLabel: 'Try Sigh of relief', tryTech: 'sigh' },
+    { id: 'thoughts', title: 'Thoughts are guesses, not facts', min: 1,
+      body: ['A thought like "I always mess things up" can feel completely true in the moment. It is really a guess your mind makes, often on a tired or heavy day.',
+        'Thoughts, feelings and actions move together. When you look at a thought from a little distance, the feeling often softens too.',
+        'Ask: what would I tell a dear friend who had this thought? Then try saying it to yourself.'],
+      takeaway: 'Notice the thought, then look for a kinder, truer version.', tryLabel: 'Reframe a thought', tryTool: 'reframe' },
+    { id: 'steps', title: 'On heavy days, action comes first', min: 1,
+      body: ['When energy is low, it is natural to wait until you feel like doing something. Often the feeling follows the action instead.',
+        'Tiny actions count: a glass of water, two minutes of daylight, a hello to someone you trust. Each one is a small vote for yourself.',
+        'Pick something so small it feels almost too easy. Then notice how you feel afterwards.'],
+      takeaway: 'Start tiny. The lift often comes after the step.', tryLabel: 'Take a Small step', tryTool: 'today' },
+    { id: 'sleep', title: 'A gentle runway to sleep', min: 1,
+      body: ['Sleep comes more easily when the hour before bed slows down. Dim the lights, put the phone face down, and keep the room cool and quiet.',
+        'Waking at about the same time each day, even on weekends, helps your body know when to feel sleepy.',
+        'If your mind races in bed, write the thoughts down or play a soft sound, then return to slow breathing.'],
+      takeaway: 'Same wake time, a softer last hour, and a calm sound if you need it.', tryLabel: 'Play a calm sound', tryTool: 'sounds' },
+    { id: 'kindness', title: 'Talk to yourself like a friend', min: 1,
+      body: ['Many of us speak to ourselves more harshly than we would ever speak to anyone we love.',
+        'Self-kindness is not letting yourself off the hook. It is the steady voice that helps you try again.',
+        'Try a hand on your heart and the words: this is a hard moment, I am not alone, may I be kind to myself.'],
+      takeaway: 'Use the voice you would use for a dear friend.', tryLabel: 'Try Kind words', tryTech: 'kind' },
+    { id: 'work', title: 'Boundaries that protect your energy at work', min: 1,
+      body: ['Energy at work comes back in small pieces: a two-minute pause between meetings, one task at a time, a real lunch away from the screen.',
+        'Saying "I can do this by Friday" is clearer and kinder than saying yes to everything today.',
+        'End the day with a small ritual, like closing the laptop and three slow breaths, so your mind knows work is done.'],
+      takeaway: 'Small pauses and clear limits keep you steady through the week.', tryLabel: 'Open the Work space', trySpace: 'work' },
+    { id: 'repair', title: 'Repair after a disagreement', min: 1,
+      body: ['Disagreements happen in every close relationship. What matters most is the repair afterwards.',
+        'Wait until both of you feel calmer. Start with "I felt" rather than "You always". Listen to understand, not to reply.',
+        'Owning your part, even a small part, often opens the door for the other person to do the same.'],
+      takeaway: 'Calm down first, speak from "I", and repair early.', tryLabel: 'Try Pause before replying', tryTech: 'pause' },
+    { id: 'friend', title: 'Supporting a friend who is struggling', min: 1,
+      body: ['Listening without fixing is one of the kindest things you can offer. Try: "That sounds really hard. I am here."',
+        'If you are worried about them, ask directly: "Are you thinking about ending your life?" Asking does not put the idea in their head, and it can be a huge relief.',
+        'If they say yes, stay with them and call Tele-MANAS on 14416 together, or 112 in an emergency.'],
+      takeaway: 'Listen, ask directly, and connect them to support.', tryLabel: 'See helplines and support', tryTool: 'support' },
+    { id: 'help', title: 'When to talk to a professional', min: 1,
+      body: ['Everyone has heavy days. It is a good time to talk to a professional if low moods last more than two weeks, if sleep, eating or work are clearly affected, or if you have thoughts of hurting yourself.',
+        'A psychiatrist is a doctor who can assess and prescribe. A psychologist or counsellor offers talk therapy. Tele-MANAS (14416) can help you decide, for free.',
+        'Reaching out early is a strength. Many people feel lighter after just the first conversation.'],
+      takeaway: 'Two weeks of heavy days is a good reason to reach out.', tryLabel: 'Find support', tryTool: 'support' }
+  ];
+  var currentLesson = null;
+  function renderLearn() {
+    var ul = $('lesson-list');
+    ul.textContent = '';
+    LESSONS.forEach(function (l) {
+      var li = document.createElement('li');
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'lesson-item';
+      b.setAttribute('data-lesson', l.id);
+      var t = document.createElement('strong'); t.textContent = l.title;
+      var m = document.createElement('span');
+      m.textContent = state.lessonsDone.indexOf(l.id) !== -1 ? 'Read' : l.min + ' min';
+      if (state.lessonsDone.indexOf(l.id) !== -1) b.classList.add('done');
+      b.appendChild(t); b.appendChild(m); li.appendChild(b); ul.appendChild(li);
+    });
+  }
+  function openLesson(id) {
+    var l = LESSONS.filter(function (x) { return x.id === id; })[0];
+    if (!l) return;
+    currentLesson = l;
+    go('lesson');
+    setText('lesson-meta', 'Lesson ' + (LESSONS.indexOf(l) + 1) + ' of ' + LESSONS.length);
+    setText('lesson-title', l.title);
+    var body = $('lesson-body');
+    body.textContent = '';
+    l.body.forEach(function (para) { var p0 = document.createElement('p'); p0.textContent = para; body.appendChild(p0); });
+    setText('lesson-takeaway', l.takeaway);
+    setText('lesson-try', l.tryLabel);
+    if (state.lessonsDone.indexOf(l.id) === -1) { state.lessonsDone.push(l.id); state.xp += 2; save(); }
+    translateDom(document.getElementById('screen-lesson'));
+  }
+  function tryLesson() {
+    var l = currentLesson;
+    if (!l) return;
+    if (l.tryTech) {
+      startCheckin('guided');
+      flow.technique = l.tryTech; flow.picked = true; flow.fromLesson = true; flow.reason = 'From your lesson: ' + l.title + '.';
+    } else if (l.trySpace) startCheckin('guided', l.trySpace);
+    else go(l.tryTool);
+  }
+
+  /* ---------- Theme ---------- */
+  function resolvedTheme() {
+    var t = state.theme || 'auto';
+    return t === 'dark' || (t === 'auto' && mm('(prefers-color-scheme: dark)')) ? 'dark' : 'light';
+  }
+  function applyTheme() {
+    var r = resolvedTheme();
+    document.documentElement.setAttribute('data-theme', r);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', r === 'dark' ? '#0E1626' : '#EDF7FF');
+    try { window.localStorage.setItem('loosenup.theme', state.theme || 'auto'); } catch (e) { /* private mode */ }
+    var btns = document.querySelectorAll('[data-theme-choice]');
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', String(btns[i].getAttribute('data-theme-choice') === (state.theme || 'auto')));
+  }
+  function setTheme(t) { state.theme = t; save(); applyTheme(); }
+
   /* ---------- Live updates (iPhone and Android apps) ---------- */
   // The native apps check our own domain for a newer web bundle, download it in the
   // background (checksum verified) and switch to it the next time LoosenUp opens.
@@ -2085,6 +2430,16 @@
     var sku = el.getAttribute('data-sku');
     var gameId = el.getAttribute('data-game');
     var card = el.getAttribute('data-card');
+    var guide = el.getAttribute('data-guide');
+    if (guide) { if (guide === 'voice') state.voice = !state.voice; else state.chime = !state.chime; save(); renderGuide(); renderVoiceButtons(); if (guide === 'chime' && state.chime) chime(); haptic('light'); return; }
+    var bed = el.getAttribute('data-bed');
+    if (bed) { state.bed = bed; save(); renderGuide(); haptic('light'); return; }
+    var lessonId = el.getAttribute('data-lesson');
+    if (lessonId) { openLesson(lessonId); return; }
+    var themeChoice = el.getAttribute('data-theme-choice');
+    if (themeChoice) { setTheme(themeChoice); haptic('light'); return; }
+    var langChoice = el.getAttribute('data-lang-choice');
+    if (langChoice) { setLang(langChoice); haptic('light'); return; }
     var tool = el.getAttribute('data-tool');
     if (tool) { closeSheets(true); go(tool); return; }
     if (el.hasAttribute('data-back')) { if (current === 'sounds') { /* sounds keep playing */ } go(lastTab || 'today'); return; }
@@ -2134,7 +2489,7 @@
         flow.before = clampScore($('calm-before').value);
         if (!flow.context) { flow.context = 'Just a quick lift'; flow.contexts = [flow.context]; }
         if (flow.mode === 'quick') beginBreak('quick');
-        else { flow.picked = false; go('pick'); }
+        else { flow.picked = !!flow.fromLesson; go('pick'); }
         break;
       case 'checkin-back': go(state.onboarded ? 'today' : 'gift'); break;
       case 'pick-begin': beginBreak(flow.technique); break;
@@ -2150,7 +2505,7 @@
       case 'start-break': startCheckin('guided'); break;
       case 'quick-breeze': startCheckin('quick'); break;
       case 'seed-pill': case 'open-shop': openShop(); break;
-      case 'shop-close': case 'checkout-cancel': case 'support-close': case 'reset-cancel': closeSheets(); break;
+      case 'shop-close': case 'checkout-cancel': case 'support-close': case 'reset-cancel': closeSheets(); document.body.classList.remove('lock-sos'); break;
       case 'shop-quick':
         closeSheets(true);
         if (current === 'pick') beginBreak('quick'); else startCheckin('quick');
@@ -2177,6 +2532,30 @@
       case 'step-another': stepOffset++; renderSteps(); break;
       case 'jar-add': openJar(); break;
       case 'care-save': saveCare(); break;
+      case 'lesson-back': go('learn'); break;
+      case 'lesson-try': tryLesson(); break;
+      case 'lock-unlock': tryUnlock(); break;
+      case 'lock-bio': tryBio(); break;
+      case 'lock-sos': document.body.classList.add('lock-sos'); openSupport(); break;
+      case 'lock-forgot': $('lock-reset').hidden = false; break;
+      case 'lock-erase':
+        try { window.localStorage.removeItem(KEY); } catch (err) { /* nothing stored */ }
+        state = freshState(); hideLock(); go('welcome'); toast('A fresh start. You can restore a backup from Me.');
+        break;
+      case 'lock-toggle':
+        if (lockEnabled()) { $('lock-off-form').hidden = false; $('lock-setup').hidden = true; }
+        else { $('lock-setup').hidden = false; $('lock-off-form').hidden = true; }
+        break;
+      case 'pin-save': savePin(); break;
+      case 'pin-off': turnOffLock(); break;
+      case 'bio-toggle':
+        var BP = bioPlugin();
+        if (!BP) break;
+        BP.isAvailable().then(function (r) {
+          if (!r || !r.isAvailable) { toast('Face ID or fingerprint is not set up on this phone.'); return; }
+          state.lock.bio = !state.lock.bio; save(); renderLockCard();
+        }, function () { toast('Face ID or fingerprint is not available.'); });
+        break;
       case 'care-edit': renderCare(true); break;
       case 'copy-script': copyScript(); break;
       case 'sp-save': saveSafety(); break;
@@ -2250,6 +2629,15 @@
     window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; if (current === 'me') renderInstall(); });
     window.addEventListener('appinstalled', function () { installEvt = null; toast('LoosenUp is on your home screen.'); });
     document.addEventListener('visibilitychange', function () { if (!document.hidden && current === 'today') renderGoldenBanner(); });
+    applyTheme();
+    applyLang();
+    $('lock-pin').addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) hiddenAt = Date.now();
+      else if (lockEnabled() && hiddenAt && Date.now() - hiddenAt > 60000) showLock();
+    });
+    if (lockEnabled()) showLock();
+    try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { if ((state.theme || 'auto') === 'auto') applyTheme(); }); } catch (e) { /* older browsers */ }
     renderIosTip();
     go(state.onboarded ? 'today' : 'welcome');
     registerSW();
@@ -2273,6 +2661,17 @@
     recommendFor: recommendFor,
     newerVersion: newerVersion,
     restoreBackup: restoreBackup,
+    setTheme: setTheme,
+    chimesPlayed: function () { return chimesPlayed; },
+    lessons: LESSONS,
+    openLesson: openLesson,
+    isLocked: isLocked,
+    showLock: showLock,
+    setLang: setLang,
+    tr: tr,
+    translateDom: translateDom,
+    sha256: sha256,
+    resolvedTheme: resolvedTheme,
     wellbeingNote: wellbeingNote,
     checkDue: checkDue,
     playSound: playSound,
