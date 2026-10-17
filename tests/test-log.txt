@@ -1,0 +1,87 @@
+Sunpetal acceptance test log
+Run at: 2026-10-17 16:42 UTC   Node v26.8.2   Live URL: https://sunpetal.vercel.app
+
+== Unit, flow, copy and safety tests (jsdom) ==
+✔ AT1 manifest has the required PWA fields (1.799125ms)
+✔ AT1 every manifest icon exists with the declared pixel size (3.577291ms)
+✔ AT1 service worker is registered and precaches the shell (2.593083ms)
+✔ AT1 vercel.json sets sw.js no-cache and the manifest content type (2.66325ms)
+✔ AT2 iOS meta tags and viewport-fit=cover are present (1.91475ms)
+✔ AT2 safe-area insets are applied to nav, sheets and toast (1.53225ms)
+✔ AT3 first open shows welcome and asks for a first name (441.6255ms)
+✔ AT3 gift grants 5 Seeds and 25 XP, Seedling bar at 50 percent, then straight into the first break (193.732709ms)
+✔ AT3 gift is only granted once, even after a reload (237.769ms)
+✔ AT4 full loop: Seed decrements, Calm gain is correct, streak 1, XP 45 (181.38975ms)
+✔ AT4 a lower after score is framed positively and earns a Seed (161.388ms)
+✔ AT4 the garden grows by one flower per break and never shrinks (174.300666ms)
+✔ AT5 Sunny days count once per calendar day (429.895291ms)
+✔ AT5 a Rain day bridges a 2-day gap once per week and the 3-day milestone grants a Seed (182.064709ms)
+✔ AT5 a gap longer than one day starts a fresh run (94.50325ms)
+✔ AT5 milestone Seed respects the weekly free Seed cap of 2 (107.629834ms)
+✔ AT5 free reward Seeds never exceed 2 in a week across all sources (90.25175ms)
+✔ AT5 Sunbeam surprise rolls at most once per day (73.594875ms)
+✔ AT6 day one recommendation is rule based by context (92.163625ms)
+✔ AT6 switches to the best average gain after 2 or more tries in that context (69.970083ms)
+✔ AT6 locked techniques are excluded even with great history (471.833666ms)
+✔ AT6 unlock thresholds: Soft release after 3 breaks, Let it out after 5 (126.606959ms)
+✔ AT5 XP rule: 10 + 2 x positive gain (91.877584ms)
+✔ AT7 zero Seeds on the free plan opens the Seed shop instead of a guided break (590.117834ms)
+✔ AT7 shop lists Full Bloom and Seed packs in INR and USD (267.302916ms)
+✔ AT7 demo purchase adds Seeds after a clearly labelled demo confirmation (212.155583ms)
+✔ AT7 Full Bloom guided breaks do not consume Seeds (169.427292ms)
+✔ AT7 Quick breeze is always free, even at zero Seeds (215.91ms)
+✔ AT8 no banned words (whole-word) in any UI copy file (8.604917ms)
+✔ AT8 rendered UI text on every screen has no banned words (1099.921333ms)
+✔ AT8 no em or en dashes in any repo file (39.788209ms)
+✔ AT8 locked vocabulary and footer note are present (2.239416ms)
+✔ AT11 crisis phrases are detected (453.778959ms)
+✔ AT11 typing a crisis phrase in Let it out opens the support sheet with helplines (396.012625ms)
+✔ AT11 journal text is never stored (133.127042ms)
+✔ AT11 support lines are always reachable from Me (195.702083ms)
+✔ AT13 reduced motion, focus ring and 48px targets are defined in CSS (0.915ms)
+✔ AT13 app honours reduced motion in JS (no orb animation loop) (101.991625ms)
+✔ AT14 Play tab lists three calm games (444.503375ms)
+✔ AT14 Petal Pairs: 12 cards, matching all pairs finishes kindly and grants game XP (522.36425ms)
+✔ AT14 a mismatched pair turns back over without any penalty (1085.23925ms)
+✔ AT14 game XP is capped at 3 rewarded games a day (542.541708ms)
+✔ AT14 Sunbeam Catch: tapping a sunbeam fills the jar (98.061834ms)
+✔ AT14 Breath Bloom: holding starts the breath guide and finishing blooms kindly (86.97975ms)
+ℹ tests 44
+ℹ suites 0
+ℹ pass 44
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20370.881042
+
+== Real browser tests (Playwright Chromium) ==
+✔ AT9 no console errors and no horizontal scroll at 390px (17722.518083ms)
+✔ AT9 no console errors and no horizontal scroll at 820px (17850.38825ms)
+✔ AT9 no console errors and no horizontal scroll at 1440px (17355.611875ms)
+✔ AT10 offline shell works after first load (493.765084ms)
+✔ AT13 every visible button and tab is at least 48px tall and wide (5827.369041ms)
+✔ AT13 visible focus ring on keyboard focus (206.052083ms)
+✔ AT13 prefers-reduced-motion stops the breathing orb animation (1072.119875ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 70069.289583
+
+== Live deployment tests ==
+✔ AT1 live: every shell file returns 200 (4684.863625ms)
+✔ AT1 live: manifest is served with the manifest content type and matches the repo (35.562625ms)
+✔ AT1 live: sw.js is served no-cache and matches the repo (72.741417ms)
+✔ AT12 live: production URL loads the app over HTTPS from Vercel (36.952708ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6356.976583
