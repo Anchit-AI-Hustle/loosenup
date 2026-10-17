@@ -1,4 +1,4 @@
-"""Generate LightenUp icons: a petal sun rising over green hills on sky blue.
+"""Generate LightenUp icons: a sun-striped hot-air balloon lifting over green hills on sky blue.
 
 Usage:
   .venv/bin/python scripts/make_icons.py          # web icons into www/
@@ -79,19 +79,78 @@ def petal_sun(layer, cx, cy, unit, glow=True):
     layer.alpha_composite(core)
 
 
+def balloon(layer, cx, top, unit, glow=True):
+    """Draw the LightenUp logo: a sun-striped hot-air balloon. unit = pixels per logo unit (balloon is 460 x 700 units)."""
+    W, R = 230 * unit, 230 * unit          # envelope half width and crown radius
+    cy = top + R                           # centre of the round crown
+    neck_y = top + 540 * unit              # where the envelope narrows to the burner
+    neck_w = 58 * unit
+
+    def half(y):
+        if y <= cy:
+            return math.sqrt(max(0.0, R * R - (y - cy) ** 2))
+        t = (y - cy) / (neck_y - cy)
+        return neck_w + (W - neck_w) * math.cos(t * math.pi / 2) ** 1.15
+
+    if glow:
+        mask = Image.new("L", layer.size, 0)
+        g_r = 330 * unit
+        ImageDraw.Draw(mask).ellipse([cx - g_r, cy - g_r, cx + g_r, cy + g_r], fill=170)
+        g = Image.new("RGBA", layer.size, (255, 226, 154, 0))
+        g.putalpha(mask.filter(ImageFilter.GaussianBlur(60 * unit)))
+        layer.alpha_composite(g)
+
+    d = ImageDraw.Draw(layer)
+    ys = [top + (neck_y - top) * i / 120 for i in range(121)]
+    # Gores between meridians spaced like a sphere seen from the side.
+    us = [math.sin(math.radians(a)) for a in range(-90, 91, 30)]
+    colours = [SUN_B, SUN_A, PEACH, (255, 226, 154), PEACH, SUN_A]
+    for k in range(len(us) - 1):
+        left = [(cx + us[k] * half(y), y) for y in ys]
+        right = [(cx + us[k + 1] * half(y), y) for y in reversed(ys)]
+        d.polygon(left + right, fill=colours[k] + (255,))
+    # Soft highlight on the upper left of the crown.
+    hl = Image.new("RGBA", layer.size, (0, 0, 0, 0))
+    hd = ImageDraw.Draw(hl)
+    hd.ellipse([cx - W * 0.62, cy - R * 0.62, cx - W * 0.44, cy + R * 0.18], fill=(255, 255, 255, 90))
+    layer.alpha_composite(hl.filter(ImageFilter.GaussianBlur(9 * unit)))
+    d = ImageDraw.Draw(layer)
+    # Mouth band, ropes and basket.
+    d.rounded_rectangle([cx - neck_w - 6 * unit, neck_y - 8 * unit, cx + neck_w + 6 * unit, neck_y + 16 * unit],
+                        radius=8 * unit, fill=SUN_B + (255,))
+    bt, bb, bw = neck_y + 92 * unit, neck_y + 168 * unit, 62 * unit
+    rope = max(2, int(7 * unit))
+    for sx0, sx1 in [(cx - neck_w, cx - bw + 8 * unit), (cx + neck_w, cx + bw - 8 * unit), (cx - neck_w * 0.3, cx - bw * 0.3), (cx + neck_w * 0.3, cx + bw * 0.3)]:
+        d.line([(sx0, neck_y + 14 * unit), (sx1, bt)], fill=(138, 107, 74, 255), width=rope)
+    d.rounded_rectangle([cx - bw, bt, cx + bw, bb], radius=14 * unit, fill=LEAF_DARK + (255,))
+    d.rounded_rectangle([cx - bw, bt, cx + bw, bt + 18 * unit], radius=9 * unit, fill=LEAF + (255,))
+
+
+def cloud(layer, x, y, unit, alpha=210):
+    d = ImageDraw.Draw(layer)
+    col = (255, 255, 255, alpha)
+    d.rounded_rectangle([x - 120 * unit, y - 28 * unit, x + 120 * unit, y + 28 * unit], radius=28 * unit, fill=col)
+    d.ellipse([x - 70 * unit, y - 68 * unit, x + 10 * unit, y + 12 * unit], fill=col)
+    d.ellipse([x - 5 * unit, y - 52 * unit, x + 65 * unit, y + 18 * unit], fill=col)
+
+
 def artwork(scale=1.0):
-    """Transparent layer: petal sun rising over two hills. scale < 1 shrinks into the maskable safe zone."""
+    """Transparent layer: the balloon lifting over two hills. scale < 1 shrinks into the maskable safe zone."""
     layer = Image.new("RGBA", (S, S), (0, 0, 0, 0))
     c = S / 2
 
     def sx(v):
         return c + (v - c) * scale
 
-    petal_sun(layer, c, sx(470), 3.5 * scale)
+    cl = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+    cloud(cl, sx(250), sx(700), scale)
+    cloud(cl, sx(820), sx(330), scale * 0.8, 180)
+    layer.alpha_composite(cl)
     d = ImageDraw.Draw(layer)
-    d.ellipse([sx(-300), sx(700), sx(720), sx(1340)], fill=HILL_BACK + (255,))
-    d.ellipse([sx(300), sx(740), sx(1330), sx(1380)], fill=HILL + (255,))
-    d.ellipse([sx(-200), sx(880), sx(1220), sx(1500)], fill=LEAF_DARK + (255,))
+    d.ellipse([sx(-300), sx(800), sx(720), sx(1400)], fill=HILL_BACK + (255,))
+    d.ellipse([sx(300), sx(840), sx(1330), sx(1440)], fill=HILL + (255,))
+    d.ellipse([sx(-200), sx(950), sx(1220), sx(1560)], fill=LEAF_DARK + (255,))
+    balloon(layer, c, sx(70), 1.12 * scale)
     return layer
 
 
@@ -153,7 +212,7 @@ def native():
 
 
 def splash_image(w, h):
-    """Sky gradient with the petal sun rising over the hills, sized for a native splash screen."""
+    """Sky gradient with the LightenUp balloon, sized for a native splash screen."""
     img = Image.new("RGB", (w, h))
     d = ImageDraw.Draw(img)
     for y in range(h):
@@ -161,7 +220,7 @@ def splash_image(w, h):
         d.line([(0, y), (w, y)], fill=lerp(SKY_TOP, (255, 246, 227), t))
     s = min(w, h)
     layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    petal_sun(layer, w / 2, h / 2 - s * 0.04, s * 0.0016)
+    balloon(layer, w / 2, h / 2 - s * 0.2, s * 0.00052)
     img = Image.alpha_composite(img.convert("RGBA"), layer)
     return img.convert("RGB")
 

@@ -27,6 +27,16 @@
       <radialGradient id="g-sun" cx=".42" cy=".36" r=".72">
         <stop offset="0" stop-color="#FFF3CF"/><stop offset=".5" stop-color="#FFC857"/><stop offset="1" stop-color="#F2A72B"/>
       </radialGradient>
+      <!-- LightenUp logo: a sun-striped hot-air balloon -->
+      <symbol id="lift-logo" viewBox="0 0 40 40">
+        <path d="M20 2.5C28.6 2.5 34.5 8.4 34.5 15.6 34.5 21.6 28.9 25.4 24.3 29.6H15.7C11.1 25.4 5.5 21.6 5.5 15.6 5.5 8.4 11.4 2.5 20 2.5Z" fill="#F2A72B"/>
+        <path d="M20 2.5C25.4 2.5 29 8.4 29 15.6 29 21.4 25.9 25.4 23.2 29.6H16.8C14.1 25.4 11 21.4 11 15.6 11 8.4 14.6 2.5 20 2.5Z" fill="#FFC857"/>
+        <path d="M20 2.5C23.3 2.5 25 8.4 25 15.6 25 21.4 23.1 25.4 21.6 29.6H18.4C16.9 25.4 15 21.4 15 15.6 15 8.4 16.7 2.5 20 2.5Z" fill="#FFB088"/>
+        <path d="M20 2.5C21.3 2.5 21.8 8.4 21.8 15.6 21.8 21.4 21 25.4 20.5 29.6H19.5C19 25.4 18.2 21.4 18.2 15.6 18.2 8.4 18.7 2.5 20 2.5Z" fill="#FFE29A"/>
+        <rect x="15.4" y="29" width="9.2" height="2.2" rx="1" fill="#F2A72B"/>
+        <path d="M16.2 31.2l1 3.3M23.8 31.2l-1 3.3" stroke="#8A6B4A" stroke-width="0.9" stroke-linecap="round"/>
+        <rect x="16.4" y="34.2" width="7.2" height="4.3" rx="1.2" fill="#2E7D5B"/>
+      </symbol>
       <symbol id="petal-sun" viewBox="-100 -100 200 200">
         <g>
           <path d="M0-44C17-52 18-78 0-94-18-78-17-52 0-44Z" fill="#FFC857"/>
@@ -50,10 +60,10 @@
 
   <div class="app">
     <header class="topbar">
-      <div class="brand"><svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg><span class="wordmark">LightenUp</span></div>
+      <div class="brand"><svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#lift-logo" width="40" height="40"/></svg><span class="wordmark">LightenUp</span></div>
       <div class="top-actions">
         <button id="seed-pill" class="seed-pill" type="button" hidden aria-label="Seeds and plan">
-          <span class="seed-dot" aria-hidden="true"></span><span id="seed-pill-count">0</span><span>Seeds</span>
+          <span class="seed-dot" aria-hidden="true"></span><span id="seed-pill-count">0</span><span class="seed-word">Seeds</span>
         </button>
         <button id="sos-btn" class="sos-btn" type="button" aria-label="SOS: get support now">SOS</button>
       </div>
@@ -67,14 +77,15 @@
             <defs><linearGradient id="w-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CFE8FF"/><stop offset="1" stop-color="#FFF6E3"/></linearGradient>
               <clipPath id="w-clip"><rect width="360" height="176"/></clipPath></defs>
             <rect width="360" height="220" fill="url(#w-sky)"/>
-            <g clip-path="url(#w-clip)"><g class="welcome-sun"><use href="#petal-sun" x="95" y="34" width="170" height="170"/></g></g>
+            <g class="welcome-sun"><use href="#petal-sun" x="250" y="14" width="84" height="84"/></g>
             <path d="M0 160Q90 128 180 156T360 148V220H0Z" fill="#7AC498"/>
             <path d="M0 184Q120 158 240 180T360 172V220H0Z" fill="#4FA67C"/>
             <path d="M0 204Q160 188 360 202V220H0Z" fill="#2E7D5B"/>
+            <g class="welcome-balloon"><use href="#lift-logo" x="112" y="6" width="136" height="136"/></g>
           </svg>
         </div>
         <p class="eyebrow">Two calm minutes</p>
-        <h1 id="welcome-title" class="display">Hello, sunshine.</h1>
+        <h1 id="welcome-title" class="display">Welcome. Take a breath.</h1>
         <p class="lead">Two calm minutes to feel lighter. Ease a tense workday, soften a heavy mood, and watch your Calm gain grow into a garden.</p>
         <form id="welcome-form" class="stack" novalidate>
           <label class="field-label" for="name-input">What should we call you?</label>

@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.2.0';
+  var VERSION = '1.2.1';
   var KEY = 'lightenup.v1';
   var PUBLIC_URL = 'https://lightenup-app.vercel.app';
   var WEEKLY_FREE_SEEDS = 2;

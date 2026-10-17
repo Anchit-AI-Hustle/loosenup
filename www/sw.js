@@ -1,5 +1,5 @@
 /* LightenUp service worker: precache the shell, cache-first for same-origin GET. */
-var CACHE = 'lightenup-v1.2.0';
+var CACHE = 'lightenup-v1.2.1';
 var SHELL = [
   '/',
   '/index.html',
