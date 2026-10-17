@@ -1,5 +1,5 @@
-/* Sunpetal service worker: precache the shell, cache-first for same-origin GET. */
-var CACHE = 'sunpetal-v1.1.0';
+/* LightenUp service worker: precache the shell, cache-first for same-origin GET. */
+var CACHE = 'lightenup-v1.2.0';
 var SHELL = [
   '/',
   '/index.html',

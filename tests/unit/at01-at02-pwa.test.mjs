@@ -13,8 +13,8 @@ const pngSize = (file) => {
 test('AT1 manifest has the required PWA fields', () => {
   const m = JSON.parse(read('www/manifest.json'));
   assert.equal(m.id, '/');
-  assert.equal(m.name, 'Sunpetal');
-  assert.equal(m.short_name, 'Sunpetal');
+  assert.equal(m.name, 'LightenUp');
+  assert.equal(m.short_name, 'LightenUp');
   assert.equal(m.display, 'standalone');
   assert.equal(m.start_url, '/');
   assert.equal(m.scope, '/');
@@ -65,7 +65,7 @@ test('AT2 iOS meta tags and viewport-fit=cover are present', () => {
   const html = read('www/index.html');
   assert.match(html, /<meta name="apple-mobile-web-app-capable" content="yes">/);
   assert.match(html, /<meta name="mobile-web-app-capable" content="yes">/);
-  assert.match(html, /<meta name="apple-mobile-web-app-title" content="Sunpetal">/);
+  assert.match(html, /<meta name="apple-mobile-web-app-title" content="LightenUp">/);
   assert.match(html, /<link rel="apple-touch-icon"[^>]*href="\/apple-touch-icon\.png"/);
   assert.match(html, /<meta name="viewport" content="[^"]*viewport-fit=cover/);
   assert.match(html, /<link rel="manifest" href="\/manifest\.json">/);

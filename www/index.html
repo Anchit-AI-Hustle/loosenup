@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Sunpetal</title>
-  <meta name="description" content="Two calm minutes, whenever you want them. Rate how you feel, breathe with a sun that opens like a flower, and watch your Calm gain grow.">
+  <title>LightenUp</title>
+  <meta name="description" content="Two calm minutes to feel lighter. Gentle breaks for work, relationships and heavy days, with SOS support one tap away.">
   <meta name="theme-color" content="#EDF7FF">
   <meta name="color-scheme" content="light">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Sunpetal">
+  <meta name="apple-mobile-web-app-title" content="LightenUp">
   <meta name="format-detection" content="telephone=no">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -50,10 +50,13 @@
 
   <div class="app">
     <header class="topbar">
-      <div class="brand"><svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg><span class="wordmark">Sunpetal</span></div>
-      <button id="seed-pill" class="seed-pill" type="button" hidden aria-label="Seeds and plan">
-        <span class="seed-dot" aria-hidden="true"></span><span id="seed-pill-count">0</span><span>Seeds</span>
-      </button>
+      <div class="brand"><svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg><span class="wordmark">LightenUp</span></div>
+      <div class="top-actions">
+        <button id="seed-pill" class="seed-pill" type="button" hidden aria-label="Seeds and plan">
+          <span class="seed-dot" aria-hidden="true"></span><span id="seed-pill-count">0</span><span>Seeds</span>
+        </button>
+        <button id="sos-btn" class="sos-btn" type="button" aria-label="SOS: get support now">SOS</button>
+      </div>
     </header>
 
     <main id="main" tabindex="-1">
@@ -72,7 +75,7 @@
         </div>
         <p class="eyebrow">Two calm minutes</p>
         <h1 id="welcome-title" class="display">Hello, sunshine.</h1>
-        <p class="lead">Rate how you feel, breathe with a sun that opens like a flower, and watch your Calm gain grow into a garden.</p>
+        <p class="lead">Two calm minutes to feel lighter. Ease a tense workday, soften a heavy mood, and watch your Calm gain grow into a garden.</p>
         <form id="welcome-form" class="stack" novalidate>
           <label class="field-label" for="name-input">What should we call you?</label>
           <input id="name-input" class="text-input" type="text" autocomplete="given-name" maxlength="24" placeholder="Your first name" required>
@@ -120,7 +123,8 @@
           <div class="range-ends" aria-hidden="true"><span>1 a bit tangled</span><span>10 very calm</span></div>
         </div>
         <h2 class="subtitle" id="context-title">What is going on?</h2>
-        <div id="context-chips" class="chips" role="group" aria-labelledby="context-title"></div>
+        <div id="context-chips" class="context-groups" role="group" aria-labelledby="context-title"></div>
+        <button id="context-all" class="btn btn-ghost" type="button" hidden>Show all feelings</button>
         <button id="checkin-next" class="btn btn-sun" type="button">Next</button>
         <button id="checkin-back" class="btn btn-ghost" type="button">Back</button>
       </section>
@@ -234,6 +238,26 @@
             <p class="sky-pill"><span class="sky-pill-dot" aria-hidden="true"></span><span id="today-sky-streak"></span></p>
           </div>
         </div>
+        <article id="mood-card" class="card mood-card">
+          <p class="eyebrow">Daily check-in</p>
+          <h2 class="subtitle">How is your mood today?</h2>
+          <div class="moods" role="group" aria-label="Mood today">
+            <button type="button" class="mood" data-mood="1" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(12 12) scale(.4)"/></svg><span>Very heavy</span></button>
+            <button type="button" class="mood" data-mood="2" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(9 9) scale(.55)"/></svg><span>Heavy</span></button>
+            <button type="button" class="mood" data-mood="3" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(6 6) scale(.7)"/></svg><span>Okay</span></button>
+            <button type="button" class="mood" data-mood="4" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(3 3) scale(.85)"/></svg><span>Light</span></button>
+            <button type="button" class="mood" data-mood="5" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg><span>Bright</span></button>
+          </div>
+          <p id="mood-done" class="muted" aria-live="polite"></p>
+          <p id="jar-memory" class="jar-memory" hidden></p>
+        </article>
+        <article id="support-card" class="card support-card" hidden>
+          <p class="eyebrow">We are here with you</p>
+          <h2 class="subtitle">It has been a heavy few days. You do not have to carry it alone.</h2>
+          <p class="muted">Talking to someone you trust, or a free helpline, can make a real difference.</p>
+          <button id="support-card-sos" class="btn btn-sos" type="button">Talk to someone now</button>
+          <button id="support-card-step" class="btn btn-ghost" type="button">Try one Small step</button>
+        </article>
         <div id="golden-banner" class="banner" hidden>
           <span class="banner-sun" aria-hidden="true"></span>
           <p><strong>Golden hour is here.</strong> Two calm minutes, whenever you like.</p>
@@ -243,6 +267,27 @@
           <p class="muted">Tell us how you feel and we will pick a break that suits you.</p>
           <button id="start-break" class="btn btn-sun" type="button">Start a break</button>
           <button id="quick-breeze" class="btn btn-ghost" type="button">Quick breeze, 60s, always free</button>
+        </article>
+        <h2 class="subtitle">Spaces for what you are carrying</h2>
+        <div class="spaces">
+          <button class="space-card space-work" type="button" data-space="work"><strong>Work</strong><span>Ease the workday, before meetings, after tough calls</span></button>
+          <button class="space-card space-rel" type="button" data-space="relationships"><strong>Relationships</strong><span>When things feel tense with someone</span></button>
+          <button class="space-card space-low" type="button" data-space="lowdays"><strong>Low days</strong><span>Gentle lifts for heavy days</span></button>
+          <button class="space-card space-sleep" type="button" data-space="sleep"><strong>Sleep</strong><span>Wind down and quiet a racing mind</span></button>
+        </div>
+        <article id="steps-card" class="card steps-card">
+          <p class="eyebrow">Small step</p>
+          <p id="step-idea" class="step-idea" aria-live="polite"></p>
+          <div class="row">
+            <button id="step-done" class="btn btn-sun" type="button">I did it</button>
+            <button id="step-another" class="btn btn-ghost" type="button">Another idea</button>
+          </div>
+          <p id="steps-note" class="fine"></p>
+        </article>
+        <article id="jar-card" class="card jar-card">
+          <p class="eyebrow">Good things jar</p>
+          <p id="jar-count" class="muted"></p>
+          <button id="jar-add" class="btn btn-soft" type="button">Add a good thing</button>
         </article>
         <div class="stat-grid">
           <div class="stat"><span class="stat-k">Sunny days</span><span id="today-streak" class="stat-v"></span></div>
@@ -322,6 +367,7 @@
           <h2 class="subtitle">What lifts you most</h2>
           <p id="insight-tech"></p>
           <p id="insight-time"></p>
+          <p id="insight-mood"></p>
         </article>
       </section>
 
@@ -351,18 +397,19 @@
         </article>
         <article class="card sunbeam-card">
           <h2 class="subtitle">Share a Sunbeam</h2>
-          <p class="muted">Invite a friend to Sunpetal. Sharing earns you a Seed (up to 2 free Seeds a week).</p>
+          <p class="muted">Invite a friend to LightenUp. Sharing earns you a Seed (up to 2 free Seeds a week).</p>
           <button id="sunbeam-share" class="btn btn-sun" type="button">Share a Sunbeam</button>
         </article>
         <article class="card" id="install-card">
-          <h2 class="subtitle">Install Sunpetal</h2>
+          <h2 class="subtitle">Install LightenUp</h2>
           <p id="install-text" class="muted"></p>
           <button id="install-btn" class="btn btn-soft" type="button" hidden>Install app</button>
         </article>
         <article class="card">
-          <h2 class="subtitle">Support lines</h2>
-          <p class="muted">Kind people are ready to listen, any time.</p>
-          <button id="open-support" class="btn btn-soft" type="button">Open support lines</button>
+          <h2 class="subtitle">SOS and support</h2>
+          <p class="muted" id="me-trusted">Add a trusted person so SOS can message them in one tap.</p>
+          <button id="open-trusted" class="btn btn-soft" type="button">Set up my trusted person</button>
+          <button id="open-support" class="btn btn-ghost" type="button">Open SOS and helplines</button>
         </article>
         <article class="card">
           <h2 class="subtitle">Start fresh</h2>
@@ -410,7 +457,7 @@
       <button class="pack" type="button" data-sku="seeds30"><em class="ribbon">Popular</em><strong>30 Seeds</strong><span>₹249 or USD 4.99</span></button>
       <button class="pack" type="button" data-sku="seeds100"><em class="ribbon">Best value</em><strong>100 Seeds</strong><span>₹699 or USD 12.99</span></button>
     </div>
-    <p class="fine">Quick breeze is always free. Prices are placeholders while Sunpetal is in preview.</p>
+    <p class="fine">Quick breeze is always free. Prices are placeholders while LightenUp is in preview.</p>
     <button id="shop-quick" class="btn btn-soft" type="button">Take a Quick breeze</button>
     <button id="shop-close" class="btn btn-ghost" type="button">Close</button>
   </section>
@@ -424,15 +471,49 @@
     <button id="checkout-cancel" class="btn btn-ghost" type="button">Not now</button>
   </section>
 
-  <section id="support-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="support-title" hidden>
+  <section id="support-sheet" class="sheet sos-sheet" role="dialog" aria-modal="true" aria-labelledby="support-title" hidden>
     <div class="sheet-grip" aria-hidden="true"></div>
-    <h2 id="support-title" class="title">You matter. Support is here.</h2>
-    <p class="muted">Talking to someone can help. These lines are free and kind.</p>
-    <a class="btn btn-sun" href="tel:14416">Call Tele-MANAS 14416 (India, 24x7)</a>
-    <a class="btn btn-soft" href="https://findahelpline.com" target="_blank" rel="noopener">Find a helpline anywhere: findahelpline.com</a>
+    <p class="eyebrow">SOS</p>
+    <h2 id="support-title" class="title">You are not alone. Help is here.</h2>
+    <p class="muted">If you might act on thoughts of ending your life, please call 112 now. Kind, trained people are ready to listen, any time.</p>
+    <a id="sos-alert" class="btn btn-sos" href="#" hidden>Message my trusted person</a>
+    <button id="sos-location" class="btn btn-ghost" type="button" aria-pressed="false" hidden>Add my location to the message: off</button>
+    <a class="btn btn-sun" href="tel:14416">Call Tele-MANAS 14416 (India, free, 24x7)</a>
     <a class="btn btn-soft" href="tel:112">Emergency: call 112</a>
-    <p class="fine">Sunpetal is a wellbeing companion, not medical care. What you typed was not saved.</p>
-    <button id="support-close" class="btn btn-ghost" type="button">Back to Sunpetal</button>
+    <a class="btn btn-soft" href="https://findahelpline.com" target="_blank" rel="noopener">Find a helpline anywhere: findahelpline.com</a>
+    <button id="sos-breathe" class="btn btn-soft" type="button">Breathe with me for 60 seconds</button>
+    <button id="trusted-edit" class="btn btn-ghost" type="button" hidden>Change trusted person</button>
+    <div id="trusted-setup" class="card trusted-setup">
+      <h3 class="subtitle">Add a trusted person</h3>
+      <p class="fine">Someone you would want by your side on a hard day. Saved only on this device.</p>
+      <label class="field-label" for="trusted-name">Their name</label>
+      <input id="trusted-name" class="text-input" type="text" maxlength="40" autocomplete="off" placeholder="For example, Meera">
+      <label class="field-label" for="trusted-phone">Their phone number</label>
+      <input id="trusted-phone" class="text-input" type="tel" inputmode="tel" maxlength="20" autocomplete="off" placeholder="+91 98765 43210">
+      <button id="trusted-save" class="btn btn-soft" type="button">Save trusted person</button>
+    </div>
+    <p class="fine">LightenUp is a wellbeing companion, not medical care. Nothing you write in Let it out is ever saved.</p>
+    <button id="support-close" class="btn btn-ghost" type="button">Back to LightenUp</button>
+  </section>
+
+  <section id="safety-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="safety-title" hidden>
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <h2 id="safety-title" class="title">Thank you for telling us.</h2>
+    <p class="muted">Heavy days are real, and you deserve support. Can we gently ask you something important?</p>
+    <p class="subtitle">Are you having thoughts of ending your life or hurting yourself?</p>
+    <button id="safety-yes" class="btn btn-sos" type="button">Yes, or I am not sure</button>
+    <button id="safety-no" class="btn btn-soft" type="button">No, not right now</button>
+  </section>
+
+  <section id="jar-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="jar-title" hidden>
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <h2 id="jar-title" class="title">A good thing from today</h2>
+    <p class="muted">It can be tiny: a warm cup, a kind word, a moment of sun.</p>
+    <label class="sr-only" for="good-text">A good thing from today</label>
+    <textarea id="good-text" class="journal" rows="3" maxlength="160" autocomplete="off" placeholder="Something that felt good today..."></textarea>
+    <p class="fine">Saved only on this device, and only when you tap Save.</p>
+    <button id="good-save" class="btn btn-sun" type="button">Save to my jar</button>
+    <button id="good-close" class="btn btn-ghost" type="button">Not now</button>
   </section>
 
   <section id="confirm-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirm-title" hidden>

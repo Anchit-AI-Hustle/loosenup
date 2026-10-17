@@ -1,5 +1,5 @@
-Sunpetal acceptance test log
-Run at: 2026-10-17 16:42 UTC   Node v26.8.2   Live URL: https://sunpetal.vercel.app
+LightenUp acceptance test log
+Run at: 2026-10-17 16:42 UTC   Node v26.8.2   Live URL: https://lightenup-app.vercel.app
 
 == Unit, flow, copy and safety tests (jsdom) ==
 ✔ AT1 manifest has the required PWA fields (1.799125ms)

@@ -79,7 +79,7 @@ test('AT8 locked vocabulary and footer note are present', () => {
   const html = readFileSync(path.join(ROOT, 'www/index.html'), 'utf8');
   const js = readFileSync(path.join(ROOT, 'www/app.js'), 'utf8');
   const all = html + js;
-  for (const w of ['Sunpetal', 'Seeds', 'Full Bloom', 'Calm gain', 'Sunny days', 'Rain day', 'Golden hour', 'Sunbeam',
+  for (const w of ['LightenUp', 'Seeds', 'Full Bloom', 'Calm gain', 'Sunny days', 'Rain day', 'Golden hour', 'Sunbeam',
     'Seedling', 'Sprout', 'Bud', 'Bloom', 'Meadow', 'Sunny week', 'Sigh of relief', 'Slow breeze', 'Here and now',
     'Soft release', 'Let it out', 'Quick breeze']) {
     assert.ok(all.includes(w), `vocabulary: ${w}`);

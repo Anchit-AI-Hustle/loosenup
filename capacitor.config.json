@@ -1,6 +1,6 @@
 {
-  "appId": "com.sunpetal.calm",
-  "appName": "Sunpetal",
+  "appId": "com.lightenup.calm",
+  "appName": "LightenUp",
   "webDir": "www",
   "backgroundColor": "#EDF7FF",
   "android": {
@@ -12,7 +12,7 @@
   },
   "plugins": {
     "LocalNotifications": {
-      "smallIcon": "ic_stat_sunpetal",
+      "smallIcon": "ic_stat_lightenup",
       "iconColor": "#F2A72B"
     }
   }

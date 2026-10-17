@@ -1,4 +1,4 @@
-// Loads www/index.html + www/app.js into jsdom and exposes the Sunpetal test API.
+// Loads www/index.html + www/app.js into jsdom and exposes the LightenUp test API.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -23,7 +23,7 @@ export function day(n, hour = 9) {
 
 export function makeApp({ state, now, rng } = {}) {
   const dom = new JSDOM(html(), {
-    url: 'https://sunpetal.test/',
+    url: 'https://lightenup.test/',
     runScripts: 'outside-only',
     pretendToBeVisual: true,
   });
@@ -32,11 +32,11 @@ export function makeApp({ state, now, rng } = {}) {
   const errors = [];
   window.console.error = (...a) => errors.push(a.join(' '));
   window.addEventListener('error', (e) => errors.push(String(e.message)));
-  if (state) window.localStorage.setItem('sunpetal.v1', JSON.stringify(state));
-  window.__SUNPETAL_TEST__ = { now: now || null, rng: rng || null };
+  if (state) window.localStorage.setItem('lightenup.v1', JSON.stringify(state));
+  window.__LIGHTENUP_TEST__ = { now: now || null, rng: rng || null };
   window.eval(appJs());
-  const B = window.Sunpetal;
-  if (!B) throw new Error('window.Sunpetal API missing');
+  const B = window.LightenUp;
+  if (!B) throw new Error('window.LightenUp API missing');
   const $ = (sel) => window.document.querySelector(sel);
   const click = (sel) => {
     const el = typeof sel === 'string' ? $(sel) : sel;
@@ -57,7 +57,7 @@ export function makeApp({ state, now, rng } = {}) {
   return { dom, window, document: window.document, B, $, click, setValue, visible, errors };
 }
 
-// Walks the Sunpetal onboarding: welcome -> gift -> first check-in.
+// Walks the LightenUp onboarding: welcome -> gift -> first check-in.
 export function onboard(app, name = 'Asha') {
   app.setValue('#name-input', name);
   app.click('#welcome-go');

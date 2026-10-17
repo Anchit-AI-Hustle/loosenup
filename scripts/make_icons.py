@@ -1,4 +1,4 @@
-"""Generate Sunpetal icons: a petal sun rising over green hills on sky blue.
+"""Generate LightenUp icons: a petal sun rising over green hills on sky blue.
 
 Usage:
   .venv/bin/python scripts/make_icons.py          # web icons into www/
@@ -54,7 +54,7 @@ PETAL = bezier((0, -44), (17, -52), (18, -78), (0, -94)) + bezier((0, -94), (-18
 
 
 def petal_sun(layer, cx, cy, unit, glow=True):
-    """Draw the Sunpetal mark centred at (cx, cy); unit = pixels per mark unit (mark spans -100..100)."""
+    """Draw the LightenUp mark centred at (cx, cy); unit = pixels per mark unit (mark spans -100..100)."""
     if glow:
         # Blur only the alpha so the glow stays warm instead of fading through grey.
         mask = Image.new("L", layer.size, 0)

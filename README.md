@@ -1,14 +1,16 @@
-# Sunpetal
+# LightenUp
 
-Two calm minutes, whenever you want them. Rate how calm you feel, breathe with a sun that opens like a flower, rate again, and see your **Calm gain**. A garden grows with every break, and the Play tab has three gentle mini-games.
+**Two calm minutes to feel lighter.** LightenUp's goal is simple: help people ease a tense day and soften a heavy, low mood, and make sure help is one tap away on the hardest days.
 
-The brand mark is a petal sun: a sun whose rays are petals. It opens on every in-breath, unfurls on the result screen and sits in the app icon.
+Rate how calm you feel, take a 2-minute guided break chosen for what you are carrying (work, relationships, low days, sleep), rate again, and see your **Calm gain**. A daily mood check-in, Small steps, Kind words and a Good things jar support low days. **SOS** sits in the header of every screen.
+
+The brand mark is a petal sun that opens on every in-breath, unfurls on the result screen and sits in the app icon.
 
 > A wellbeing companion, not medical care.
 
-- **Live app:** https://sunpetal.vercel.app
-- **QR code:** [sunpetal-live-qr.png](sunpetal-live-qr.png)
-- **Android debug APK:** `android/app/build/outputs/apk/debug/app-debug.apk` (also exported as `dist/sunpetal-android-debug-v1.1.0.apk`)
+- **Live app:** https://lightenup-app.vercel.app
+- **QR code:** [lightenup-live-qr.png](lightenup-live-qr.png)
+- **Android debug APK:** `android/app/build/outputs/apk/debug/app-debug.apk` (also exported as `dist/lightenup-android-debug-v1.2.0.apk`)
 
 ## Install on your phone
 
@@ -21,17 +23,21 @@ The app works offline after the first load.
 
 | Area | Details |
 | --- | --- |
+| SOS | An SOS button on every screen, even before onboarding. It opens Tele-MANAS 14416 (India, free, 24x7), emergency 112, findahelpline.com, a free 60 second breather and **Message my trusted person**: a pre-written text to someone you chose (saved on the device only), with your location added only if you switch that on. The phone's messaging app opens with the text ready; you tap Send. With no server, the app cannot send messages silently. |
+| Detecting hard moments | Crisis phrases (for example suicide, kill myself, end it all, self harm, want to die) are checked in every text box: Let it out and the Good things jar. A match opens SOS straight away and the text is not saved. Choosing the lowest mood asks one direct, gentle question: "Are you having thoughts of ending your life or hurting yourself?" Yes opens SOS. Three heavy check-ins in a row bring up a "you do not have to carry it alone" card. |
+| Spaces | **Work:** Work pile-up, Before a meeting, After a tough call, Hard to switch off, with Desk reset and Steady square (box breathing). **Relationships:** Tense with someone, After a disagreement, Before a hard talk, Feeling disconnected, with Pause before replying, Cool down (long breath out) and Warm wishes. **Low days:** Feeling low, Low energy, Hard on myself, with Kind words (self-compassion). **Sleep:** Winding down, Mind racing at night. |
+| Lifting low days | **Mood check-in** once a day (Very heavy to Bright, +2 XP) with a mood line and trend insight on the Sunny week. **Small steps:** one tiny doable action at a time, based on behavioural activation (daylight, water, a hello to someone you trust); each plants a sprout in the garden (+3 XP, up to 3 a day). **Good things jar:** saved only when you tap Save; on heavy days a saved good thing resurfaces. |
 | First open | Welcome (first name), welcome gift of 5 Seeds and 25 XP (Seedling bar starts at 50 percent), then straight into the first break. No paywall. |
 | Break loop | Calm before (1 to 10) and a context chip, an auto-picked technique with the reason, the guided session (breathing orb or step counter, optional device voice, pause, finish early), calm after, then the result with the rising sun. |
-| Techniques | Sigh of relief, Slow breeze, Here and now, Soft release (opens after 3 breaks), Let it out (opens after 5 breaks). Quick breeze is a 60s preset that is always free. |
+| Techniques | Everyday: Sigh of relief, Slow breeze, Here and now, Soft release (opens after 3 breaks), Let it out (opens after 5 breaks). Work: Desk reset, Steady square. Relationships: Pause before replying, Cool down, Warm wishes. Low days: Kind words. Quick breeze is a 60s preset that is always free. |
 | Recommender | Rule based by context on day one. After 2 or more breaks with a technique in a context, the technique with the best average Calm gain for that context is preferred. Techniques that are not open yet are never picked. |
 | Gamification | Sunny days (once per calendar day), one Rain day per week bridges a single quiet day, milestones at 3, 7, 21 and 30 days, a daily 25 percent Sunbeam surprise, XP = 10 + 2 x positive Calm gain, levels Seedling, Sprout, Bud, Bloom, Full Bloom, Meadow, badges, a garden that only grows. |
 | Play | Three calm mini-games where every round ends kindly and nothing costs Seeds. **Petal Pairs** (memory match, 6 flower pairs), **Sunbeam Catch** (45 seconds of tapping drifting sunbeams into a jar, nothing is ever dropped), **Breath Bloom** (hold to breathe in with a growing ring, let go to breathe out, six breaths bloom six flowers). Each finished game gives 5 XP, up to 3 games a day, plus a Playful badge. Games never give free Seeds, so paid Seeds stay protected. |
 | Design | Morning sky palette, Fraunces (soft serif) for headlines and numbers with Nunito for UI text, both self-hosted. Glass cards, a floating pill tab bar, a living sky on Today that follows the real time of day (sun arc by hour, golden evenings, starry quiet nights), the breathing petal sun, and the rising sun with unfurling petals on the result screen. |
 | Fair rewards | At most 2 free Seeds per week from all rewards combined (milestones, Sunbeam surprise, sharing, "You showed up"). At most 2 nudges per day. |
 | Money | Seeds (credits) and Full Bloom (subscription). Checkout is a clearly labelled **DEMO**: nothing is charged and no payment details are asked for. At 0 Seeds on the free plan, a guided break opens the Seed shop. Quick breeze never uses a Seed. |
-| Safety | Let it out checks typed text for crisis phrases and opens a support sheet: India Tele-MANAS 14416, findahelpline.com, emergency 112. Journal text is never stored anywhere. Support lines are always available from Me. |
-| Privacy | All data stays on the device in localStorage (`sunpetal.v1`). No accounts, no analytics, fonts are self-hosted. |
+| Safety | No medical claims anywhere: LightenUp is a wellbeing companion, not medical care, and says so on every screen. Let it out text is never stored. SOS and support are free forever and never need Seeds. |
+| Privacy | All data stays on the device in localStorage (`lightenup.v1`). No accounts, no analytics, fonts are self-hosted. |
 | Golden hour | A daily time you choose. On the web it shows a gentle in-app note. On the Android and iOS apps it schedules one real local notification per day. |
 
 ### Prices (placeholders)
@@ -57,7 +63,7 @@ www/            the web app (PWA). Also the Capacitor webDir.
   manifest.json standalone, id "/", 192, 512 and maskable icons
 tests/          acceptance tests AT1 to AT13 (jsdom + Playwright)
 scripts/        icon, splash and QR generators (Python Pillow and qrcode), native-setup.sh
-android/ ios/   Capacitor native projects (appId com.sunpetal.calm)
+android/ ios/   Capacitor native projects (appId com.lightenup.calm)
 vercel.json     static hosting from www/ with sw.js no-cache and the manifest content type
 ```
 
@@ -67,7 +73,7 @@ vercel.json     static hosting from www/ with sw.js no-cache and the manifest co
 npm install
 npm run serve            # http://127.0.0.1:4173
 npm test                 # unit (jsdom) + browser (Playwright) suites
-LIVE_URL=https://sunpetal.vercel.app npm run test:live
+LIVE_URL=https://lightenup-app.vercel.app npm run test:live
 ```
 
 The first browser run needs `npx playwright install chromium`. Screenshots from the browser suite land in `tests/screenshots/` at 390, 820 and 1440 px.
@@ -77,7 +83,7 @@ Regenerate icons and the QR code:
 ```bash
 python3 -m venv .venv && .venv/bin/pip install pillow qrcode
 .venv/bin/python scripts/make_icons.py --native
-.venv/bin/python scripts/make_qr.py https://sunpetal.vercel.app
+.venv/bin/python scripts/make_qr.py https://lightenup-app.vercel.app
 ```
 
 ## Native apps (Capacitor 8)

@@ -1,8 +1,8 @@
 {
-  "name": "sunpetal",
-  "version": "1.1.0",
+  "name": "lightenup",
+  "version": "1.2.0",
   "private": true,
-  "description": "Sunpetal - 2-minute guided calm breaks with a before and after Calm gain. A wellbeing companion, not medical care.",
+  "description": "LightenUp - 2-minute guided calm breaks with a before and after Calm gain. A wellbeing companion, not medical care.",
   "type": "module",
   "scripts": {
     "test": "node --test --test-concurrency=1 tests/",

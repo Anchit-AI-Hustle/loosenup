@@ -1,17 +1,17 @@
-/* Sunpetal - 2-minute guided calm breaks. Data stays on this device (localStorage). */
+/* LightenUp - 2-minute guided calm breaks. Data stays on this device (localStorage). */
 (function () {
   'use strict';
 
-  var VERSION = '1.1.0';
-  var KEY = 'sunpetal.v1';
-  var PUBLIC_URL = 'https://sunpetal.vercel.app';
+  var VERSION = '1.2.0';
+  var KEY = 'lightenup.v1';
+  var PUBLIC_URL = 'https://lightenup-app.vercel.app';
   var WEEKLY_FREE_SEEDS = 2;
   var DAILY_NUDGES = 2;
   var MILESTONES = [3, 7, 21, 30];
   var GAME_XP = 5;
   var DAILY_GAME_REWARDS = 3;
 
-  var TEST = window.__SUNPETAL_TEST__ || {};
+  var TEST = window.__LIGHTENUP_TEST__ || {};
   var nowOverride = TEST.now ? new Date(TEST.now) : null;
   var rng = TEST.rng || Math.random;
   function now() { return nowOverride ? new Date(nowOverride.getTime()) : new Date(); }
@@ -45,15 +45,65 @@
       id: 'letitout', name: 'Let it out', seconds: 120, unlockAt: 5, color: '#FFC857', kind: 'journal',
       desc: 'Two minutes to type whatever is on your mind. Nothing is saved.'
     },
+    kind: {
+      id: 'kind', name: 'Kind words', seconds: 120, unlockAt: 0, color: '#F28FA0', kind: 'steps', space: 'lowdays',
+      desc: 'A gentle self-compassion break for when your inner voice feels harsh.',
+      steps: ['Place a hand on your heart or your cheek. Feel its warmth.', 'Name it softly: this is a hard moment.',
+        'Remember: everyone has hard moments. You are not alone in this.', 'Say to yourself: may I be kind to myself right now.',
+        'Ask: what would I say to a dear friend who felt this way? Say it to you.']
+    },
+    desk: {
+      id: 'desk', name: 'Desk reset', seconds: 120, unlockAt: 0, color: '#8CC8F0', kind: 'steps', space: 'work',
+      desc: 'Release the workday from your body without leaving your chair.',
+      steps: ['Roll your shoulders back slowly, five times.', 'Tilt one ear toward your shoulder, then the other.',
+        'Press your palms together for a breath, then let them go soft.', 'Look at something far away for twenty seconds.',
+        'Sit tall, feet flat, and take one long breath out.']
+    },
+    square: {
+      id: 'square', name: 'Steady square', seconds: 120, unlockAt: 0, color: '#6FB3E0', kind: 'breath', space: 'work',
+      desc: 'Box breathing: in for four, hold for four, out for four, rest for four.',
+      pattern: [['Breathe in', 4, 1], ['Hold gently', 4, 1], ['Breathe out', 4, 0.6], ['Rest', 4, 0.6]]
+    },
+    pause: {
+      id: 'pause', name: 'Pause before replying', seconds: 120, unlockAt: 0, color: '#FFB088', kind: 'steps', space: 'relationships',
+      desc: 'A few calm steps so you can answer from care, not from heat.',
+      steps: ['Take one slow breath before you say anything.', 'Name the feeling in one word.', 'Ask yourself: what do I need right now?',
+        'Ask: what might they be feeling?', 'Choose one kind, honest sentence to begin with.']
+    },
+    cooldown: {
+      id: 'cooldown', name: 'Cool down', seconds: 120, unlockAt: 0, color: '#9ED3C4', kind: 'breath', space: 'relationships',
+      desc: 'Long breaths out that help your body settle after a disagreement.',
+      pattern: [['Breathe in', 4, 1], ['Long breath out', 7, 0.6]]
+    },
+    warmth: {
+      id: 'warmth', name: 'Warm wishes', seconds: 120, unlockAt: 0, color: '#F7C59F', kind: 'steps', space: 'relationships',
+      desc: 'Send kind wishes to someone you love, someone you feel tense with, and yourself.',
+      steps: ['Picture someone you care about and smile at them in your mind.', 'Wish them: may you feel safe and at ease.',
+        'Now picture the person you feel tense with.', 'Wish them: may you find some ease too.', 'Wish yourself the same: may I feel at ease.']
+    },
     quick: {
       id: 'quick', name: 'Quick breeze', seconds: 60, unlockAt: 0, color: '#CFE8FF', kind: 'breath', free: true,
       desc: 'Sixty seconds of slow, easy breathing. Always free.',
       pattern: [['Breathe in', 4, 1], ['Breathe out', 6, 0.6]]
     }
   };
-  var CHOOSABLE = ['sigh', 'breeze', 'here', 'release', 'letitout'];
+  var CHOOSABLE = ['sigh', 'breeze', 'here', 'release', 'letitout', 'kind', 'desk', 'square', 'pause', 'cooldown', 'warmth'];
 
-  var CONTEXTS = ['Busy mind', 'Tight shoulders', 'Big moment ahead', 'Hard to focus', 'Winding down', 'Just a quick lift'];
+  // Spaces group feelings by what people are carrying: everyday, work, relationships, low days and sleep.
+  var SPACES = {
+    everyday: { name: 'Everyday', contexts: ['Busy mind', 'Tight shoulders', 'Big moment ahead', 'Hard to focus', 'Just a quick lift'] },
+    work: { name: 'Work', contexts: ['Work pile-up', 'Before a meeting', 'After a tough call', 'Hard to switch off'] },
+    relationships: { name: 'Relationships', contexts: ['Tense with someone', 'After a disagreement', 'Before a hard talk', 'Feeling disconnected'] },
+    lowdays: { name: 'Low days', contexts: ['Feeling low', 'Low energy', 'Hard on myself'] },
+    sleep: { name: 'Sleep', contexts: ['Winding down', 'Mind racing at night'] }
+  };
+  var SPACE_ORDER = ['everyday', 'work', 'relationships', 'lowdays', 'sleep'];
+  var CONTEXTS = [];
+  SPACE_ORDER.forEach(function (k) { CONTEXTS = CONTEXTS.concat(SPACES[k].contexts); });
+  function spaceOf(context) {
+    for (var i = 0; i < SPACE_ORDER.length; i++) if (SPACES[SPACE_ORDER[i]].contexts.indexOf(context) !== -1) return SPACE_ORDER[i];
+    return 'everyday';
+  }
   var RULES = {
     'Busy mind': [['letitout', 'Putting thoughts into words can make a busy mind feel roomier.'],
       ['here', 'Noticing what is around you gently brings a busy mind back to now.']],
@@ -63,8 +113,39 @@
     'Hard to focus': [['breeze', 'Slow, even breathing gives your attention a calm rhythm to follow.']],
     'Winding down': [['release', 'Letting each muscle go soft is a lovely way to wind down.'],
       ['breeze', 'Slow breathing is a gentle way to wind down.']],
-    'Just a quick lift': [['sigh', 'A Sigh of relief is the quickest lift we know.']]
+    'Just a quick lift': [['sigh', 'A Sigh of relief is the quickest lift we know.']],
+    'Work pile-up': [['square', 'A steady square breath helps you take one thing at a time.']],
+    'Before a meeting': [['square', 'Four calm counts in, hold, out and rest help you walk in steady.']],
+    'After a tough call': [['desk', 'A quick desk reset helps your body let go of the last call.']],
+    'Hard to switch off': [['release', 'Softening each muscle tells your body the workday is done.'],
+      ['breeze', 'Slow breathing helps you move from work mode to you mode.']],
+    'Tense with someone': [['pause', 'A pause before replying helps you answer from calm.']],
+    'After a disagreement': [['cooldown', 'Long breaths out help your body settle after a disagreement.']],
+    'Before a hard talk': [['square', 'Steady breaths help you begin a hard talk feeling grounded.']],
+    'Feeling disconnected': [['warmth', 'Sending warm wishes can help you feel closer to the people you care about.']],
+    'Feeling low': [['kind', 'Kind words to yourself can soften a heavy day.']],
+    'Low energy': [['here', 'Gently noticing the world around you can bring a small lift.']],
+    'Hard on myself': [['kind', 'Speak to yourself the way you would speak to a dear friend.']],
+    'Mind racing at night': [['letitout', 'Putting thoughts on the page can help a racing mind settle.'],
+      ['release', 'Softening the body can help a racing mind slow down.'],
+      ['breeze', 'Slow breathing helps a racing mind ease toward sleep.']]
   };
+
+  var MOODS = [null, 'Very heavy', 'Heavy', 'Okay', 'Light', 'Bright'];
+  var MOOD_NOTES = [null,
+    'Thank you for being honest. Kind words or a Small step are here for you, and so is SOS.',
+    'Heavy days happen. Kind words or a Small step can help a little.',
+    'Okay is okay. A Small step could add a little lift.',
+    'Light today. A calm break can keep the good going.',
+    'Bright today. Lovely! Maybe share a Sunbeam and pass it on.'];
+  var STEPS = ['Step outside or by a window for two minutes of daylight.', 'Drink a full glass of water, slowly.',
+    'Stretch your arms up high, then let them float down.', 'Send a short hello to someone you trust.',
+    'Tidy one small thing near you.', 'Play one song you love and let yourself enjoy it.',
+    'Wash your face or hands with cool water.', 'Eat something nourishing, even something small.',
+    'Open a window and take three easy breaths.', 'Walk to the end of the street and back.',
+    'Write one kind line to tomorrow you.', 'Water a plant, or look at something green for a minute.',
+    'Change into something comfortable.', 'Give yourself a small smile in the mirror.'];
+  var LIFT_XP_PER_DAY = 3;
 
   var LEVELS = [['Seedling', 0], ['Sprout', 50], ['Bud', 150], ['Bloom', 300], ['Full Bloom', 500], ['Meadow', 800]];
 
@@ -78,7 +159,7 @@
     bigLift: ['Big lift', 'A Calm gain of +5 or more'],
     explorer: ['Explorer', 'Tried every technique'],
     sunbeam: ['Sunbeam', 'Caught a Sunbeam surprise'],
-    sharer: ['Sunbeam sharer', 'Shared Sunpetal'],
+    sharer: ['Sunbeam sharer', 'Shared LightenUp'],
     golden: ['Golden hour', 'Set a daily time'],
     playful: ['Playful', 'Played a calm game']
   };
@@ -143,13 +224,15 @@
       sessions: [], streak: { count: 0, lastDay: null, best: 0 }, rainDayWeek: null,
       rewardSeeds: { week: null, count: 0 }, milestones: [], sunbeamDay: null, referralDay: null,
       nudges: { day: null, count: 0, shown: [] }, goldenHour: null, voice: false, badges: [], purchases: [],
-      games: { day: null, count: 0 }, gameBest: { pairs: null, catch: 0, bloom: 0 }
+      games: { day: null, count: 0 }, gameBest: { pairs: null, catch: 0, bloom: 0 },
+      moods: [], smallSteps: [], goodThings: [], trusted: null, sosLocation: false, jarXp: { day: null, count: 0 }
     };
   }
   function load() {
     var s = freshState();
     try {
-      var raw = window.localStorage.getItem(KEY);
+      // Carry progress over from the app's earlier names.
+      var raw = window.localStorage.getItem(KEY) || window.localStorage.getItem('sunpetal.v1') || window.localStorage.getItem('brightside.v1');
       if (raw) {
         var p = JSON.parse(raw);
         for (var k in p) if (Object.prototype.hasOwnProperty.call(s, k)) s[k] = p[k];
@@ -395,7 +478,11 @@
     closeSheets();
     toast(sku === 'fullbloom' ? 'Welcome to Full Bloom (demo). Enjoy every break.' : '+' + item.seeds + ' Seeds added (demo).');
   }
-  function openSupport() { openSheet('support-sheet'); }
+  function openSupport(editing) {
+    renderSos(editing);
+    openSheet('support-sheet');
+    if (editing && $('trusted-name').focus) $('trusted-name').focus();
+  }
 
   /* ---------- Check-in and pick ---------- */
 
@@ -419,19 +506,31 @@
   function renderContextChips() {
     var box = $('context-chips');
     box.textContent = '';
-    CONTEXTS.forEach(function (c) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip';
-      b.setAttribute('data-context', c);
-      b.setAttribute('aria-pressed', String(flow.context === c));
-      b.textContent = c;
-      box.appendChild(b);
+    var only = flow.space && !flow.showAll ? [flow.space] : SPACE_ORDER;
+    only.forEach(function (k) {
+      var group = document.createElement('div');
+      group.className = 'context-group';
+      if (only.length > 1) { var h = document.createElement('h3'); h.textContent = SPACES[k].name; group.appendChild(h); }
+      var chips = document.createElement('div');
+      chips.className = 'chips';
+      SPACES[k].contexts.forEach(function (c) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'chip';
+        b.setAttribute('data-context', c);
+        b.setAttribute('aria-pressed', String(flow.context === c));
+        b.textContent = c;
+        chips.appendChild(b);
+      });
+      group.appendChild(chips);
+      box.appendChild(group);
     });
+    $('context-all').hidden = !(flow.space && !flow.showAll);
+    setText('checkin-step', 'Step 1 of 3' + (flow.space ? ' \u00b7 ' + SPACES[flow.space].name : ''));
   }
 
-  function startCheckin(mode) {
-    flow = { mode: mode, before: 5, context: null, technique: mode === 'quick' ? 'quick' : null };
+  function startCheckin(mode, space) {
+    flow = { mode: mode, before: 5, context: null, technique: mode === 'quick' ? 'quick' : null, space: space || null, showAll: false };
     $('calm-before').value = '5';
     $('calm-before').dispatchEvent(new Event('input'));
     go('checkin');
@@ -448,7 +547,10 @@
     $('pick-card').style.setProperty('--badge', t.color);
     var box = $('pick-chips');
     box.textContent = '';
+    var sp = spaceOf(flow.context);
     CHOOSABLE.forEach(function (id) {
+      var tsp = TECH[id].space || 'everyday';
+      if (tsp !== 'everyday' && tsp !== sp && id !== flow.technique) return;
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'chip';
@@ -737,6 +839,141 @@
       ul.appendChild(li);
     });
     renderGoldenBanner();
+    renderMood();
+    renderSupportCard();
+    renderSteps();
+    renderJar();
+  }
+
+  function todayMood() {
+    var dk = dayKey(now());
+    for (var i = 0; i < state.moods.length; i++) if (state.moods[i].day === dk) return state.moods[i].mood;
+    return null;
+  }
+  function setMood(n) {
+    var dk = dayKey(now());
+    var found = false;
+    state.moods.forEach(function (m) { if (m.day === dk) { m.mood = n; found = true; } });
+    if (!found) { state.moods.push({ day: dk, mood: n }); state.xp += 2; }
+    if (state.moods.length > 400) state.moods = state.moods.slice(-400);
+    save();
+    renderMood();
+    renderSupportCard();
+    renderSeedPill();
+    if (n === 1) openSheet('safety-sheet');
+  }
+  function renderMood() {
+    var m = todayMood();
+    var btns = document.querySelectorAll('[data-mood]');
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', String(+btns[i].getAttribute('data-mood') === m));
+    setText('mood-done', m ? MOOD_NOTES[m] : 'One tap is enough. Every answer is welcome here.');
+    var mem = $('jar-memory');
+    if (m && m <= 2 && state.goodThings.length) {
+      var g = state.goodThings[Math.floor(rng() * state.goodThings.length)];
+      mem.textContent = 'From your Good things jar: "' + g.text + '"';
+      mem.hidden = false;
+    } else mem.hidden = true;
+  }
+  function heavyStretch() {
+    // Three check-ins in a row on consecutive days, all heavy, the latest today or yesterday.
+    var ms = state.moods.slice().sort(function (a, b) { return a.day < b.day ? -1 : 1; }).slice(-3);
+    if (ms.length < 3) return false;
+    for (var i = 0; i < 3; i++) if (ms[i].mood > 2) return false;
+    if (daysBetween(ms[0].day, ms[1].day) !== 1 || daysBetween(ms[1].day, ms[2].day) !== 1) return false;
+    return daysBetween(ms[2].day, dayKey(now())) <= 1;
+  }
+  function renderSupportCard() { $('support-card').hidden = !heavyStretch(); }
+
+  var stepOffset = 0;
+  function currentStep() { return STEPS[(dayNum(dayKey(now())) + stepOffset) % STEPS.length]; }
+  function renderSteps() {
+    setText('step-idea', currentStep());
+    var dk = dayKey(now());
+    var today = state.smallSteps.filter(function (x) { return x.day === dk; }).length;
+    setText('steps-note', today ? plural(today, 'small step', 'small steps') + ' today. Each one plants a sprout.' : 'Tiny actions count. Each one plants a sprout in your garden.');
+  }
+  function doStep() {
+    var dk = dayKey(now());
+    var today = state.smallSteps.filter(function (x) { return x.day === dk; }).length;
+    state.smallSteps.push({ day: dk, step: currentStep() });
+    var xp = today < LIFT_XP_PER_DAY;
+    if (xp) state.xp += 3;
+    save();
+    stepOffset++;
+    renderSteps();
+    renderSeedPill();
+    toast(xp ? 'Lovely. A sprout joins your garden. +3 XP' : 'Lovely. A sprout joins your garden.');
+  }
+  function renderJar() {
+    var n = state.goodThings.length;
+    setText('jar-count', n ? plural(n, 'good thing', 'good things') + ' saved in your jar.' : 'Your jar is ready. Today\'s first good thing can be tiny.');
+  }
+  function openJar() {
+    $('good-text').value = '';
+    openSheet('jar-sheet');
+    var t = $('good-text');
+    if (t.focus) t.focus();
+  }
+  function onGoodInput() {
+    if (isCrisis($('good-text').value)) { $('good-text').value = ''; openSupport(); }
+  }
+  function saveGood() {
+    var text = ($('good-text').value || '').trim().replace(/\s+/g, ' ').slice(0, 160);
+    if (!text) { toast('Write a word or two first.'); return; }
+    if (isCrisis(text)) { $('good-text').value = ''; openSupport(); return; }
+    state.goodThings.push({ day: dayKey(now()), text: text });
+    if (state.goodThings.length > 200) state.goodThings = state.goodThings.slice(-200);
+    var dk = dayKey(now());
+    if (state.jarXp.day !== dk) state.jarXp = { day: dk, count: 0 };
+    var xp = state.jarXp.count < LIFT_XP_PER_DAY;
+    if (xp) { state.jarXp.count++; state.xp += 2; }
+    save();
+    $('good-text').value = '';
+    closeSheets();
+    renderJar();
+    renderSeedPill();
+    toast(xp ? 'Saved in your jar. +2 XP' : 'Saved in your jar.');
+  }
+
+  /* ---------- SOS ---------- */
+
+  function sosHref(loc) {
+    var t = state.trusted;
+    if (!t) return '#';
+    var body = 'Hi ' + t.name + ', it is ' + (state.name && state.name !== 'friend' ? state.name : 'me') +
+      '. I am having a really hard time and could really use you right now. Can you call me or come be with me?';
+    if (loc) body += ' I am here: https://maps.google.com/?q=' + loc.lat.toFixed(5) + ',' + loc.lon.toFixed(5);
+    return 'sms:' + t.phone + '?&body=' + encodeURIComponent(body);
+  }
+  function renderSos(editing) {
+    var t = state.trusted;
+    var a = $('sos-alert');
+    a.hidden = !t;
+    if (t) { a.textContent = 'Message ' + t.name + ' now'; a.setAttribute('href', sosHref(null)); }
+    $('sos-location').hidden = !t;
+    setText('sos-location', 'Add my location to the message: ' + (state.sosLocation ? 'on' : 'off'));
+    $('sos-location').setAttribute('aria-pressed', String(!!state.sosLocation));
+    $('trusted-setup').hidden = !!t && !editing;
+    $('trusted-edit').hidden = !t || !!editing;
+    if (editing && t) { $('trusted-name').value = t.name; $('trusted-phone').value = t.phone; }
+  }
+  function saveTrusted() {
+    var name = ($('trusted-name').value || '').trim().slice(0, 40);
+    var phone = ($('trusted-phone').value || '').replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
+    if (phone.replace(/\D/g, '').length < 6) { toast('Add their phone number, with the country code if you can.'); return; }
+    state.trusted = { name: name || 'my trusted person', phone: phone };
+    save();
+    renderSos(false);
+    if (current === 'me') renderMe();
+    toast('Saved. SOS can now message ' + state.trusted.name + ' in one tap.');
+  }
+  function sendSos(e) {
+    if (!state.trusted) return;
+    if (!state.sosLocation || !navigator.geolocation) return; // the link opens the messaging app as it is
+    e.preventDefault();
+    var go2 = function (loc) { window.location.href = sosHref(loc); };
+    navigator.geolocation.getCurrentPosition(function (pos) { go2({ lat: pos.coords.latitude, lon: pos.coords.longitude }); },
+      function () { go2(null); }, { timeout: 6000, maximumAge: 60000 });
   }
 
   function renderGoldenBanner() {
@@ -815,6 +1052,14 @@
       }
       svg('circle', { cx: x.toFixed(1), cy: cy.toFixed(1), r: (size * 0.45).toFixed(1), fill: '#FFC857' }, f);
     }
+    state.smallSteps.slice(-60).forEach(function (st, j) {
+      var rr = seeded(j + 101);
+      var sx0 = 14 + rr() * 332, sy0 = 238 + rr() * 16;
+      var sp = svg('g', { 'class': 'sprout' }, g);
+      svg('path', { d: 'M' + sx0.toFixed(1) + ' ' + sy0.toFixed(1) + ' v -10', stroke: '#2E7D5B', 'stroke-width': 2, 'stroke-linecap': 'round' }, sp);
+      svg('ellipse', { cx: (sx0 - 4).toFixed(1), cy: (sy0 - 11).toFixed(1), rx: 4.5, ry: 2.4, fill: '#7AC498', transform: 'rotate(-25 ' + (sx0 - 4).toFixed(1) + ' ' + (sy0 - 11).toFixed(1) + ')' }, sp);
+      svg('ellipse', { cx: (sx0 + 4).toFixed(1), cy: (sy0 - 12).toFixed(1), rx: 4.5, ry: 2.4, fill: '#4FA67C', transform: 'rotate(25 ' + (sx0 + 4).toFixed(1) + ' ' + (sy0 - 12).toFixed(1) + ')' }, sp);
+    });
     if (!n) {
       var tx = svg('text', { x: 180, y: 222, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 800, fill: '#FFFFFF' }, g);
       tx.textContent = 'Your first flower is one break away';
@@ -874,9 +1119,27 @@
     setText('week-count', String(weekSessions.length));
     setText('week-avg', weekSessions.length ? signed(Math.round(total / weekSessions.length * 10) / 10) : '+0');
     c.setAttribute('aria-label', 'Calm gain for the last 7 days: ' + days.map(function (d) { return d.label + ' ' + signed(d.gain); }).join(', '));
+    // Mood line: 1 (very heavy) low on the chart to 5 (bright) high.
+    var moodBy = {};
+    state.moods.forEach(function (m) { moodBy[m.day] = m.mood; });
+    var pts = [];
+    days.forEach(function (d, i) { if (moodBy[d.key]) pts.push([18 + i * 45 + 16, 140 - (moodBy[d.key] - 1) * 28, moodBy[d.key]]); });
+    if (pts.length > 1) svg('polyline', { points: pts.map(function (p) { return p[0] + ',' + p[1]; }).join(' '), fill: 'none', stroke: '#F28F6B', 'stroke-width': 3, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', opacity: 0.85 }, c);
+    pts.forEach(function (p) { svg('circle', { 'class': 'mood-dot', cx: p[0], cy: p[1], r: 5.5, fill: '#fff', stroke: '#F28F6B', 'stroke-width': 3 }, c); });
     var ins = insights();
     setText('insight-tech', ins.tech);
     setText('insight-time', ins.time);
+    setText('insight-mood', moodInsight(days.map(function (d) { return moodBy[d.key]; }).filter(Boolean)));
+  }
+
+  function moodInsight(ms) {
+    if (ms.length < 3) return 'Check in with your mood each day and your trend will appear here as a coral line.';
+    var half = Math.floor(ms.length / 2);
+    var avg = function (a) { return a.reduce(function (x, y) { return x + y; }, 0) / a.length; };
+    var earlier = avg(ms.slice(0, half)), recent = avg(ms.slice(-half));
+    if (recent - earlier >= 0.5) return 'Your days have been getting lighter this week. Lovely to see.';
+    if (earlier - recent >= 0.5) return 'This week has felt heavier. Small steps, Kind words and SOS are all here for you.';
+    return 'Your mood has been steady this week. Small breaks keep it that way.';
   }
 
   function insights() {
@@ -909,6 +1172,9 @@
       : (isNative() ? 'Pick a daily time for one gentle reminder.' : 'Pick a daily time and a gentle note will appear in the app. The phone apps can send one daily reminder.'));
     renderVoiceButtons();
     renderInstall();
+    setText('me-trusted', state.trusted ? 'Trusted person: ' + state.trusted.name + ' (' + state.trusted.phone + '). SOS can message them in one tap.'
+      : 'Add a trusted person so SOS can message them in one tap.');
+    setText('open-trusted', state.trusted ? 'Change my trusted person' : 'Set up my trusted person');
   }
 
   var RENDER = { today: renderToday, play: renderPlay, garden: renderGarden, week: renderWeek, me: renderMe, pick: renderPick, checkin: renderContextChips };
@@ -954,7 +1220,7 @@
   function shareUrl() { return /^https?:$/.test(location.protocol) && !isNative() && location.hostname !== 'localhost' ? location.origin : PUBLIC_URL; }
   function shareSunbeam() {
     var url = shareUrl();
-    var text = 'Two calm minutes that brighten my day. Grow a garden with me on Sunpetal.';
+    var text = 'Two calm minutes that brighten my day. Grow a garden with me on LightenUp.';
     var rewardShare = function () {
       var dk = dayKey(now());
       addBadge('sharer');
@@ -975,7 +1241,7 @@
       return Promise.resolve();
     };
     if (navigator.share) {
-      return navigator.share({ title: 'Sunpetal', text: text, url: url }).then(rewardShare, function (e) {
+      return navigator.share({ title: 'LightenUp', text: text, url: url }).then(rewardShare, function (e) {
         if (e && e.name === 'AbortError') return;
         return copy();
       });
@@ -992,8 +1258,8 @@
     var ua = navigator.userAgent || '';
     var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
     $('install-btn').hidden = !installEvt;
-    if (isStandalone()) setText('install-text', 'Sunpetal is installed. Lovely to have you here.');
-    else if (installEvt) setText('install-text', 'Add Sunpetal to your home screen for quick, offline breaks.');
+    if (isStandalone()) setText('install-text', 'LightenUp is installed. Lovely to have you here.');
+    else if (installEvt) setText('install-text', 'Add LightenUp to your home screen for quick, offline breaks.');
     else if (ios) setText('install-text', 'On iPhone: open this page in Safari, tap Share, then Add to Home Screen.');
     else setText('install-text', 'On Android: open the Chrome menu, then Install app. On iPhone: Safari Share, then Add to Home Screen.');
   }
@@ -1351,6 +1617,11 @@
     var sku = el.getAttribute('data-sku');
     var gameId = el.getAttribute('data-game');
     var card = el.getAttribute('data-card');
+    var spaceId = el.getAttribute('data-space');
+    var moodV = el.getAttribute('data-mood');
+    if (spaceId) { startCheckin('guided', spaceId); return; }
+    if (moodV) { setMood(+moodV); return; }
+    if (id === 'sos-alert') { sendSos(e); return; }
     if (gameId) { openGame(gameId); return; }
     if (card !== null) { flipCard(+card); return; }
     if (ctx) {
@@ -1397,7 +1668,29 @@
         if (current === 'pick') beginBreak('quick'); else startCheckin('quick');
         break;
       case 'checkout-confirm': demoPurchase(pendingSku); break;
-      case 'open-support': openSupport(); break;
+      case 'open-support': case 'sos-btn': case 'support-card-sos': openSupport(); break;
+      case 'open-trusted': openSupport(true); break;
+      case 'trusted-edit': renderSos(true); break;
+      case 'trusted-save': saveTrusted(); break;
+      case 'sos-location': state.sosLocation = !state.sosLocation; save(); renderSos(false); break;
+      case 'sos-breathe':
+        closeSheets(true);
+        flow = { mode: 'quick', before: 5, context: 'Just a quick lift', technique: 'quick', space: null };
+        beginBreak('quick');
+        break;
+      case 'safety-yes': openSupport(); break;
+      case 'safety-no':
+        closeSheets();
+        setText('mood-done', MOOD_NOTES[1]);
+        toast('Thank you. We are glad you are here.');
+        break;
+      case 'context-all': flow.showAll = true; renderContextChips(); break;
+      case 'step-done': doStep(); break;
+      case 'support-card-step': if ($('steps-card').scrollIntoView) $('steps-card').scrollIntoView({ behavior: 'smooth', block: 'center' }); break;
+      case 'step-another': stepOffset++; renderSteps(); break;
+      case 'jar-add': openJar(); break;
+      case 'good-save': saveGood(); break;
+      case 'good-close': $('good-text').value = ''; closeSheets(); break;
       case 'golden-save': saveGoldenHour(); break;
       case 'golden-clear': clearGoldenHour(); break;
       case 'sunbeam-share': shareSunbeam(); break;
@@ -1446,6 +1739,7 @@
     document.addEventListener('click', onClick);
     $('welcome-form').addEventListener('submit', onWelcome);
     $('letitout-text').addEventListener('input', onJournal);
+    $('good-text').addEventListener('input', onGoodInput);
     $('scrim').addEventListener('click', function () { closeSheets(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('scrim').hidden) closeSheets(); });
     addPetals($('orb-petals'), 0, 0, 1);
@@ -1453,7 +1747,7 @@
     bindSlider('calm-before');
     bindSlider('calm-after');
     window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; if (current === 'me') renderInstall(); });
-    window.addEventListener('appinstalled', function () { installEvt = null; toast('Sunpetal is on your home screen.'); });
+    window.addEventListener('appinstalled', function () { installEvt = null; toast('LightenUp is on your home screen.'); });
     document.addEventListener('visibilitychange', function () { if (!document.hidden && current === 'today') renderGoldenBanner(); });
     go(state.onboarded ? 'today' : 'welcome');
     registerSW();
@@ -1462,7 +1756,7 @@
 
   /* ---------- Public API (used by the app shell and the test suite) ---------- */
 
-  window.Sunpetal = {
+  window.LightenUp = {
     version: VERSION,
     state: function () { return JSON.parse(JSON.stringify(state)); },
     setState: function (patch) { for (var k in patch) state[k] = patch[k]; save(); if (current && RENDER[current]) RENDER[current](); renderSeedPill(); },
@@ -1478,6 +1772,8 @@
     openShop: function (note) { openShop(note); },
     demoPurchase: demoPurchase,
     isCrisis: isCrisis,
+    sosHref: sosHref,
+    spaces: SPACES,
     dayKey: dayKey,
     weekKey: weekKey,
     prefersReducedMotion: prefersReducedMotion,

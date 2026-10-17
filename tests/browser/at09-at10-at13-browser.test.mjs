@@ -73,11 +73,23 @@ async function walkScreens(page, width, label) {
     if (g === 'pairs') { await page.click('[data-card="0"]'); await page.click('[data-card="1"]'); }
     if (g === 'bloom') { await page.locator('#bloom-hold').dispatchEvent('pointerdown'); await page.waitForTimeout(1500); }
     await check('game-' + g);
-    await page.evaluate(() => window.Sunpetal.finishCurrentGame());
+    await page.evaluate(() => window.LightenUp.finishCurrentGame());
     await check('game-' + g + '-done');
     await page.click('#game-back');
   }
-  await page.evaluate(() => window.Sunpetal.openShop());
+  await page.click('[data-tab="today"]');
+  await page.click('[data-mood="4"]');
+  await check('today-mood');
+  await page.click('[data-space="work"]');
+  await check('space-work');
+  await page.click('#checkin-back');
+  await page.click('#jar-add');
+  await check('jar');
+  await page.click('#good-close');
+  await page.click('#sos-btn');
+  await check('sos');
+  await page.click('#support-close');
+  await page.evaluate(() => window.LightenUp.openShop());
   await check('shop');
   return shots;
 }
@@ -86,7 +98,7 @@ for (const width of [390, 820, 1440]) {
   test(`AT9 no console errors and no horizontal scroll at ${width}px`, async () => {
     const { ctx, page, errors } = await newPage(width);
     const shots = await walkScreens(page, width, `${width}px`);
-    assert.ok(shots.length >= 18, 'screenshots taken');
+    assert.ok(shots.length >= 22, 'screenshots taken');
     assert.deepEqual(errors, []);
     await ctx.close();
   });
@@ -102,7 +114,7 @@ test('AT10 offline shell works after first load', async () => {
   await page.reload();
   await page.waitForSelector('#screen-welcome:not([hidden])');
   const title = await page.title();
-  assert.equal(title, 'Sunpetal');
+  assert.equal(title, 'LightenUp');
   const cssOk = await page.evaluate(() => getComputedStyle(document.body).fontFamily.includes('Nunito'));
   assert.ok(cssOk, 'styles.css served from cache');
   const fontOk = await page.evaluate(async () => { await document.fonts.ready; return document.fonts.check('16px Nunito') && document.fonts.check('16px Fraunces'); });
@@ -135,7 +147,11 @@ test('AT13 every visible button and tab is at least 48px tall and wide', async (
   await page.click('#result-done');
   for (const tab of ['today', 'play', 'garden', 'week', 'me']) { await page.click(`[data-tab="${tab}"]`); await measure(tab); }
   for (const g of ['pairs', 'catch', 'bloom']) { await page.click('[data-tab="play"]'); await page.click(`[data-game="${g}"]`); await measure('game-' + g); await page.click('#game-back'); }
-  await page.evaluate(() => window.Sunpetal.openShop()); await measure('shop');
+  await page.click('[data-tab="today"]'); await page.click('[data-mood="3"]'); await measure('today-mood');
+  await page.click('#sos-btn'); await measure('sos'); await page.click('#support-close');
+  await page.click('#jar-add'); await measure('jar'); await page.click('#good-close');
+  await page.click('[data-space="relationships"]'); await measure('space-relationships'); await page.click('#checkin-back');
+  await page.evaluate(() => window.LightenUp.openShop()); await measure('shop');
   assert.deepEqual(small, []);
   await ctx.close();
 });
@@ -167,7 +183,7 @@ test('AT13 prefers-reduced-motion stops the breathing orb animation', async () =
   const r = await page.evaluate(() => {
     const orb = document.querySelector('#orb');
     const s = getComputedStyle(orb);
-    return { transition: s.transitionDuration, anim: s.animationName, rm: window.Sunpetal.prefersReducedMotion() };
+    return { transition: s.transitionDuration, anim: s.animationName, rm: window.LightenUp.prefersReducedMotion() };
   });
   assert.equal(r.rm, true);
   assert.ok(['0s', '0.00001s', '1e-05s'].includes(r.transition) || parseFloat(r.transition) < 0.01, `orb transition ${r.transition}`);

@@ -33,7 +33,7 @@ test('AT3 gift grants 5 Seeds and 25 XP, Seedling bar at 50 percent, then straig
 test('AT3 gift is only granted once, even after a reload', () => {
   const app = makeApp({ now: day(1) });
   onboard(app);
-  const saved = app.window.localStorage.getItem('sunpetal.v1');
+  const saved = app.window.localStorage.getItem('lightenup.v1');
   const again = makeApp({ state: JSON.parse(saved), now: day(1) });
   assert.equal(again.B.state().seeds, 5);
   assert.equal(again.B.currentScreen(), 'today');
