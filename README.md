@@ -8,20 +8,22 @@ The brand mark is a petal sun that opens on every in-breath, unfurls on the resu
 
 > A wellbeing companion, not medical care.
 
-- **Live app:** https://loosenup.vercel.app
-- **QR code:** [loosenup-live-qr.png](loosenup-live-qr.png)
+- **Live app:** https://loosenup-ios.anchit-tandon.com (iPhone and web), https://loosenup-android.anchit-tandon.com (Android install page), also https://loosenup.vercel.app
+- **QR codes:** [loosenup-android-qr.png](loosenup-android-qr.png), [loosenup-ios-qr.png](loosenup-ios-qr.png)
 - **Android APK:** `downloads/loosenup-android.apk` (served at `/download/loosenup-android.apk`; also `dist/loosenup-android-debug-v1.3.1.apk`)
 - **Repository:** https://github.com/Anchit-AI-Hustle/loosenup (private)
 
 ## Install on your phone
 
-Open **https://loosenup.vercel.app/install.html** on the phone, or scan `loosenup-install-qr.png`.
+| Platform | Link | QR code |
+| --- | --- | --- |
+| Android | https://loosenup-android.anchit-tandon.com | `loosenup-android-qr.png` |
+| iPhone | https://loosenup-ios.anchit-tandon.com | `loosenup-ios-qr.png` |
 
-- **Android (direct install):** tap **Download for Android**, open the downloaded `LoosenUp.apk`, allow your browser to install apps if asked (Settings, then Install unknown apps), then tap Install. Direct link: https://loosenup.vercel.app/download/loosenup-android.apk
-- **Android (web app):** open the live URL in Chrome, open the menu, then **Install app**.
-- **iPhone:** open the live URL in Safari, tap **Share**, then **Add to Home Screen**. A native iPhone install needs TestFlight, which needs an Apple Developer account (see Native apps below).
+- **Android (direct install):** open the Android link on the phone and tap **Download for Android**, open `LoosenUp.apk`, allow your browser to install apps if asked (Settings, then Install unknown apps), then tap Install. Direct file: https://loosenup-android.anchit-tandon.com/download/loosenup-android.apk. The full web app is at `/?app=1` on the same domain.
+- **iPhone:** open the iPhone link in Safari, tap **Share**, then **Add to Home Screen**. Safari shows this tip on the welcome screen. A native iPhone install needs TestFlight, which needs an Apple Developer account (see Native apps below).
 
-The app works offline after the first load.
+Both domains (and https://loosenup.vercel.app) serve the same Vercel project. `anchit-tandon.com` uses Vercel DNS, so HTTPS is automatic.
 
 ## What is inside
 
