@@ -202,3 +202,17 @@ test('AT18 install page fits a phone screen with 48px targets', async () => {
   assert.deepEqual(errors, []);
   await ctx.close();
 });
+
+test('AT19 with the service worker active, /install.html still shows the install page', async () => {
+  const { ctx, page, errors } = await newPage(390);
+  await page.goto(server.url + '/');
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.reload();
+  await page.waitForFunction(() => !!navigator.serviceWorker.controller);
+  await page.goto(server.url + '/install.html');
+  assert.equal(await page.title(), 'Install LoosenUp');
+  await page.goto(server.url + '/');
+  assert.equal(await page.title(), 'LoosenUp');
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});

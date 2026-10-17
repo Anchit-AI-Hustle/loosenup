@@ -2,9 +2,11 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.3.1';
+  var VERSION = '1.4.0';
   var KEY = 'loosenup.v1';
-  var PUBLIC_URL = 'https://loosenup.vercel.app';
+  var PUBLIC_URL = 'https://loosenup-ios.anchit-tandon.com';
+  var ANDROID_URL = 'https://loosenup-android.anchit-tandon.com';
+  var IOS_URL = 'https://loosenup-ios.anchit-tandon.com';
   var WEEKLY_FREE_SEEDS = 2;
   var DAILY_NUDGES = 2;
   var MILESTONES = [3, 7, 21, 30];
@@ -1220,7 +1222,7 @@
   function shareUrl() { return /^https?:$/.test(location.protocol) && !isNative() && location.hostname !== 'localhost' ? location.origin : PUBLIC_URL; }
   function shareSunbeam() {
     var url = shareUrl();
-    var text = 'Two calm minutes that brighten my day. Grow a garden with me on LoosenUp.';
+    var text = 'Two calm minutes that brighten my day. Grow a garden with me on LoosenUp. Android: ' + ANDROID_URL + '  iPhone: ' + IOS_URL;
     var rewardShare = function () {
       var dk = dayKey(now());
       addBadge('sharer');
@@ -1234,14 +1236,14 @@
     };
     var copy = function () {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        return navigator.clipboard.writeText(text + ' ' + url).then(function () { toast('Link copied. Share it anywhere you like.'); rewardShare(); },
+        return navigator.clipboard.writeText(text).then(function () { toast('Link copied. Share it anywhere you like.'); rewardShare(); },
           function () { toast('Share this link: ' + url); });
       }
       toast('Share this link: ' + url);
       return Promise.resolve();
     };
     if (navigator.share) {
-      return navigator.share({ title: 'LoosenUp', text: text, url: url }).then(rewardShare, function (e) {
+      return navigator.share({ title: 'LoosenUp', text: text }).then(rewardShare, function (e) {
         if (e && e.name === 'AbortError') return;
         return copy();
       });
@@ -1251,6 +1253,13 @@
 
   var installEvt = null;
   function isStandalone() { return mm('(display-mode: standalone)') || window.navigator.standalone === true || isNative(); }
+  function isIosSafari() {
+    var ua = navigator.userAgent || '';
+    var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    return ios && !/CriOS|FxiOS|EdgiOS/.test(ua);
+  }
+  function renderIosTip() { $('ios-tip').hidden = !(isIosSafari() && !isStandalone()); }
+
   function renderInstall() {
     var card = $('install-card');
     if (isNative()) { card.hidden = true; return; }
@@ -1260,7 +1269,7 @@
     $('install-btn').hidden = !installEvt;
     if (isStandalone()) setText('install-text', 'LoosenUp is installed. Lovely to have you here.');
     else if (installEvt) setText('install-text', 'Add LoosenUp to your home screen for quick, offline breaks.');
-    else if (ios) setText('install-text', 'On iPhone: open this page in Safari, tap Share, then Add to Home Screen.');
+    else if (ios) setText('install-text', 'On iPhone: open loosenup-ios.anchit-tandon.com in Safari, tap Share, then Add to Home Screen.');
     else setText('install-text', 'On Android: open the Chrome menu, then Install app. On iPhone: Safari Share, then Add to Home Screen.');
   }
 
@@ -1749,6 +1758,7 @@
     window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; if (current === 'me') renderInstall(); });
     window.addEventListener('appinstalled', function () { installEvt = null; toast('LoosenUp is on your home screen.'); });
     document.addEventListener('visibilitychange', function () { if (!document.hidden && current === 'today') renderGoldenBanner(); });
+    renderIosTip();
     go(state.onboarded ? 'today' : 'welcome');
     registerSW();
     if (state.goldenHour) scheduleGoldenHour();

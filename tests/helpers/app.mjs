@@ -21,7 +21,7 @@ export function day(n, hour = 9) {
   return new Date(2026, 9, 4 + n, hour, 0, 0);
 }
 
-export function makeApp({ state, now, rng } = {}) {
+export function makeApp({ state, now, rng, ua } = {}) {
   const dom = new JSDOM(html(), {
     url: 'https://loosenup.test/',
     runScripts: 'outside-only',
@@ -32,6 +32,7 @@ export function makeApp({ state, now, rng } = {}) {
   const errors = [];
   window.console.error = (...a) => errors.push(a.join(' '));
   window.addEventListener('error', (e) => errors.push(String(e.message)));
+  if (ua) Object.defineProperty(window.navigator, 'userAgent', { value: ua, configurable: true });
   if (state) window.localStorage.setItem('loosenup.v1', JSON.stringify(state));
   window.__LOOSENUP_TEST__ = { now: now || null, rng: rng || null };
   window.eval(appJs());

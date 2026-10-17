@@ -84,5 +84,23 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "loosenup-android.anchit-tandon.com"
+        }
+      ],
+      "missing": [
+        {
+          "type": "query",
+          "key": "app"
+        }
+      ],
+      "destination": "/install.html"
+    }
   ]
 }
