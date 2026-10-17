@@ -13,7 +13,7 @@ android/.idea/
 android/captures/
 ios/App/build/
 ios/App/Pods/
-ios/DerivedData/
+ios/DerivedData*/
 ios/App/App.xcodeproj/xcuserdata/
 ios/App/App.xcworkspace/xcuserdata/
 dist/
