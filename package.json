@@ -5,10 +5,10 @@
   "description": "LoosenUp - 2-minute guided calm breaks with a before and after Calm gain. A wellbeing companion, not medical care.",
   "type": "module",
   "scripts": {
-    "test": "node --test --test-concurrency=1 tests/",
-    "test:unit": "node --test --test-concurrency=1 tests/unit/",
-    "test:browser": "node --test --test-concurrency=1 tests/browser/",
-    "test:live": "node --test --test-concurrency=1 tests/live/",
+    "test": "node --test --test-concurrency=1 'tests/unit/*.test.mjs' 'tests/browser/*.test.mjs'",
+    "test:unit": "node --test --test-concurrency=1 'tests/unit/*.test.mjs'",
+    "test:browser": "node --test --test-concurrency=1 'tests/browser/*.test.mjs'",
+    "test:live": "node --test --test-concurrency=1 'tests/live/*.test.mjs'",
     "serve": "node tests/helpers/serve.mjs",
     "cap:sync": "npx cap sync",
     "android:debug": "npx cap sync android && cd android && ./gradlew assembleDebug"
