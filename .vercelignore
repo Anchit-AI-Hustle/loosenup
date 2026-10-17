@@ -6,5 +6,5 @@ tests/
 dist/
 assets/
 scripts/
-*.zip
+/*.zip
 site/
