@@ -2,10 +2,10 @@
 # Run every acceptance suite and save a readable log to tests/test-log.txt.
 set -uo pipefail
 cd "$(dirname "$0")/.."
-LIVE_URL="${LIVE_URL:-https://lightenup-app.vercel.app}"
+LIVE_URL="${LIVE_URL:-https://loosenup.vercel.app}"
 LOG=tests/test-log.txt
 {
-  echo "LightenUp acceptance test log"
+  echo "LoosenUp acceptance test log"
   echo "Run at: $(date -u '+%Y-%m-%d %H:%M UTC')   Node $(node -v)   Live URL: $LIVE_URL"
   echo
   echo "== Unit, flow, copy and safety tests (jsdom) =="

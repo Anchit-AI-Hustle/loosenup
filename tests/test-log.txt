@@ -1,5 +1,5 @@
-LightenUp acceptance test log
-Run at: 2026-10-17 17:40 UTC   Node v26.8.2   Live URL: https://lightenup-app.vercel.app
+LoosenUp acceptance test log
+Run at: 2026-10-17 17:40 UTC   Node v26.8.2   Live URL: https://loosenup.vercel.app
 
 == Unit, flow, copy and safety tests (jsdom) ==
 ✔ AT1 manifest has the required PWA fields (0.736375ms)

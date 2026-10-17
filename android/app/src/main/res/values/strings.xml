@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">LightenUp</string>
-    <string name="title_activity_main">LightenUp</string>
-    <string name="package_name">com.lightenup.calm</string>
-    <string name="custom_url_scheme">com.lightenup.calm</string>
+    <string name="app_name">LoosenUp</string>
+    <string name="title_activity_main">LoosenUp</string>
+    <string name="package_name">com.loosenup.calm</string>
+    <string name="custom_url_scheme">com.loosenup.calm</string>
 </resources>

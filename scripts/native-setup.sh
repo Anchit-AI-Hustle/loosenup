@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Re-apply LightenUp's native customisations after `npx cap add android` / `npx cap add ios`.
+# Re-apply LoosenUp's native customisations after `npx cap add android` / `npx cap add ios`.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -9,9 +9,9 @@ if [ -d "$RES" ]; then
   MANIFEST=android/app/src/main/AndroidManifest.xml
   grep -q POST_NOTIFICATIONS "$MANIFEST" || perl -0pi -e 's|(<uses-permission android:name="android.permission.INTERNET" />)|$1\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />|' "$MANIFEST"
   # Small white sun used in the status bar for the Golden hour notification.
-  cat > "$RES/drawable/ic_stat_lightenup.xml" <<'XML'
+  cat > "$RES/drawable/ic_stat_loosenup.xml" <<'XML'
 <?xml version="1.0" encoding="utf-8"?>
-<!-- LightenUp notification icon: a small petal sun -->
+<!-- LoosenUp notification icon: a small petal sun -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
     <path android:fillColor="#FFFFFFFF" android:pathData="M12,7.5a4.5,4.5 0,1 1,0 9a4.5,4.5 0,1 1,0 -9z"/>

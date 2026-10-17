@@ -1,4 +1,4 @@
-"""Generate LightenUp icons: a sun-striped hot-air balloon lifting over green hills on sky blue.
+"""Generate LoosenUp icons: a sun-striped hot-air balloon lifting over green hills on sky blue.
 
 Usage:
   .venv/bin/python scripts/make_icons.py          # web icons into www/
@@ -54,7 +54,7 @@ PETAL = bezier((0, -44), (17, -52), (18, -78), (0, -94)) + bezier((0, -94), (-18
 
 
 def petal_sun(layer, cx, cy, unit, glow=True):
-    """Draw the LightenUp mark centred at (cx, cy); unit = pixels per mark unit (mark spans -100..100)."""
+    """Draw the LoosenUp mark centred at (cx, cy); unit = pixels per mark unit (mark spans -100..100)."""
     if glow:
         # Blur only the alpha so the glow stays warm instead of fading through grey.
         mask = Image.new("L", layer.size, 0)
@@ -80,7 +80,7 @@ def petal_sun(layer, cx, cy, unit, glow=True):
 
 
 def balloon(layer, cx, top, unit, glow=True):
-    """Draw the LightenUp logo: a sun-striped hot-air balloon. unit = pixels per logo unit (balloon is 460 x 700 units)."""
+    """Draw the LoosenUp logo: a sun-striped hot-air balloon. unit = pixels per logo unit (balloon is 460 x 700 units)."""
     W, R = 230 * unit, 230 * unit          # envelope half width and crown radius
     cy = top + R                           # centre of the round crown
     neck_y = top + 540 * unit              # where the envelope narrows to the burner
@@ -212,7 +212,7 @@ def native():
 
 
 def splash_image(w, h):
-    """Sky gradient with the LightenUp balloon, sized for a native splash screen."""
+    """Sky gradient with the LoosenUp balloon, sized for a native splash screen."""
     img = Image.new("RGB", (w, h))
     d = ImageDraw.Draw(img)
     for y in range(h):

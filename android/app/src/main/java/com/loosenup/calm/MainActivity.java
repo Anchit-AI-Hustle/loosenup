@@ -1,4 +1,4 @@
-package com.lightenup.calm;
+package com.loosenup.calm;
 
 import com.getcapacitor.BridgeActivity;
 

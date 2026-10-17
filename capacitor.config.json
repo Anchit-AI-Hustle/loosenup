@@ -1,6 +1,6 @@
 {
-  "appId": "com.lightenup.calm",
-  "appName": "LightenUp",
+  "appId": "com.loosenup.calm",
+  "appName": "LoosenUp",
   "webDir": "www",
   "backgroundColor": "#EDF7FF",
   "android": {
@@ -12,7 +12,7 @@
   },
   "plugins": {
     "LocalNotifications": {
-      "smallIcon": "ic_stat_lightenup",
+      "smallIcon": "ic_stat_loosenup",
       "iconColor": "#F2A72B"
     }
   }

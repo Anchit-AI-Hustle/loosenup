@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "LightenUp",
-  "short_name": "LightenUp",
-  "description": "Two calm minutes to feel lighter. A wellbeing companion, not medical care.",
+  "name": "LoosenUp",
+  "short_name": "LoosenUp",
+  "description": "Two calm minutes to loosen up and feel lighter. A wellbeing companion, not medical care.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -1,17 +1,17 @@
-/* LightenUp - 2-minute guided calm breaks. Data stays on this device (localStorage). */
+/* LoosenUp - 2-minute guided calm breaks. Data stays on this device (localStorage). */
 (function () {
   'use strict';
 
-  var VERSION = '1.2.1';
-  var KEY = 'lightenup.v1';
-  var PUBLIC_URL = 'https://lightenup-app.vercel.app';
+  var VERSION = '1.3.0';
+  var KEY = 'loosenup.v1';
+  var PUBLIC_URL = 'https://loosenup.vercel.app';
   var WEEKLY_FREE_SEEDS = 2;
   var DAILY_NUDGES = 2;
   var MILESTONES = [3, 7, 21, 30];
   var GAME_XP = 5;
   var DAILY_GAME_REWARDS = 3;
 
-  var TEST = window.__LIGHTENUP_TEST__ || {};
+  var TEST = window.__LOOSENUP_TEST__ || {};
   var nowOverride = TEST.now ? new Date(TEST.now) : null;
   var rng = TEST.rng || Math.random;
   function now() { return nowOverride ? new Date(nowOverride.getTime()) : new Date(); }
@@ -159,7 +159,7 @@
     bigLift: ['Big lift', 'A Calm gain of +5 or more'],
     explorer: ['Explorer', 'Tried every technique'],
     sunbeam: ['Sunbeam', 'Caught a Sunbeam surprise'],
-    sharer: ['Sunbeam sharer', 'Shared LightenUp'],
+    sharer: ['Sunbeam sharer', 'Shared LoosenUp'],
     golden: ['Golden hour', 'Set a daily time'],
     playful: ['Playful', 'Played a calm game']
   };
@@ -232,7 +232,7 @@
     var s = freshState();
     try {
       // Carry progress over from the app's earlier names.
-      var raw = window.localStorage.getItem(KEY) || window.localStorage.getItem('sunpetal.v1') || window.localStorage.getItem('brightside.v1');
+      var raw = window.localStorage.getItem(KEY) || window.localStorage.getItem('lightenup.v1') || window.localStorage.getItem('sunpetal.v1') || window.localStorage.getItem('brightside.v1');
       if (raw) {
         var p = JSON.parse(raw);
         for (var k in p) if (Object.prototype.hasOwnProperty.call(s, k)) s[k] = p[k];
@@ -1220,7 +1220,7 @@
   function shareUrl() { return /^https?:$/.test(location.protocol) && !isNative() && location.hostname !== 'localhost' ? location.origin : PUBLIC_URL; }
   function shareSunbeam() {
     var url = shareUrl();
-    var text = 'Two calm minutes that brighten my day. Grow a garden with me on LightenUp.';
+    var text = 'Two calm minutes that brighten my day. Grow a garden with me on LoosenUp.';
     var rewardShare = function () {
       var dk = dayKey(now());
       addBadge('sharer');
@@ -1241,7 +1241,7 @@
       return Promise.resolve();
     };
     if (navigator.share) {
-      return navigator.share({ title: 'LightenUp', text: text, url: url }).then(rewardShare, function (e) {
+      return navigator.share({ title: 'LoosenUp', text: text, url: url }).then(rewardShare, function (e) {
         if (e && e.name === 'AbortError') return;
         return copy();
       });
@@ -1258,8 +1258,8 @@
     var ua = navigator.userAgent || '';
     var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
     $('install-btn').hidden = !installEvt;
-    if (isStandalone()) setText('install-text', 'LightenUp is installed. Lovely to have you here.');
-    else if (installEvt) setText('install-text', 'Add LightenUp to your home screen for quick, offline breaks.');
+    if (isStandalone()) setText('install-text', 'LoosenUp is installed. Lovely to have you here.');
+    else if (installEvt) setText('install-text', 'Add LoosenUp to your home screen for quick, offline breaks.');
     else if (ios) setText('install-text', 'On iPhone: open this page in Safari, tap Share, then Add to Home Screen.');
     else setText('install-text', 'On Android: open the Chrome menu, then Install app. On iPhone: Safari Share, then Add to Home Screen.');
   }
@@ -1747,7 +1747,7 @@
     bindSlider('calm-before');
     bindSlider('calm-after');
     window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; if (current === 'me') renderInstall(); });
-    window.addEventListener('appinstalled', function () { installEvt = null; toast('LightenUp is on your home screen.'); });
+    window.addEventListener('appinstalled', function () { installEvt = null; toast('LoosenUp is on your home screen.'); });
     document.addEventListener('visibilitychange', function () { if (!document.hidden && current === 'today') renderGoldenBanner(); });
     go(state.onboarded ? 'today' : 'welcome');
     registerSW();
@@ -1756,7 +1756,7 @@
 
   /* ---------- Public API (used by the app shell and the test suite) ---------- */
 
-  window.LightenUp = {
+  window.LoosenUp = {
     version: VERSION,
     state: function () { return JSON.parse(JSON.stringify(state)); },
     setState: function (patch) { for (var k in patch) state[k] = patch[k]; save(); if (current && RENDER[current]) RENDER[current](); renderSeedPill(); },

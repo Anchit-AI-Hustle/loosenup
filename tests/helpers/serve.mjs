@@ -46,5 +46,5 @@ export function startServer(port = 0) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const s = await startServer(Number(process.env.PORT || 4173));
-  console.log('LightenUp serving at ' + s.url);
+  console.log('LoosenUp serving at ' + s.url);
 }

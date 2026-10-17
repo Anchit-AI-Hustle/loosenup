@@ -73,7 +73,7 @@ async function walkScreens(page, width, label) {
     if (g === 'pairs') { await page.click('[data-card="0"]'); await page.click('[data-card="1"]'); }
     if (g === 'bloom') { await page.locator('#bloom-hold').dispatchEvent('pointerdown'); await page.waitForTimeout(1500); }
     await check('game-' + g);
-    await page.evaluate(() => window.LightenUp.finishCurrentGame());
+    await page.evaluate(() => window.LoosenUp.finishCurrentGame());
     await check('game-' + g + '-done');
     await page.click('#game-back');
   }
@@ -89,7 +89,7 @@ async function walkScreens(page, width, label) {
   await page.click('#sos-btn');
   await check('sos');
   await page.click('#support-close');
-  await page.evaluate(() => window.LightenUp.openShop());
+  await page.evaluate(() => window.LoosenUp.openShop());
   await check('shop');
   return shots;
 }
@@ -114,7 +114,7 @@ test('AT10 offline shell works after first load', async () => {
   await page.reload();
   await page.waitForSelector('#screen-welcome:not([hidden])');
   const title = await page.title();
-  assert.equal(title, 'LightenUp');
+  assert.equal(title, 'LoosenUp');
   const cssOk = await page.evaluate(() => getComputedStyle(document.body).fontFamily.includes('Nunito'));
   assert.ok(cssOk, 'styles.css served from cache');
   const fontOk = await page.evaluate(async () => { await document.fonts.ready; return document.fonts.check('16px Nunito') && document.fonts.check('16px Fraunces'); });
@@ -151,7 +151,7 @@ test('AT13 every visible button and tab is at least 48px tall and wide', async (
   await page.click('#sos-btn'); await measure('sos'); await page.click('#support-close');
   await page.click('#jar-add'); await measure('jar'); await page.click('#good-close');
   await page.click('[data-space="relationships"]'); await measure('space-relationships'); await page.click('#checkin-back');
-  await page.evaluate(() => window.LightenUp.openShop()); await measure('shop');
+  await page.evaluate(() => window.LoosenUp.openShop()); await measure('shop');
   assert.deepEqual(small, []);
   await ctx.close();
 });
@@ -183,7 +183,7 @@ test('AT13 prefers-reduced-motion stops the breathing orb animation', async () =
   const r = await page.evaluate(() => {
     const orb = document.querySelector('#orb');
     const s = getComputedStyle(orb);
-    return { transition: s.transitionDuration, anim: s.animationName, rm: window.LightenUp.prefersReducedMotion() };
+    return { transition: s.transitionDuration, anim: s.animationName, rm: window.LoosenUp.prefersReducedMotion() };
   });
   assert.equal(r.rm, true);
   assert.ok(['0s', '0.00001s', '1e-05s'].includes(r.transition) || parseFloat(r.transition) < 0.01, `orb transition ${r.transition}`);

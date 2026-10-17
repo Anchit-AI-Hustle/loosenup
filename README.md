@@ -1,6 +1,6 @@
-# LightenUp
+# LoosenUp
 
-**Two calm minutes to feel lighter.** LightenUp's goal is simple: help people ease a tense day and soften a heavy, low mood, and make sure help is one tap away on the hardest days.
+**Two calm minutes to loosen up and feel lighter.** LoosenUp's goal is simple: help people ease a tense day and soften a heavy, low mood, and make sure help is one tap away on the hardest days.
 
 Rate how calm you feel, take a 2-minute guided break chosen for what you are carrying (work, relationships, low days, sleep), rate again, and see your **Calm gain**. A daily mood check-in, Small steps, Kind words and a Good things jar support low days. **SOS** sits in the header of every screen.
 
@@ -8,9 +8,9 @@ The brand mark is a petal sun that opens on every in-breath, unfurls on the resu
 
 > A wellbeing companion, not medical care.
 
-- **Live app:** https://lightenup-app.vercel.app
-- **QR code:** [lightenup-live-qr.png](lightenup-live-qr.png)
-- **Android debug APK:** `android/app/build/outputs/apk/debug/app-debug.apk` (also exported as `dist/lightenup-android-debug-v1.2.0.apk`)
+- **Live app:** https://loosenup.vercel.app
+- **QR code:** [loosenup-live-qr.png](loosenup-live-qr.png)
+- **Android debug APK:** `android/app/build/outputs/apk/debug/app-debug.apk` (also exported as `dist/loosenup-android-debug-v1.2.0.apk`)
 
 ## Install on your phone
 
@@ -36,8 +36,8 @@ The app works offline after the first load.
 | Design | Morning sky palette, Fraunces (soft serif) for headlines and numbers with Nunito for UI text, both self-hosted. Glass cards, a floating pill tab bar, a living sky on Today that follows the real time of day (sun arc by hour, golden evenings, starry quiet nights), the breathing petal sun, and the rising sun with unfurling petals on the result screen. |
 | Fair rewards | At most 2 free Seeds per week from all rewards combined (milestones, Sunbeam surprise, sharing, "You showed up"). At most 2 nudges per day. |
 | Money | Seeds (credits) and Full Bloom (subscription). Checkout is a clearly labelled **DEMO**: nothing is charged and no payment details are asked for. At 0 Seeds on the free plan, a guided break opens the Seed shop. Quick breeze never uses a Seed. |
-| Safety | No medical claims anywhere: LightenUp is a wellbeing companion, not medical care, and says so on every screen. Let it out text is never stored. SOS and support are free forever and never need Seeds. |
-| Privacy | All data stays on the device in localStorage (`lightenup.v1`). No accounts, no analytics, fonts are self-hosted. |
+| Safety | No medical claims anywhere: LoosenUp is a wellbeing companion, not medical care, and says so on every screen. Let it out text is never stored. SOS and support are free forever and never need Seeds. |
+| Privacy | All data stays on the device in localStorage (`loosenup.v1`). No accounts, no analytics, fonts are self-hosted. |
 | Golden hour | A daily time you choose. On the web it shows a gentle in-app note. On the Android and iOS apps it schedules one real local notification per day. |
 
 ### Prices (placeholders)
@@ -63,7 +63,7 @@ www/            the web app (PWA). Also the Capacitor webDir.
   manifest.json standalone, id "/", 192, 512 and maskable icons
 tests/          acceptance tests AT1 to AT13 (jsdom + Playwright)
 scripts/        icon, splash and QR generators (Python Pillow and qrcode), native-setup.sh
-android/ ios/   Capacitor native projects (appId com.lightenup.calm)
+android/ ios/   Capacitor native projects (appId com.loosenup.calm)
 vercel.json     static hosting from www/ with sw.js no-cache and the manifest content type
 ```
 
@@ -73,7 +73,7 @@ vercel.json     static hosting from www/ with sw.js no-cache and the manifest co
 npm install
 npm run serve            # http://127.0.0.1:4173
 npm test                 # unit (jsdom) + browser (Playwright) suites
-LIVE_URL=https://lightenup-app.vercel.app npm run test:live
+LIVE_URL=https://loosenup.vercel.app npm run test:live
 ```
 
 The first browser run needs `npx playwright install chromium`. Screenshots from the browser suite land in `tests/screenshots/` at 390, 820 and 1440 px.
@@ -83,7 +83,7 @@ Regenerate icons and the QR code:
 ```bash
 python3 -m venv .venv && .venv/bin/pip install pillow qrcode
 .venv/bin/python scripts/make_icons.py --native
-.venv/bin/python scripts/make_qr.py https://lightenup-app.vercel.app
+.venv/bin/python scripts/make_qr.py https://loosenup.vercel.app
 ```
 
 ## Native apps (Capacitor 8)
