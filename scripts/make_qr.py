@@ -1,6 +1,6 @@
 """Make a QR code PNG for the live LoosenUp URL.
 
-Usage: .venv/bin/python scripts/make_qr.py https://loosenup.vercel.app
+Usage: .venv/bin/python scripts/make_qr.py https://loosenup.vercel.app [output.png]
 """
 import sys
 from pathlib import Path
@@ -41,6 +41,6 @@ text = "LoosenUp  " + url.replace("https://", "")
 tw = d.textlength(text, font=font)
 d.text(((W - tw) / 2, code.size[1] + 18), text, fill="#2E7D5B", font=font)
 
-dest = ROOT / "loosenup-live-qr.png"
+dest = ROOT / (sys.argv[2] if len(sys.argv) > 2 else "loosenup-live-qr.png")
 out.save(dest, optimize=True)
 print("wrote", dest.name, out.size, "->", url)

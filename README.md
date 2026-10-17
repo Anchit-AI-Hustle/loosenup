@@ -10,12 +10,16 @@ The brand mark is a petal sun that opens on every in-breath, unfurls on the resu
 
 - **Live app:** https://loosenup.vercel.app
 - **QR code:** [loosenup-live-qr.png](loosenup-live-qr.png)
-- **Android debug APK:** `android/app/build/outputs/apk/debug/app-debug.apk` (also exported as `dist/loosenup-android-debug-v1.2.0.apk`)
+- **Android APK:** `downloads/loosenup-android.apk` (served at `/download/loosenup-android.apk`; also `dist/loosenup-android-debug-v1.3.1.apk`)
+- **Repository:** https://github.com/Anchit-AI-Hustle/loosenup (private)
 
 ## Install on your phone
 
-- **Android (Chrome):** open the live URL, tap the Chrome menu, then **Install app**.
-- **iPhone (Safari):** open the live URL, tap **Share**, then **Add to Home Screen**.
+Open **https://loosenup.vercel.app/install.html** on the phone, or scan `loosenup-install-qr.png`.
+
+- **Android (direct install):** tap **Download for Android**, open the downloaded `LoosenUp.apk`, allow your browser to install apps if asked (Settings, then Install unknown apps), then tap Install. Direct link: https://loosenup.vercel.app/download/loosenup-android.apk
+- **Android (web app):** open the live URL in Chrome, open the menu, then **Install app**.
+- **iPhone:** open the live URL in Safari, tap **Share**, then **Add to Home Screen**. A native iPhone install needs TestFlight, which needs an Apple Developer account (see Native apps below).
 
 The app works offline after the first load.
 
