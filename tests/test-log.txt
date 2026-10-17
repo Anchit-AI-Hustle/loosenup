@@ -1,71 +1,69 @@
-NOTE: the 4 live tests below fail because Vercel blocked the v1.2.0 deploy (Hobby plan limit of 100 deployments per day on team anchit-ai-hustle). Re-run with: LIVE_URL=https://lightenup-app.vercel.app npm run test:live after deploying.
-
 LightenUp acceptance test log
-Run at: 2026-10-17 17:27 UTC   Node v26.8.2   Live URL: https://lightenup-app.vercel.app
+Run at: 2026-10-17 17:40 UTC   Node v26.8.2   Live URL: https://lightenup-app.vercel.app
 
 == Unit, flow, copy and safety tests (jsdom) ==
-✔ AT1 manifest has the required PWA fields (1.640875ms)
-✔ AT1 every manifest icon exists with the declared pixel size (4.869208ms)
-✔ AT1 service worker is registered and precaches the shell (1.964208ms)
-✔ AT1 vercel.json sets sw.js no-cache and the manifest content type (0.634875ms)
-✔ AT2 iOS meta tags and viewport-fit=cover are present (1.178792ms)
-✔ AT2 safe-area insets are applied to nav, sheets and toast (2.3505ms)
-✔ AT3 first open shows welcome and asks for a first name (200.2375ms)
-✔ AT3 gift grants 5 Seeds and 25 XP, Seedling bar at 50 percent, then straight into the first break (78.71625ms)
-✔ AT3 gift is only granted once, even after a reload (112.354167ms)
-✔ AT4 full loop: Seed decrements, Calm gain is correct, streak 1, XP 45 (95.25325ms)
-✔ AT4 a lower after score is framed positively and earns a Seed (117.091209ms)
-✔ AT4 the garden grows by one flower per break and never shrinks (152.718ms)
-✔ AT5 Sunny days count once per calendar day (236.439583ms)
-✔ AT5 a Rain day bridges a 2-day gap once per week and the 3-day milestone grants a Seed (54.989916ms)
-✔ AT5 a gap longer than one day starts a fresh run (46.860958ms)
-✔ AT5 milestone Seed respects the weekly free Seed cap of 2 (53.50175ms)
-✔ AT5 free reward Seeds never exceed 2 in a week across all sources (47.562209ms)
-✔ AT5 Sunbeam surprise rolls at most once per day (52.68375ms)
-✔ AT6 day one recommendation is rule based by context (55.688167ms)
-✔ AT6 switches to the best average gain after 2 or more tries in that context (54.725ms)
-✔ AT6 locked techniques are excluded even with great history (44.062667ms)
-✔ AT6 unlock thresholds: Soft release after 3 breaks, Let it out after 5 (54.706041ms)
-✔ AT5 XP rule: 10 + 2 x positive gain (56.140084ms)
-✔ AT7 zero Seeds on the free plan opens the Seed shop instead of a guided break (316.582625ms)
-✔ AT7 shop lists Full Bloom and Seed packs in INR and USD (91.234125ms)
-✔ AT7 demo purchase adds Seeds after a clearly labelled demo confirmation (99.7465ms)
-✔ AT7 Full Bloom guided breaks do not consume Seeds (104.965417ms)
-✔ AT7 Quick breeze is always free, even at zero Seeds (96.149833ms)
-✔ AT8 no banned words (whole-word) in any UI copy file (8.037417ms)
-✔ AT8 rendered UI text on every screen has no banned words (634.237458ms)
-✔ AT8 no em or en dashes in any repo file (38.025667ms)
-✔ AT8 locked vocabulary and footer note are present (0.718375ms)
-✔ AT11 crisis phrases are detected (249.833291ms)
-✔ AT11 typing a crisis phrase in Let it out opens the support sheet with helplines (177.349583ms)
-✔ AT11 journal text is never stored (70.711416ms)
-✔ AT11 support lines are always reachable from Me (112.448458ms)
-✔ AT13 reduced motion, focus ring and 48px targets are defined in CSS (1.004208ms)
-✔ AT13 app honours reduced motion in JS (no orb animation loop) (48.386458ms)
-✔ AT14 Play tab lists three calm games (320.251042ms)
-✔ AT14 Petal Pairs: 12 cards, matching all pairs finishes kindly and grants game XP (271.619209ms)
-✔ AT14 a mismatched pair turns back over without any penalty (1103.559875ms)
-✔ AT14 game XP is capped at 3 rewarded games a day (406.819459ms)
-✔ AT14 Sunbeam Catch: tapping a sunbeam fills the jar (74.8295ms)
-✔ AT14 Breath Bloom: holding starts the breath guide and finishing blooms kindly (51.032ms)
-✔ AT15 SOS button is reachable from every screen, even before onboarding (493.493ms)
-✔ AT15 SOS sheet offers helplines, a breather and trusted-person setup (109.014916ms)
-✔ AT15 trusted person is saved on device and the alert pre-fills a message (106.161834ms)
-✔ AT15 SOS alert can include a location link only when asked (110.921416ms)
-✔ AT15 crisis phrases in the Good things jar open the support sheet and are not saved (70.178541ms)
-✔ AT15 lowest mood asks a direct, gentle safety question (73.0305ms)
-✔ AT15 answering no to the safety question offers gentle next steps (77.894291ms)
-✔ AT15 three heavy days in a row surface a support card (108.437ms)
-✔ AT15 lighter days do not show the support card (178.108792ms)
-✔ AT16 mood check-in saves one mood per day and gives a little XP once (476.087625ms)
-✔ AT16 mood trend appears on the Sunny week with a kind insight (130.166542ms)
-✔ AT16 Small steps: completing one grows a sprout and gives XP, capped at 3 a day (206.153541ms)
-✔ AT16 Good things jar saves only when asked and resurfaces on heavy days (273.756792ms)
-✔ AT16 Kind words is a guided break recommended for low days (126.483041ms)
-✔ AT17 Work space: contexts and breaks for the workday (156.228792ms)
-✔ AT17 Relationships space: pause, cool down and warm wishes (73.911416ms)
-✔ AT17 a full Relationships break completes and counts toward the garden (76.205667ms)
-✔ AT17 Low days and Sleep spaces exist with their own feelings (77.207334ms)
+✔ AT1 manifest has the required PWA fields (0.736375ms)
+✔ AT1 every manifest icon exists with the declared pixel size (1.462625ms)
+✔ AT1 service worker is registered and precaches the shell (0.913458ms)
+✔ AT1 vercel.json sets sw.js no-cache and the manifest content type (0.327167ms)
+✔ AT2 iOS meta tags and viewport-fit=cover are present (0.481875ms)
+✔ AT2 safe-area insets are applied to nav, sheets and toast (0.585375ms)
+✔ AT3 first open shows welcome and asks for a first name (99.795833ms)
+✔ AT3 gift grants 5 Seeds and 25 XP, Seedling bar at 50 percent, then straight into the first break (37.402833ms)
+✔ AT3 gift is only granted once, even after a reload (81.635333ms)
+✔ AT4 full loop: Seed decrements, Calm gain is correct, streak 1, XP 45 (41.534375ms)
+✔ AT4 a lower after score is framed positively and earns a Seed (55.053541ms)
+✔ AT4 the garden grows by one flower per break and never shrinks (55.235833ms)
+✔ AT5 Sunny days count once per calendar day (92.125916ms)
+✔ AT5 a Rain day bridges a 2-day gap once per week and the 3-day milestone grants a Seed (25.742459ms)
+✔ AT5 a gap longer than one day starts a fresh run (23.792584ms)
+✔ AT5 milestone Seed respects the weekly free Seed cap of 2 (19.370541ms)
+✔ AT5 free reward Seeds never exceed 2 in a week across all sources (21.832125ms)
+✔ AT5 Sunbeam surprise rolls at most once per day (18.053167ms)
+✔ AT6 day one recommendation is rule based by context (18.205167ms)
+✔ AT6 switches to the best average gain after 2 or more tries in that context (21.63475ms)
+✔ AT6 locked techniques are excluded even with great history (18.164917ms)
+✔ AT6 unlock thresholds: Soft release after 3 breaks, Let it out after 5 (20.888375ms)
+✔ AT5 XP rule: 10 + 2 x positive gain (16.673542ms)
+✔ AT7 zero Seeds on the free plan opens the Seed shop instead of a guided break (131.263792ms)
+✔ AT7 shop lists Full Bloom and Seed packs in INR and USD (27.24775ms)
+✔ AT7 demo purchase adds Seeds after a clearly labelled demo confirmation (29.9505ms)
+✔ AT7 Full Bloom guided breaks do not consume Seeds (33.504667ms)
+✔ AT7 Quick breeze is always free, even at zero Seeds (38.211416ms)
+✔ AT8 no banned words (whole-word) in any UI copy file (2.621542ms)
+✔ AT8 rendered UI text on every screen has no banned words (206.492584ms)
+✔ AT8 no em or en dashes in any repo file (22.893042ms)
+✔ AT8 locked vocabulary and footer note are present (0.43825ms)
+✔ AT11 crisis phrases are detected (85.794334ms)
+✔ AT11 typing a crisis phrase in Let it out opens the support sheet with helplines (75.7415ms)
+✔ AT11 journal text is never stored (33.997958ms)
+✔ AT11 support lines are always reachable from Me (38.511583ms)
+✔ AT13 reduced motion, focus ring and 48px targets are defined in CSS (0.365875ms)
+✔ AT13 app honours reduced motion in JS (no orb animation loop) (21.487292ms)
+✔ AT14 Play tab lists three calm games (94.904ms)
+✔ AT14 Petal Pairs: 12 cards, matching all pairs finishes kindly and grants game XP (98.54775ms)
+✔ AT14 a mismatched pair turns back over without any penalty (1036.834167ms)
+✔ AT14 game XP is capped at 3 rewarded games a day (137.151125ms)
+✔ AT14 Sunbeam Catch: tapping a sunbeam fills the jar (18.989916ms)
+✔ AT14 Breath Bloom: holding starts the breath guide and finishing blooms kindly (15.860959ms)
+✔ AT15 SOS button is reachable from every screen, even before onboarding (121.725ms)
+✔ AT15 SOS sheet offers helplines, a breather and trusted-person setup (30.06ms)
+✔ AT15 trusted person is saved on device and the alert pre-fills a message (19.420542ms)
+✔ AT15 SOS alert can include a location link only when asked (21.10675ms)
+✔ AT15 crisis phrases in the Good things jar open the support sheet and are not saved (19.64325ms)
+✔ AT15 lowest mood asks a direct, gentle safety question (18.942625ms)
+✔ AT15 answering no to the safety question offers gentle next steps (22.261416ms)
+✔ AT15 three heavy days in a row surface a support card (20.12875ms)
+✔ AT15 lighter days do not show the support card (21.869542ms)
+✔ AT16 mood check-in saves one mood per day and gives a little XP once (120.034792ms)
+✔ AT16 mood trend appears on the Sunny week with a kind insight (36.599875ms)
+✔ AT16 Small steps: completing one grows a sprout and gives XP, capped at 3 a day (33.836166ms)
+✔ AT16 Good things jar saves only when asked and resurfaces on heavy days (74.686583ms)
+✔ AT16 Kind words is a guided break recommended for low days (23.728458ms)
+✔ AT17 Work space: contexts and breaks for the workday (32.003458ms)
+✔ AT17 Relationships space: pause, cool down and warm wishes (26.770625ms)
+✔ AT17 a full Relationships break completes and counts toward the garden (34.298834ms)
+✔ AT17 Low days and Sleep spaces exist with their own feelings (26.746917ms)
 ℹ tests 62
 ℹ suites 0
 ℹ pass 62
@@ -73,16 +71,16 @@ Run at: 2026-10-17 17:27 UTC   Node v26.8.2   Live URL: https://lightenup-app.ve
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 16438.481833
+ℹ duration_ms 6357.925667
 
 == Real browser tests (Playwright Chromium) ==
-✔ AT9 no console errors and no horizontal scroll at 390px (21514.019916ms)
-✔ AT9 no console errors and no horizontal scroll at 820px (19679.477ms)
-✔ AT9 no console errors and no horizontal scroll at 1440px (19547.603875ms)
-✔ AT10 offline shell works after first load (304.10525ms)
-✔ AT13 every visible button and tab is at least 48px tall and wide (6868.503334ms)
-✔ AT13 visible focus ring on keyboard focus (128.360583ms)
-✔ AT13 prefers-reduced-motion stops the breathing orb animation (905.672791ms)
+✔ AT9 no console errors and no horizontal scroll at 390px (19215.902958ms)
+✔ AT9 no console errors and no horizontal scroll at 820px (18942.082416ms)
+✔ AT9 no console errors and no horizontal scroll at 1440px (19021.647375ms)
+✔ AT10 offline shell works after first load (206.375ms)
+✔ AT13 every visible button and tab is at least 48px tall and wide (6760.942083ms)
+✔ AT13 visible focus ring on keyboard focus (72.116209ms)
+✔ AT13 prefers-reduced-motion stops the breathing orb animation (835.768583ms)
 ℹ tests 7
 ℹ suites 0
 ℹ pass 7
@@ -90,92 +88,18 @@ Run at: 2026-10-17 17:27 UTC   Node v26.8.2   Live URL: https://lightenup-app.ve
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 71017.059542
+ℹ duration_ms 65577.539833
 
 == Live deployment tests ==
-✖ AT1 live: every shell file returns 200 (595.049ms)
-✖ AT1 live: manifest is served with the manifest content type and matches the repo (72.931458ms)
-✖ AT1 live: sw.js is served no-cache and matches the repo (44.219917ms)
-✖ AT12 live: production URL loads the app over HTTPS from Vercel (39.706209ms)
+✔ AT1 live: every shell file returns 200 (776.444708ms)
+✔ AT1 live: manifest is served with the manifest content type and matches the repo (94.155291ms)
+✔ AT1 live: sw.js is served no-cache and matches the repo (44.387209ms)
+✔ AT12 live: production URL loads the app over HTTPS from Vercel (58.316333ms)
 ℹ tests 4
 ℹ suites 0
-ℹ pass 0
-ℹ fail 4
+ℹ pass 4
+ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1242.042083
-
-✖ failing tests:
-
-test at tests/live/at01-at12-live.test.mjs:14:1
-✖ AT1 live: every shell file returns 200 (595.049ms)
-  AssertionError [ERR_ASSERTION]: / -> 403
-  
-  403 !== 200
-  
-      at TestContext.<anonymous> (file:///Users/anchittandon/Brightside/tests/live/at01-at12-live.test.mjs:17:12)
-      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
-      at async Test.run (node:internal/test_runner/test:1409:7)
-      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
-    generatedMessage: false,
-    code: 'ERR_ASSERTION',
-    actual: 403,
-    expected: 200,
-    operator: 'strictEqual',
-    diff: 'simple'
-  }
-
-test at tests/live/at01-at12-live.test.mjs:21:1
-✖ AT1 live: manifest is served with the manifest content type and matches the repo (72.931458ms)
-  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /application\/manifest\+json/. Input:
-  
-  'text/html; charset=utf-8'
-  
-      at TestContext.<anonymous> (file:///Users/anchittandon/Brightside/tests/live/at01-at12-live.test.mjs:23:10)
-      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
-      at async Test.run (node:internal/test_runner/test:1409:7)
-      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
-    generatedMessage: true,
-    code: 'ERR_ASSERTION',
-    actual: 'text/html; charset=utf-8',
-    expected: /application\/manifest\+json/,
-    operator: 'match',
-    diff: 'simple'
-  }
-
-test at tests/live/at01-at12-live.test.mjs:29:1
-✖ AT1 live: sw.js is served no-cache and matches the repo (44.219917ms)
-  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /no-cache/. Input:
-  
-  'private, no-store, max-age=0'
-  
-      at TestContext.<anonymous> (file:///Users/anchittandon/Brightside/tests/live/at01-at12-live.test.mjs:31:10)
-      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
-      at async Test.run (node:internal/test_runner/test:1409:7)
-      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
-    generatedMessage: true,
-    code: 'ERR_ASSERTION',
-    actual: 'private, no-store, max-age=0',
-    expected: /no-cache/,
-    operator: 'match',
-    diff: 'simple'
-  }
-
-test at tests/live/at01-at12-live.test.mjs:35:1
-✖ AT12 live: production URL loads the app over HTTPS from Vercel (39.706209ms)
-  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-  
-  403 !== 200
-  
-      at TestContext.<anonymous> (file:///Users/anchittandon/Brightside/tests/live/at01-at12-live.test.mjs:38:10)
-      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
-      at async Test.run (node:internal/test_runner/test:1409:7)
-      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
-    generatedMessage: true,
-    code: 'ERR_ASSERTION',
-    actual: 403,
-    expected: 200,
-    operator: 'strictEqual',
-    diff: 'simple'
-  }
+ℹ duration_ms 1391.542333
