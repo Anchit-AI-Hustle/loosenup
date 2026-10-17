@@ -10,7 +10,7 @@ test('AT18 install page offers a direct Android download and iPhone home screen 
   assert.match(html, /<a id="apk-download"[^>]*href="\/download\/loosenup-android\.apk"/);
   assert.match(html, /Install unknown apps/);
   assert.match(html, /Add to Home Screen/);
-  assert.match(html, /Apple Developer account/);
+  assert.match(html, /Install the iPhone app/);
   assert.match(html, /href="tel:14416"/);
   assert.match(html, /A wellbeing companion, not medical care\./);
 });
@@ -35,4 +35,21 @@ test('AT18 the APK is served as an Android package download', () => {
 
 test('AT18 Me links to the install page on the web', () => {
   assert.match(read('www/index.html'), /<a id="install-page-link"[^>]*href="\/install\.html"/);
+});
+
+test('AT27 the iPhone app installs from a link: install button, Apple manifest and a signed app file', () => {
+  const html = read('www/install.html');
+  const link = html.match(/id="ipa-install"[^>]*href="([^"]+)"/) || html.match(/href="([^"]+)"[^>]*id="ipa-install"/);
+  assert.ok(link, 'install button present');
+  assert.equal(link[1].replace(/&amp;/g, '&'), 'itms-services://?action=download-manifest&url=https://loosenup-ios.anchit-tandon.com/loosenup-ios.plist');
+  const plist = read('www/loosenup-ios.plist');
+  assert.match(plist, /<string>software-package<\/string>\s*<key>url<\/key><string>https:\/\/loosenup-ios\.anchit-tandon\.com\/download\/loosenup-ios\.ipa<\/string>/);
+  assert.match(plist, /<key>bundle-identifier<\/key><string>com\.loosenup\.calm<\/string>/);
+  assert.match(plist, /<key>title<\/key><string>LoosenUp<\/string>/);
+  const ipa = readFileSync(path.join(ROOT, 'downloads', 'loosenup-ios.ipa'));
+  assert.ok(ipa.length > 500000, 'app file is a real build');
+  assert.equal(ipa.subarray(0, 2).toString(), 'PK', 'app file is a zip archive');
+  assert.ok(ipa.includes(Buffer.from('Payload/App.app/embedded.mobileprovision')), 'signed with a provisioning profile');
+  const vercel = JSON.parse(read('vercel.json'));
+  assert.match(vercel.buildCommand, /cp downloads\/loosenup-ios\.ipa site\/download\/loosenup-ios\.ipa/);
 });

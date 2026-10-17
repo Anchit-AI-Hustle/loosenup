@@ -13,7 +13,7 @@ const TEXT_EXT = new Set(['.html', '.css', '.js', '.mjs', '.json', '.md', '.txt'
 
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
-    if (SKIP_DIRS.has(name)) continue;
+    if (SKIP_DIRS.has(name) || name.startsWith('DerivedData')) continue;
     const p = path.join(dir, name);
     const st = statSync(p);
     if (st.isDirectory()) walk(p, out);

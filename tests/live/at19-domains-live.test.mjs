@@ -37,3 +37,16 @@ test('AT21 live: the update manifest and bundle are served to the apps', { skip 
   const buf = Buffer.from(await z.arrayBuffer());
   assert.equal(buf.toString('ascii', 0, 2), 'PK');
 });
+
+test('AT27 live: the iPhone install manifest and app file are served over HTTPS', { skip }, async () => {
+  const m = await fetch(IOS + '/loosenup-ios.plist');
+  assert.equal(m.status, 200);
+  assert.match(m.headers.get('content-type'), /xml/);
+  assert.match(await m.text(), /com\.loosenup\.calm/);
+  const ipa = await fetch(IOS + '/download/loosenup-ios.ipa');
+  assert.equal(ipa.status, 200);
+  const buf = Buffer.from(await ipa.arrayBuffer());
+  assert.equal(buf.subarray(0, 2).toString(), 'PK');
+  const page = await (await fetch(IOS + '/install.html')).text();
+  assert.match(page, /itms-services:\/\/\?action=download-manifest/);
+});
