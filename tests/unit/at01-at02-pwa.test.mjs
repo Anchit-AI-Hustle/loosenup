@@ -58,7 +58,11 @@ test('AT1 vercel.json sets sw.js no-cache and the manifest content type', () => 
   assert.ok(sw.headers.some((h) => h.key === 'Cache-Control' && /no-cache/.test(h.value)));
   const mf = find('/manifest.json');
   assert.ok(mf.headers.some((h) => h.key === 'Content-Type' && h.value.startsWith('application/manifest+json')));
-  assert.equal(v.outputDirectory, 'www');
+  assert.equal(v.outputDirectory, 'site');
+  assert.match(v.buildCommand, /cp -R www site/);
+  assert.match(v.buildCommand, /downloads\/loosenup-android\.apk site\/download\/loosenup-android\.apk/);
+  const pp = v.headers.flatMap((h) => h.headers).find((h) => h.key === 'Permissions-Policy');
+  assert.match(pp.value, /geolocation=\(self\)/, 'SOS location must be allowed for the app itself');
 });
 
 test('AT2 iOS meta tags and viewport-fit=cover are present', () => {

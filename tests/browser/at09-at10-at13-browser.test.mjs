@@ -189,3 +189,16 @@ test('AT13 prefers-reduced-motion stops the breathing orb animation', async () =
   assert.ok(['0s', '0.00001s', '1e-05s'].includes(r.transition) || parseFloat(r.transition) < 0.01, `orb transition ${r.transition}`);
   await ctx.close();
 });
+
+test('AT18 install page fits a phone screen with 48px targets', async () => {
+  const { ctx, page, errors } = await newPage(390);
+  await page.goto(server.url + '/install.html');
+  const m = await noHScroll(page);
+  assert.ok(m.sw <= m.cw, 'no horizontal scroll');
+  const small = await page.evaluate(() => [...document.querySelectorAll('a.btn')]
+    .map((e) => e.getBoundingClientRect()).filter((b) => b.height < 48 || b.width < 48).length);
+  assert.equal(small, 0);
+  await page.screenshot({ path: path.join(SHOTS, '390-install.png'), fullPage: true });
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});

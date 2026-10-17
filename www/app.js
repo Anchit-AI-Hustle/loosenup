@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.3.0';
+  var VERSION = '1.3.1';
   var KEY = 'loosenup.v1';
   var PUBLIC_URL = 'https://loosenup.vercel.app';
   var WEEKLY_FREE_SEEDS = 2;

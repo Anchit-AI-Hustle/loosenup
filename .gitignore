@@ -22,3 +22,5 @@ dist/
 android/.kotlin/
 .vercel
 .env*
+# Vercel build output
+site/

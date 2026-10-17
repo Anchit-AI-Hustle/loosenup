@@ -23,7 +23,7 @@ function walk(dir, out = []) {
 }
 
 const COPY_FILES = [
-  'www/index.html', 'www/app.js', 'www/styles.css', 'www/sw.js', 'www/manifest.json',
+  'www/index.html', 'www/install.html', 'www/app.js', 'www/styles.css', 'www/sw.js', 'www/manifest.json',
   'README.md', 'capacitor.config.json', 'android/app/src/main/res/values/strings.xml',
 ].filter((f) => existsSync(path.join(ROOT, f)));
 

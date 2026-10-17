@@ -9,7 +9,7 @@ const LIVE = (process.env.LIVE_URL || '').replace(/\/$/, '');
 const skip = !LIVE && 'LIVE_URL not set';
 
 const FILES = ['/', '/index.html', '/styles.css', '/app.js', '/sw.js', '/manifest.json', '/apple-touch-icon.png',
-  '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png', '/fonts/nunito-latin.woff2', '/fonts/fraunces-latin.woff2', '/favicon.png'];
+  '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png', '/fonts/nunito-latin.woff2', '/fonts/fraunces-latin.woff2', '/favicon.png', '/install.html'];
 
 test('AT1 live: every shell file returns 200', { skip }, async () => {
   for (const f of FILES) {
@@ -40,4 +40,13 @@ test('AT12 live: production URL loads the app over HTTPS from Vercel', { skip },
   const html = await r.text();
   assert.match(html, /<title>LoosenUp<\/title>/);
   assert.match(html, /A wellbeing companion, not medical care\./);
+});
+
+test('AT18 live: the Android APK downloads as an Android package', { skip }, async () => {
+  const r = await fetch(LIVE + '/download/loosenup-android.apk');
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get('content-type'), 'application/vnd.android.package-archive');
+  const buf = Buffer.from(await r.arrayBuffer());
+  assert.ok(buf.length > 1_000_000, 'full APK');
+  assert.equal(buf.toString('ascii', 0, 2), 'PK');
 });
