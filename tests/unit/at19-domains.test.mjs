@@ -6,8 +6,11 @@ const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebK
 
 test('AT19 the Android domain opens on the install page, the app stays one link away', () => {
   const v = JSON.parse(read('vercel.json'));
-  const r = v.rewrites.find((x) => x.destination === '/install.html');
-  assert.ok(r, 'rewrite to the install page');
+  // A redirect, not a rewrite: Vercel serves index.html for / before any rewrite applies.
+  assert.equal(v.rewrites, undefined);
+  const r = v.redirects.find((x) => x.destination === '/install.html');
+  assert.ok(r, 'redirect to the install page');
+  assert.equal(r.permanent, false);
   assert.equal(r.source, '/');
   assert.deepEqual(r.has, [{ type: 'host', value: 'loosenup-android.anchit-tandon.com' }]);
   assert.deepEqual(r.missing, [{ type: 'query', key: 'app' }]);
