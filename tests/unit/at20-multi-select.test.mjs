@@ -17,6 +17,12 @@ test('AT20 several feelings can be picked at once, and tapping again unpicks', (
   app.click('[data-context="Feeling low"]');
   assert.deepEqual(pressed(app), ['Tight shoulders', 'Work pile-up', 'Feeling low']);
   assert.match(app.$('#context-count').textContent, /3 picked/);
+  const tray = [...app.document.querySelectorAll('[data-unpick]')].map((b) => b.getAttribute('data-unpick'));
+  assert.deepEqual(tray, ['Work pile-up', 'Tight shoulders', 'Feeling low'], 'picked tray lists choices in order');
+  assert.match(app.$('[data-space-tab="work"]').textContent, /Work \u00b7 1/);
+  app.click('[data-unpick="Feeling low"]');
+  assert.equal(app.$('[data-context="Feeling low"]').getAttribute('aria-pressed'), 'false', 'tray chip unpicks');
+  app.click('[data-context="Feeling low"]');
   app.click('[data-context="Tight shoulders"]');
   assert.deepEqual(pressed(app), ['Work pile-up', 'Feeling low']);
 });

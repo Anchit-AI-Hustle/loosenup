@@ -138,9 +138,10 @@
           <h2 class="subtitle" id="context-title">What is going on?</h2>
           <span id="context-count" class="tag" aria-live="polite"></span>
         </div>
-        <p class="fine" id="context-hint">Pick all that apply.</p>
+        <p class="fine" id="context-hint">Pick all that apply, from any space.</p>
+        <div id="picked-tray" class="picked-tray" aria-label="Picked feelings" hidden></div>
+        <div id="space-tabs" class="space-tabs" role="tablist" aria-label="Spaces"></div>
         <div id="context-chips" class="context-groups" role="group" aria-labelledby="context-title"></div>
-        <button id="context-all" class="btn btn-ghost" type="button" hidden>Show all feelings</button>
         <button id="checkin-next" class="btn btn-sun" type="button">Next</button>
         <button id="checkin-back" class="btn btn-ghost" type="button">Back</button>
       </section>
@@ -238,8 +239,8 @@
       </section>
 
       <!-- Today -->
-      <section id="screen-today" class="screen" data-screen="today" hidden aria-labelledby="today-title">
-        <div id="today-sky" class="sky-card" data-time="Mornings">
+      <section id="screen-today" class="screen today" data-screen="today" hidden aria-labelledby="today-title">
+        <div id="today-sky" class="sky-card hero" data-time="Mornings">
           <div class="sky-stars" aria-hidden="true"></div>
           <svg id="today-sun" class="sky-sun" viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg>
           <div class="sky-moon" aria-hidden="true"></div>
@@ -253,20 +254,12 @@
             <h1 id="today-title" class="display small"></h1>
             <p class="sky-pill"><span class="sky-pill-dot" aria-hidden="true"></span><span id="today-sky-streak"></span></p>
           </div>
-        </div>
-        <article id="mood-card" class="card mood-card">
-          <p class="eyebrow">Daily check-in</p>
-          <h2 class="subtitle">How is your mood today?</h2>
-          <div class="moods" role="group" aria-label="Mood today">
-            <button type="button" class="mood" data-mood="1" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(12 12) scale(.4)"/></svg><span>Very heavy</span></button>
-            <button type="button" class="mood" data-mood="2" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(9 9) scale(.55)"/></svg><span>Heavy</span></button>
-            <button type="button" class="mood" data-mood="3" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(6 6) scale(.7)"/></svg><span>Okay</span></button>
-            <button type="button" class="mood" data-mood="4" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(3 3) scale(.85)"/></svg><span>Light</span></button>
-            <button type="button" class="mood" data-mood="5" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg><span>Bright</span></button>
+          <div class="hero-actions">
+            <button id="start-break" class="btn btn-sun btn-hero" type="button">Start a calm break</button>
+            <button id="quick-breeze" class="btn btn-glass" type="button">Quick breeze &middot; 60s, always free</button>
           </div>
-          <p id="mood-done" class="muted" aria-live="polite"></p>
-          <p id="jar-memory" class="jar-memory" hidden></p>
-        </article>
+        </div>
+
         <article id="support-card" class="card support-card" hidden>
           <p class="eyebrow">We are here with you</p>
           <h2 class="subtitle">It has been a heavy few days. You do not have to carry it alone.</h2>
@@ -278,41 +271,71 @@
           <span class="banner-sun" aria-hidden="true"></span>
           <p><strong>Golden hour is here.</strong> Two calm minutes, whenever you like.</p>
         </div>
-        <article class="card hero-card">
-          <h2 class="title">Ready for two calm minutes?</h2>
-          <p class="muted">Tell us how you feel and we will pick a break that suits you.</p>
-          <button id="start-break" class="btn btn-sun" type="button">Start a break</button>
-          <button id="quick-breeze" class="btn btn-ghost" type="button">Quick breeze, 60s, always free</button>
-        </article>
-        <h2 class="subtitle">Spaces for what you are carrying</h2>
-        <div class="spaces">
-          <button class="space-card space-work" type="button" data-space="work"><strong>Work</strong><span>Ease the workday, before meetings, after tough calls</span></button>
-          <button class="space-card space-rel" type="button" data-space="relationships"><strong>Relationships</strong><span>When things feel tense with someone</span></button>
-          <button class="space-card space-low" type="button" data-space="lowdays"><strong>Low days</strong><span>Gentle lifts for heavy days</span></button>
-          <button class="space-card space-sleep" type="button" data-space="sleep"><strong>Sleep</strong><span>Wind down and quiet a racing mind</span></button>
-        </div>
-        <article id="steps-card" class="card steps-card">
-          <p class="eyebrow">Small step</p>
-          <p id="step-idea" class="step-idea" aria-live="polite"></p>
-          <div class="row">
-            <button id="step-done" class="btn btn-sun" type="button">I did it</button>
-            <button id="step-another" class="btn btn-ghost" type="button">Another idea</button>
+
+        <article id="mood-card" class="card mood-card">
+          <div class="block-head"><h2 class="subtitle">How are you feeling?</h2><span class="tag">Daily check-in</span></div>
+          <div class="moods" role="group" aria-label="Mood today">
+            <button type="button" class="mood" data-mood="1" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(12 12) scale(.4)"/></svg><span>Very heavy</span></button>
+            <button type="button" class="mood" data-mood="2" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(9 9) scale(.55)"/></svg><span>Heavy</span></button>
+            <button type="button" class="mood" data-mood="3" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(6 6) scale(.7)"/></svg><span>Okay</span></button>
+            <button type="button" class="mood" data-mood="4" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(3 3) scale(.85)"/></svg><span>Light</span></button>
+            <button type="button" class="mood" data-mood="5" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg><span>Bright</span></button>
           </div>
-          <p id="steps-note" class="fine"></p>
+          <p id="mood-done" class="fine" aria-live="polite"></p>
+          <p id="jar-memory" class="jar-memory" hidden></p>
         </article>
-        <article id="jar-card" class="card jar-card">
-          <p class="eyebrow">Good things jar</p>
-          <p id="jar-count" class="muted"></p>
-          <button id="jar-add" class="btn btn-soft" type="button">Add a good thing</button>
+
+        <section class="block" aria-labelledby="spaces-title">
+          <div class="block-head"><h2 class="subtitle" id="spaces-title">What are you carrying?</h2><span class="fine">Swipe</span></div>
+          <div class="spaces carousel">
+            <button class="space-card space-work" type="button" data-space="work">
+              <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8.5 7V5.5A1.5 1.5 0 0 1 10 4h4a1.5 1.5 0 0 1 1.5 1.5V7M3 12.5h18"/></svg>
+              <strong>Work</strong><span>Meetings, pile-ups, tough calls</span></button>
+            <button class="space-card space-rel" type="button" data-space="relationships">
+              <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+              <strong>Relationships</strong><span>When things feel tense</span></button>
+            <button class="space-card space-low" type="button" data-space="lowdays">
+              <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 2.5v1.2M2.5 8h1.2M4.1 4.1l.9.9M7 19h10.5a3.5 3.5 0 0 0 .4-7 5 5 0 0 0-9.6 1.3A3 3 0 0 0 7 19z"/></svg>
+              <strong>Low days</strong><span>Gentle lifts for heavy days</span></button>
+            <button class="space-card space-sleep" type="button" data-space="sleep">
+              <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"/><path d="M16 4l.5 1.5L18 6l-1.5.5L16 8l-.5-1.5L14 6l1.5-.5z"/></svg>
+              <strong>Sleep</strong><span>Wind down, quiet a racing mind</span></button>
+          </div>
+        </section>
+
+        <article class="card lifts">
+          <div class="block-head"><h2 class="subtitle">Little lifts</h2><span class="tag">Free</span></div>
+          <div id="steps-card" class="lift-row">
+            <span class="lift-ic lift-step" aria-hidden="true"></span>
+            <div class="lift-body">
+              <p class="tag">Small step</p>
+              <p id="step-idea" class="step-idea" aria-live="polite"></p>
+              <p id="steps-note" class="fine"></p>
+              <div class="row lift-actions">
+                <button id="step-done" class="btn btn-sun btn-small" type="button">I did it</button>
+                <button id="step-another" class="btn btn-ghost btn-small" type="button">Another idea</button>
+              </div>
+            </div>
+          </div>
+          <div id="jar-card" class="lift-row">
+            <span class="lift-ic lift-jar" aria-hidden="true"></span>
+            <div class="lift-body">
+              <p class="tag">Good things jar</p>
+              <p id="jar-count" class="muted"></p>
+              <div class="row lift-actions"><button id="jar-add" class="btn btn-soft btn-small" type="button">Add a good thing</button></div>
+            </div>
+          </div>
         </article>
-        <div class="stat-grid">
-          <div class="stat"><span class="stat-k">Sunny days</span><span id="today-streak" class="stat-v"></span></div>
-          <div class="stat"><span class="stat-k">Seeds</span><span id="today-seeds" class="stat-v"></span></div>
-          <div class="stat wide"><span class="stat-k" id="today-level-name"></span>
+
+        <article class="card progress-strip" aria-label="Your progress">
+          <div class="ps-item"><span class="stat-k">Sunny days</span><span id="today-streak" class="stat-v"></span></div>
+          <div class="ps-item"><span class="stat-k">Seeds</span><span id="today-seeds" class="stat-v"></span></div>
+          <div class="ps-item ps-level"><span class="stat-k" id="today-level-name"></span>
             <div class="bar" role="progressbar" aria-label="Level progress" aria-valuemin="0" aria-valuemax="100" id="today-level-bar"><span id="today-level-fill" class="bar-fill"></span></div>
             <span id="today-level-pct" class="fine"></span></div>
-        </div>
+        </article>
         <p id="today-rain" class="fine center"></p>
+
         <h2 class="subtitle">Recent breaks</h2>
         <ul id="today-recent" class="recent"></ul>
       </section>

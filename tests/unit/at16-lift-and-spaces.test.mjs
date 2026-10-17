@@ -75,7 +75,7 @@ test('AT17 Work space: contexts and breaks for the workday', () => {
   const app = ready();
   app.click('[data-space="work"]');
   assert.equal(app.B.currentScreen(), 'checkin');
-  const chips = [...app.document.querySelectorAll('[data-context]')].map((c) => c.getAttribute('data-context'));
+  const chips = [...app.document.querySelectorAll('#context-chips .context-group:not([hidden]) [data-context]')].map((c) => c.getAttribute('data-context'));
   assert.deepEqual(chips, ['Work pile-up', 'Before a meeting', 'After a tough call', 'Hard to switch off']);
   assert.equal(app.B.recommend('Work pile-up').id, 'square');
   assert.equal(app.B.recommend('After a tough call').id, 'desk');
@@ -91,13 +91,17 @@ test('AT17 Work space: contexts and breaks for the workday', () => {
 test('AT17 Relationships space: pause, cool down and warm wishes', () => {
   const app = ready();
   app.click('[data-space="relationships"]');
-  const chips = [...app.document.querySelectorAll('[data-context]')].map((c) => c.getAttribute('data-context'));
+  const chips = [...app.document.querySelectorAll('#context-chips .context-group:not([hidden]) [data-context]')].map((c) => c.getAttribute('data-context'));
   assert.deepEqual(chips, ['Tense with someone', 'After a disagreement', 'Before a hard talk', 'Feeling disconnected']);
   assert.equal(app.B.recommend('Tense with someone').id, 'pause');
   assert.equal(app.B.recommend('After a disagreement').id, 'cooldown');
   assert.equal(app.B.recommend('Feeling disconnected').id, 'warmth');
-  app.click('#context-all');
-  assert.ok(app.document.querySelectorAll('[data-context]').length >= 18, 'show all feelings');
+  // Every space has a tab; switching tabs shows that space's feelings.
+  assert.equal(app.document.querySelectorAll('[data-space-tab]').length, 5);
+  assert.ok(app.document.querySelectorAll('[data-context]').length >= 18, 'all feelings stay pickable');
+  app.click('[data-space-tab="lowdays"]');
+  const shown = [...app.document.querySelectorAll('#context-chips .context-group:not([hidden]) [data-context]')].map((c) => c.getAttribute('data-context'));
+  assert.deepEqual(shown, ['Feeling low', 'Low energy', 'Hard on myself']);
 });
 
 test('AT17 a full Relationships break completes and counts toward the garden', () => {
@@ -112,10 +116,10 @@ test('AT17 a full Relationships break completes and counts toward the garden', (
 test('AT17 Low days and Sleep spaces exist with their own feelings', () => {
   const app = ready();
   app.click('[data-space="lowdays"]');
-  let chips = [...app.document.querySelectorAll('[data-context]')].map((c) => c.getAttribute('data-context'));
+  let chips = [...app.document.querySelectorAll('#context-chips .context-group:not([hidden]) [data-context]')].map((c) => c.getAttribute('data-context'));
   assert.deepEqual(chips, ['Feeling low', 'Low energy', 'Hard on myself']);
   app.B.go('today');
   app.click('[data-space="sleep"]');
-  chips = [...app.document.querySelectorAll('[data-context]')].map((c) => c.getAttribute('data-context'));
+  chips = [...app.document.querySelectorAll('#context-chips .context-group:not([hidden]) [data-context]')].map((c) => c.getAttribute('data-context'));
   assert.deepEqual(chips, ['Winding down', 'Mind racing at night']);
 });

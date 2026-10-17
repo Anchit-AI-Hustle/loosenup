@@ -1,0 +1,11 @@
+import { chromium } from 'playwright';
+import { startServer } from './serve.mjs';
+const out = process.argv[2];
+const s = await startServer(0);
+const b = await chromium.launch();
+const p = await (await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })).newPage();
+await p.goto(s.url + '/'); await p.fill('#name-input', 'Asha'); await p.click('#welcome-go'); await p.click('#gift-go');
+await p.waitForTimeout(500); await p.screenshot({ path: out + '/checkin.png', fullPage: true });
+await p.click('#checkin-back'); await p.waitForTimeout(600);
+await p.screenshot({ path: out + '/today.png', fullPage: true });
+await b.close(); await s.close();

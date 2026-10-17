@@ -1,12 +1,25 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "rm -rf site && cp -R www site && mkdir -p site/download && cp downloads/loosenup-android.apk site/download/loosenup-android.apk",
+  "buildCommand": "rm -rf site && cp -R www site && mkdir -p site/download site/updates && cp downloads/loosenup-android.apk site/download/loosenup-android.apk && cp downloads/updates/* site/updates/",
   "installCommand": "",
   "outputDirectory": "site",
   "cleanUrls": false,
   "trailingSlash": false,
   "headers": [
+    {
+      "source": "/updates/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
     {
       "source": "/sw.js",
       "headers": [

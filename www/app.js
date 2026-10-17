@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.5.0';
+  var VERSION = '1.6.0';
   var KEY = 'loosenup.v1';
   var PUBLIC_URL = 'https://loosenup-ios.anchit-tandon.com';
   var ANDROID_URL = 'https://loosenup-android.anchit-tandon.com';
@@ -524,14 +524,29 @@
     return upd;
   }
 
+  function activeTab() { return flow.spaceTab || flow.space || 'everyday'; }
   function renderContextChips() {
+    // Every feeling stays in the DOM; only the active space's group is visible.
+    var tabs = $('space-tabs');
+    tabs.textContent = '';
+    SPACE_ORDER.forEach(function (k) {
+      var t = document.createElement('button');
+      t.type = 'button';
+      t.className = 'space-tab';
+      t.setAttribute('role', 'tab');
+      t.setAttribute('data-space-tab', k);
+      t.setAttribute('aria-selected', String(k === activeTab()));
+      var n = SPACES[k].contexts.filter(function (c) { return (flow.contexts || []).indexOf(c) !== -1; }).length;
+      t.textContent = SPACES[k].name + (n ? ' \u00b7 ' + n : '');
+      tabs.appendChild(t);
+    });
     var box = $('context-chips');
     box.textContent = '';
-    var only = flow.space && !flow.showAll ? [flow.space] : SPACE_ORDER;
-    only.forEach(function (k) {
+    SPACE_ORDER.forEach(function (k) {
       var group = document.createElement('div');
       group.className = 'context-group';
-      if (only.length > 1) { var h = document.createElement('h3'); h.textContent = SPACES[k].name; group.appendChild(h); }
+      group.setAttribute('data-group', k);
+      group.hidden = k !== activeTab();
       var chips = document.createElement('div');
       chips.className = 'chips';
       SPACES[k].contexts.forEach(function (c) {
@@ -546,13 +561,57 @@
       group.appendChild(chips);
       box.appendChild(group);
     });
-    $('context-all').hidden = !(flow.space && !flow.showAll);
-    setText('context-count', (flow.contexts || []).length > 1 ? flow.contexts.length + ' picked' : '');
+    renderPicked();
     setText('checkin-step', 'Step 1 of 3' + (flow.space ? ' \u00b7 ' + SPACES[flow.space].name : ''));
+  }
+  function renderPicked() {
+    var list = flow.contexts || [];
+    var tray = $('picked-tray');
+    tray.textContent = '';
+    tray.hidden = !list.length;
+    list.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'picked-chip';
+      b.setAttribute('data-unpick', c);
+      b.setAttribute('aria-label', 'Remove ' + c);
+      b.textContent = c + '  \u00d7';
+      tray.appendChild(b);
+    });
+    setText('context-count', list.length > 1 ? list.length + ' picked' : '');
+    var tabs = document.querySelectorAll('[data-space-tab]');
+    for (var i = 0; i < tabs.length; i++) {
+      var k = tabs[i].getAttribute('data-space-tab');
+      var n = SPACES[k].contexts.filter(function (c) { return list.indexOf(c) !== -1; }).length;
+      tabs[i].textContent = SPACES[k].name + (n ? ' \u00b7 ' + n : '');
+    }
+  }
+  function toggleContext(ctx) {
+    flow.contexts = flow.contexts || [];
+    var at = flow.contexts.indexOf(ctx);
+    if (at === -1) flow.contexts.push(ctx); else flow.contexts.splice(at, 1);
+    flow.context = flow.contexts[0] || null;
+    var chip = document.querySelector('[data-context="' + ctx + '"]');
+    if (chip) chip.setAttribute('aria-pressed', String(at === -1));
+    renderPicked();
+    haptic('light');
+  }
+
+  // Haptics: native taps on the phone apps, a tiny vibration on Android browsers.
+  function haptic(kind) {
+    try {
+      var H = isNative() && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
+      if (H) {
+        if (kind === 'success') H.notification({ type: 'SUCCESS' });
+        else H.impact({ style: kind === 'medium' ? 'MEDIUM' : 'LIGHT' });
+      } else if (navigator.vibrate && /Android/i.test(navigator.userAgent || '')) {
+        navigator.vibrate(kind === 'success' ? [12, 40, 12] : 8);
+      }
+    } catch (e) { /* haptics are a nicety */ }
   }
 
   function startCheckin(mode, space) {
-    flow = { mode: mode, before: 5, context: null, contexts: [], technique: mode === 'quick' ? 'quick' : null, space: space || null, showAll: false };
+    flow = { mode: mode, before: 5, context: null, contexts: [], technique: mode === 'quick' ? 'quick' : null, space: space || null, spaceTab: space || null };
     $('calm-before').value = '5';
     $('calm-before').dispatchEvent(new Event('input'));
     go('checkin');
@@ -752,6 +811,7 @@
     var r = completeSession({ technique: flow.technique || 'quick', context: flow.context || 'Just a quick lift', contexts: flow.contexts, before: before, after: after });
     renderResult(r);
     go('result');
+    haptic('success');
   }
 
   function renderResult(r) {
@@ -924,6 +984,7 @@
     stepOffset++;
     renderSteps();
     renderSeedPill();
+    haptic('success');
     toast(xp ? 'Lovely. A sprout joins your garden. +3 XP' : 'Lovely. A sprout joins your garden.');
   }
   function renderJar() {
@@ -1633,6 +1694,34 @@
     else endBloom();
   }
 
+  /* ---------- Live updates (iPhone and Android apps) ---------- */
+  // The native apps check our own domain for a newer web bundle, download it in the
+  // background (checksum verified) and switch to it the next time LoosenUp opens.
+  // Nothing is sent to third parties. If an update fails to start, the plugin rolls back.
+  var UPDATE_MANIFEST = 'https://loosenup-ios.anchit-tandon.com/updates/latest.json';
+  function newerVersion(a, b) {
+    var x = String(a).split('.').map(Number), y = String(b).split('.').map(Number);
+    for (var i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); }
+    return false;
+  }
+  function liveUpdate() {
+    var U = isNative() && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorUpdater;
+    if (!U) return Promise.resolve('web');
+    try { U.notifyAppReady(); } catch (e) { /* older bundle */ }
+    return fetch(UPDATE_MANIFEST + '?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (m) {
+        if (!m || !m.version || !m.url || !newerVersion(m.version, VERSION)) return 'current';
+        return U.download({ url: m.url, version: m.version, checksum: m.checksum }).then(function (bundle) {
+          return U.next({ id: bundle.id }).then(function () {
+            toast('A fresh LoosenUp update is ready. It opens next time you launch the app.');
+            return 'queued';
+          });
+        });
+      })
+      .catch(function () { return 'offline'; });
+  }
+
   /* ---------- Events ---------- */
 
   function onClick(e) {
@@ -1646,21 +1735,27 @@
     var sku = el.getAttribute('data-sku');
     var gameId = el.getAttribute('data-game');
     var card = el.getAttribute('data-card');
+    var spaceTab = el.getAttribute('data-space-tab');
+    var unpick = el.getAttribute('data-unpick');
+    if (spaceTab) {
+      flow.spaceTab = spaceTab;
+      var groups = document.querySelectorAll('[data-group]');
+      for (var gi = 0; gi < groups.length; gi++) groups[gi].hidden = groups[gi].getAttribute('data-group') !== spaceTab;
+      var ts = document.querySelectorAll('[data-space-tab]');
+      for (var ti = 0; ti < ts.length; ti++) ts[ti].setAttribute('aria-selected', String(ts[ti] === el));
+      haptic('light');
+      return;
+    }
+    if (unpick) { toggleContext(unpick); return; }
     var spaceId = el.getAttribute('data-space');
     var moodV = el.getAttribute('data-mood');
-    if (spaceId) { startCheckin('guided', spaceId); return; }
-    if (moodV) { setMood(+moodV); return; }
+    if (spaceId) { haptic('medium'); startCheckin('guided', spaceId); return; }
+    if (moodV) { haptic('light'); setMood(+moodV); return; }
     if (id === 'sos-alert') { sendSos(e); return; }
     if (gameId) { openGame(gameId); return; }
     if (card !== null) { flipCard(+card); return; }
     if (ctx) {
-      // Toggle: pick as many feelings as apply. The first one picked stays the primary.
-      flow.contexts = flow.contexts || [];
-      var at = flow.contexts.indexOf(ctx);
-      if (at === -1) flow.contexts.push(ctx); else flow.contexts.splice(at, 1);
-      flow.context = flow.contexts[0] || null;
-      el.setAttribute('aria-pressed', String(at === -1));
-      setText('context-count', flow.contexts.length > 1 ? flow.contexts.length + ' picked' : '');
+      toggleContext(ctx);
       return;
     }
     if (pick) {
@@ -1718,7 +1813,6 @@
         setText('mood-done', MOOD_NOTES[1]);
         toast('Thank you. We are glad you are here.');
         break;
-      case 'context-all': flow.showAll = true; renderContextChips(); break;
       case 'step-done': doStep(); break;
       case 'support-card-step': if ($('steps-card').scrollIntoView) $('steps-card').scrollIntoView({ behavior: 'smooth', block: 'center' }); break;
       case 'step-another': stepOffset++; renderSteps(); break;
@@ -1787,6 +1881,8 @@
     go(state.onboarded ? 'today' : 'welcome');
     registerSW();
     if (state.goldenHour) scheduleGoldenHour();
+    liveUpdate();
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) liveUpdate(); });
   }
 
   /* ---------- Public API (used by the app shell and the test suite) ---------- */
@@ -1802,6 +1898,9 @@
     level: function () { return level(); },
     recommend: recommend,
     recommendFor: recommendFor,
+    newerVersion: newerVersion,
+    liveUpdate: liveUpdate,
+    updateManifest: UPDATE_MANIFEST,
     isUnlocked: isUnlocked,
     completeSession: completeSession,
     beginBreak: beginBreak,

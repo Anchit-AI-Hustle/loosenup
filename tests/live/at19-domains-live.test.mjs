@@ -26,3 +26,14 @@ test('AT19 live: iOS domain serves the full app with its manifest and service wo
   const sw = await fetch(IOS + '/sw.js');
   assert.equal(sw.status, 200);
 });
+
+test('AT21 live: the update manifest and bundle are served to the apps', { skip }, async () => {
+  const r = await fetch(IOS + '/updates/latest.json');
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get('access-control-allow-origin'), '*');
+  const m = await r.json();
+  const z = await fetch(m.url);
+  assert.equal(z.status, 200);
+  const buf = Buffer.from(await z.arrayBuffer());
+  assert.equal(buf.toString('ascii', 0, 2), 'PK');
+});
