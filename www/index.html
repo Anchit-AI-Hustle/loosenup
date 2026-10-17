@@ -134,7 +134,11 @@
           <input id="calm-before" class="range" type="range" min="1" max="10" step="1" value="5" aria-label="Calm right now, 1 to 10">
           <div class="range-ends" aria-hidden="true"><span>1 a bit tangled</span><span>10 very calm</span></div>
         </div>
-        <h2 class="subtitle" id="context-title">What is going on?</h2>
+        <div class="context-head">
+          <h2 class="subtitle" id="context-title">What is going on?</h2>
+          <span id="context-count" class="tag" aria-live="polite"></span>
+        </div>
+        <p class="fine" id="context-hint">Pick all that apply.</p>
         <div id="context-chips" class="context-groups" role="group" aria-labelledby="context-title"></div>
         <button id="context-all" class="btn btn-ghost" type="button" hidden>Show all feelings</button>
         <button id="checkin-next" class="btn btn-sun" type="button">Next</button>

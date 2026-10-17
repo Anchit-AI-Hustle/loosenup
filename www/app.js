@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.4.0';
+  var VERSION = '1.5.0';
   var KEY = 'loosenup.v1';
   var PUBLIC_URL = 'https://loosenup-ios.anchit-tandon.com';
   var ANDROID_URL = 'https://loosenup-android.anchit-tandon.com';
@@ -266,7 +266,8 @@
     var ctx = RULES[context] ? context : 'Just a quick lift';
     var stats = {};
     state.sessions.forEach(function (s) {
-      if (s.context !== ctx || !TECH[s.technique] || s.technique === 'quick') return;
+      var ctxs = s.contexts || [s.context];
+      if (ctxs.indexOf(ctx) === -1 || !TECH[s.technique] || s.technique === 'quick') return;
       var st = stats[s.technique] || (stats[s.technique] = { n: 0, sum: 0 });
       st.n++; st.sum += s.gain;
     });
@@ -287,6 +288,23 @@
       if (isUnlocked(rules[i][0])) return { id: rules[i][0], name: TECH[rules[i][0]].name, reason: rules[i][1], learned: false };
     }
     return { id: 'breeze', name: TECH.breeze.name, reason: RULES['Hard to focus'][0][1], learned: false };
+  }
+
+  function joinNames(list) {
+    if (list.length <= 1) return list.join('');
+    return list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1];
+  }
+  function recommendFor(contexts) {
+    var list = (contexts || []).filter(Boolean);
+    if (list.length <= 1) return recommend(list[0]);
+    var recs = list.map(recommend);
+    var tally = {};
+    recs.forEach(function (r) { tally[r.id] = (tally[r.id] || 0) + (r.learned ? 1.5 : 1); });
+    var best = recs[0];
+    recs.forEach(function (r) { if (tally[r.id] > tally[best.id]) best = r; });
+    var covers = list.filter(function (c, i) { return recs[i].id === best.id; });
+    return { id: best.id, name: best.name, learned: best.learned,
+      reason: best.reason + ' Picked for ' + joinNames(list) + (covers.length < list.length ? ', and it suits ' + joinNames(covers) + ' best.' : '.') };
   }
 
   function grantRewardSeed() {
@@ -315,7 +333,8 @@
       levelUp: null, newBadges: [], unlocked: [] };
 
     state.xp += r.xpGained;
-    state.sessions.push({ ts: d.getTime(), day: dk, technique: input.technique, context: input.context || 'Just a quick lift',
+    var ctxList = (input.contexts && input.contexts.length ? input.contexts : [input.context || 'Just a quick lift']).slice(0, 8);
+    state.sessions.push({ ts: d.getTime(), day: dk, technique: input.technique, context: ctxList[0], contexts: ctxList,
       before: before, after: after, gain: gain });
 
     // Sunny days: once per calendar day, a Rain day bridges one quiet day per week.
@@ -520,7 +539,7 @@
         b.type = 'button';
         b.className = 'chip';
         b.setAttribute('data-context', c);
-        b.setAttribute('aria-pressed', String(flow.context === c));
+        b.setAttribute('aria-pressed', String((flow.contexts || []).indexOf(c) !== -1));
         b.textContent = c;
         chips.appendChild(b);
       });
@@ -528,18 +547,19 @@
       box.appendChild(group);
     });
     $('context-all').hidden = !(flow.space && !flow.showAll);
+    setText('context-count', (flow.contexts || []).length > 1 ? flow.contexts.length + ' picked' : '');
     setText('checkin-step', 'Step 1 of 3' + (flow.space ? ' \u00b7 ' + SPACES[flow.space].name : ''));
   }
 
   function startCheckin(mode, space) {
-    flow = { mode: mode, before: 5, context: null, technique: mode === 'quick' ? 'quick' : null, space: space || null, showAll: false };
+    flow = { mode: mode, before: 5, context: null, contexts: [], technique: mode === 'quick' ? 'quick' : null, space: space || null, showAll: false };
     $('calm-before').value = '5';
     $('calm-before').dispatchEvent(new Event('input'));
     go('checkin');
   }
 
   function renderPick() {
-    var rec = flow.picked ? null : recommend(flow.context);
+    var rec = flow.picked ? null : recommendFor(flow.contexts);
     if (rec) { flow.technique = rec.id; flow.reason = rec.reason; }
     var t = TECH[flow.technique];
     setText('pick-name', t.name);
@@ -549,10 +569,10 @@
     $('pick-card').style.setProperty('--badge', t.color);
     var box = $('pick-chips');
     box.textContent = '';
-    var sp = spaceOf(flow.context);
+    var sps = (flow.contexts && flow.contexts.length ? flow.contexts : [flow.context]).map(spaceOf);
     CHOOSABLE.forEach(function (id) {
       var tsp = TECH[id].space || 'everyday';
-      if (tsp !== 'everyday' && tsp !== sp && id !== flow.technique) return;
+      if (tsp !== 'everyday' && sps.indexOf(tsp) === -1 && id !== flow.technique) return;
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'chip';
@@ -729,7 +749,7 @@
   function finishAfter() {
     var before = flow.before;
     var after = clampScore($('calm-after').value);
-    var r = completeSession({ technique: flow.technique || 'quick', context: flow.context || 'Just a quick lift', before: before, after: after });
+    var r = completeSession({ technique: flow.technique || 'quick', context: flow.context || 'Just a quick lift', contexts: flow.contexts, before: before, after: after });
     renderResult(r);
     go('result');
   }
@@ -833,7 +853,7 @@
     recent.forEach(function (s) {
       var li = document.createElement('li');
       var a = document.createElement('span');
-      a.textContent = (TECH[s.technique] ? TECH[s.technique].name : 'Break') + ', ' + s.context;
+      a.textContent = (TECH[s.technique] ? TECH[s.technique].name : 'Break') + ', ' + (s.contexts || [s.context]).join(' + ');
       var g = document.createElement('span');
       g.className = 'g';
       g.textContent = signed(Math.max(0, s.gain)) + ' Calm gain';
@@ -1634,16 +1654,21 @@
     if (gameId) { openGame(gameId); return; }
     if (card !== null) { flipCard(+card); return; }
     if (ctx) {
-      flow.context = ctx;
-      var chips = document.querySelectorAll('[data-context]');
-      for (var i = 0; i < chips.length; i++) chips[i].setAttribute('aria-pressed', String(chips[i] === el));
+      // Toggle: pick as many feelings as apply. The first one picked stays the primary.
+      flow.contexts = flow.contexts || [];
+      var at = flow.contexts.indexOf(ctx);
+      if (at === -1) flow.contexts.push(ctx); else flow.contexts.splice(at, 1);
+      flow.context = flow.contexts[0] || null;
+      el.setAttribute('aria-pressed', String(at === -1));
+      setText('context-count', flow.contexts.length > 1 ? flow.contexts.length + ' picked' : '');
       return;
     }
     if (pick) {
       if (!isUnlocked(pick)) return;
       flow.technique = pick;
       flow.picked = true;
-      flow.reason = pick === recommend(flow.context).id ? recommend(flow.context).reason : 'Your choice. Enjoy it.';
+      var rf = recommendFor(flow.contexts);
+      flow.reason = pick === rf.id ? rf.reason : 'Your choice. Enjoy it.';
       renderPick();
       return;
     }
@@ -1653,7 +1678,7 @@
       case 'gift-go': startCheckin('guided'); break;
       case 'checkin-next':
         flow.before = clampScore($('calm-before').value);
-        if (!flow.context) flow.context = 'Just a quick lift';
+        if (!flow.context) { flow.context = 'Just a quick lift'; flow.contexts = [flow.context]; }
         if (flow.mode === 'quick') beginBreak('quick');
         else { flow.picked = false; go('pick'); }
         break;
@@ -1776,6 +1801,7 @@
     go: go,
     level: function () { return level(); },
     recommend: recommend,
+    recommendFor: recommendFor,
     isUnlocked: isUnlocked,
     completeSession: completeSession,
     beginBreak: beginBreak,

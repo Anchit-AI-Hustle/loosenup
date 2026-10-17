@@ -372,6 +372,8 @@ main:focus { outline: none; }
 .sos-sheet .title { font-size: 26px; }
 
 /* Check-in groups */
+.context-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+#context-hint { margin-top: -10px; }
 .context-groups { display: flex; flex-direction: column; gap: 14px; }
 .context-group h3 { font-size: 12px; font-weight: 900; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-2); margin: 0 0 8px; }
 
