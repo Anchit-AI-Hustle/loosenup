@@ -86,6 +86,12 @@ async function walkScreens(page, width, label) {
   await page.click('#jar-add');
   await check('jar');
   await page.click('#good-close');
+  await page.click('[data-tab="today"]');
+  for (const tool of ['support', 'safety', 'reframe', 'sounds', 'wellbeing']) {
+    await page.click(`#screen-today .toolkit [data-tool="${tool}"]`);
+    await check('tool-' + tool);
+    await page.click(`#screen-${tool} [data-back]`);
+  }
   await page.click('#sos-btn');
   await check('sos');
   await page.click('#support-close');
@@ -98,7 +104,7 @@ for (const width of [390, 820, 1440]) {
   test(`AT9 no console errors and no horizontal scroll at ${width}px`, async () => {
     const { ctx, page, errors } = await newPage(width);
     const shots = await walkScreens(page, width, `${width}px`);
-    assert.ok(shots.length >= 22, 'screenshots taken');
+    assert.ok(shots.length >= 27, 'screenshots taken');
     assert.deepEqual(errors, []);
     await ctx.close();
   });
@@ -148,6 +154,8 @@ test('AT13 every visible button and tab is at least 48px tall and wide', async (
   for (const tab of ['today', 'play', 'garden', 'week', 'me']) { await page.click(`[data-tab="${tab}"]`); await measure(tab); }
   for (const g of ['pairs', 'catch', 'bloom']) { await page.click('[data-tab="play"]'); await page.click(`[data-game="${g}"]`); await measure('game-' + g); await page.click('#game-back'); }
   await page.click('[data-tab="today"]'); await page.click('[data-mood="3"]'); await measure('today-mood');
+  await page.click('[data-tab="today"]');
+  for (const tool of ['support', 'safety', 'reframe', 'sounds', 'wellbeing']) { await page.click(`#screen-today .toolkit [data-tool="${tool}"]`); await measure('tool-' + tool); await page.click(`#screen-${tool} [data-back]`); }
   await page.click('#sos-btn'); await measure('sos'); await page.click('#support-close');
   await page.click('#jar-add'); await measure('jar'); await page.click('#good-close');
   await page.click('[data-space="relationships"]'); await measure('space-relationships'); await page.click('#checkin-back');

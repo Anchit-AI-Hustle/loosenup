@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.6.0';
+  var VERSION = '1.7.0';
   var KEY = 'loosenup.v1';
   var PUBLIC_URL = 'https://loosenup-ios.anchit-tandon.com';
   var ANDROID_URL = 'https://loosenup-android.anchit-tandon.com';
@@ -227,7 +227,8 @@
       rewardSeeds: { week: null, count: 0 }, milestones: [], sunbeamDay: null, referralDay: null,
       nudges: { day: null, count: 0, shown: [] }, goldenHour: null, voice: false, badges: [], purchases: [],
       games: { day: null, count: 0 }, gameBest: { pairs: null, catch: 0, bloom: 0 },
-      moods: [], smallSteps: [], goodThings: [], trusted: null, sosLocation: false, jarXp: { day: null, count: 0 }
+      moods: [], smallSteps: [], goodThings: [], trusted: null, sosLocation: false, jarXp: { day: null, count: 0 },
+      careTeam: null, safetyPlan: null, wellbeing: [], toolXp: { day: null, count: 0 }, reframes: 0
     };
   }
   function load() {
@@ -435,8 +436,10 @@
   var TABS = ['today', 'play', 'garden', 'week', 'me'];
   var flow = { mode: 'guided', before: 5, context: null, technique: null };
 
+  var lastTab = 'today';
   function go(name) {
     if (name !== 'game') stopGame();
+    if (TABS.indexOf(name) !== -1) lastTab = name;
     var screens = document.querySelectorAll('.screen');
     for (var i = 0; i < screens.length; i++) screens[i].hidden = screens[i].getAttribute('data-screen') !== name;
     current = name;
@@ -925,6 +928,7 @@
     renderSupportCard();
     renderSteps();
     renderJar();
+    $('check-due').hidden = !checkDue();
   }
 
   function todayMood() {
@@ -1260,7 +1264,8 @@
     setText('open-trusted', state.trusted ? 'Change my trusted person' : 'Set up my trusted person');
   }
 
-  var RENDER = { today: renderToday, play: renderPlay, garden: renderGarden, week: renderWeek, me: renderMe, pick: renderPick, checkin: renderContextChips };
+  var RENDER = { support: renderSupport, safety: renderSafety, reframe: startReframe, sounds: function () {}, wellbeing: renderWellbeing,
+    today: renderToday, play: renderPlay, garden: renderGarden, week: renderWeek, me: renderMe, pick: renderPick, checkin: renderContextChips };
 
   /* ---------- Golden hour, sharing, install ---------- */
 
@@ -1694,6 +1699,351 @@
     else endBloom();
   }
 
+
+  /* ---------- Toolkit: support, safety plan, reframe, sounds, wellbeing, backup ---------- */
+
+  var TOOL_SCREENS = ['support', 'safety', 'reframe', 'sounds', 'wellbeing'];
+  function toolXp(points) {
+    var dk = dayKey(now());
+    if (state.toolXp.day !== dk) state.toolXp = { day: dk, count: 0 };
+    if (state.toolXp.count >= 3) return false;
+    state.toolXp.count++;
+    state.xp += points;
+    return true;
+  }
+  function isIos() {
+    var ua = navigator.userAgent || '';
+    return /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  }
+
+  // Find support
+  var DEFAULT_PROS = 'Tele-MANAS 14416 (24x7, free)\nVandrevala Foundation +91 9999 666 555 (24x7, call or WhatsApp)\niCall 022-25521111 (Mon to Sat, 8am to 9pm)\nEmergency 112';
+  function renderSupport() {
+    var links = document.querySelectorAll('[data-near]');
+    for (var i = 0; i < links.length; i++) {
+      var q = links[i].getAttribute('data-near') + ' near me';
+      links[i].setAttribute('href', isIos() ? 'https://maps.apple.com/?q=' + encodeURIComponent(q) : 'https://www.google.com/maps/search/' + encodeURIComponent(q).replace(/%20/g, '+'));
+    }
+    renderCare(false);
+  }
+  function renderCare(editing) {
+    var c = state.careTeam;
+    $('care-view').hidden = !c || editing;
+    $('care-form').hidden = !!c && !editing;
+    if (c) {
+      setText('care-name', c.name);
+      setText('care-role', c.role);
+      $('care-call').setAttribute('href', 'tel:' + c.phone);
+      $('care-call').hidden = !c.phone;
+      var when = c.next ? new Date(c.next) : null;
+      setText('care-next', when && !isNaN(when) ? 'Next session: ' + when.toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'No session booked yet.');
+      if (editing) {
+        $('care-name-input').value = c.name; $('care-role-input').value = c.role;
+        $('care-phone-input').value = c.phone; $('care-next-input').value = c.next || '';
+      }
+    }
+  }
+  function saveCare() {
+    var name = ($('care-name-input').value || '').trim().slice(0, 60);
+    if (!name) { toast('Add their name first.'); return; }
+    var phone = ($('care-phone-input').value || '').replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
+    state.careTeam = { name: name, role: $('care-role-input').value || 'Therapist', phone: phone, next: $('care-next-input').value || '' };
+    save();
+    renderCare(false);
+    scheduleCareReminder();
+    toast('Saved to your care team.');
+  }
+  function scheduleCareReminder() {
+    var LN = nativeNotifications();
+    var c = state.careTeam;
+    if (!LN || !c || !c.next) return;
+    var at = new Date(new Date(c.next).getTime() - 60 * 60 * 1000);
+    if (isNaN(at) || at <= now()) return;
+    LN.cancel({ notifications: [{ id: 2 }] }).catch(function () {}).then(function () {
+      return LN.schedule({ notifications: [{ id: 2, title: 'Your session is in an hour', body: c.name + ' at ' + new Date(c.next).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '. You are doing something kind for yourself.', schedule: { at: at } }] });
+    }).catch(function () {});
+  }
+  function copyScript() {
+    var t = $('first-call-script').textContent;
+    var ok = function () { toast('Copied. Paste it into a message or keep it handy for the call.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, function () { toast('Hold to select the text and copy it.'); });
+    else toast('Hold to select the text and copy it.');
+  }
+
+  // Safety plan
+  function renderSafety() {
+    var plan = state.safetyPlan || {};
+    var fields = document.querySelectorAll('[data-sp]');
+    for (var i = 0; i < fields.length; i++) {
+      var k = fields[i].getAttribute('data-sp');
+      fields[i].value = plan[k] != null ? plan[k] : (k === 'pros' ? DEFAULT_PROS : '');
+    }
+    setText('sp-saved', state.safetyPlan ? 'Saved on this device.' : 'Nothing is saved until you tap Save.');
+  }
+  function saveSafety() {
+    var plan = {};
+    var fields = document.querySelectorAll('[data-sp]');
+    for (var i = 0; i < fields.length; i++) plan[fields[i].getAttribute('data-sp')] = (fields[i].value || '').slice(0, 1200);
+    plan.updated = now().getTime();
+    state.safetyPlan = plan;
+    save();
+    setText('sp-saved', 'Saved on this device. It is one tap away from SOS.');
+    haptic('success');
+    toast('Your safety plan is saved.');
+  }
+
+  // Reframe a thought: nothing is stored except an optional kinder thought.
+  var rf = { step: 1 };
+  function startReframe() {
+    rf = { step: 1 };
+    var areas = document.querySelectorAll('.rf');
+    for (var i = 0; i < areas.length; i++) areas[i].value = '';
+    $('rf-before').value = '6'; $('rf-after').value = '6';
+    setText('rf-before-out', '6'); setText('rf-after-out', '6');
+    $('rf-result').hidden = true; $('rf-keep').hidden = true; $('rf-next').hidden = false;
+    showRf();
+  }
+  function showRf() {
+    var panes = document.querySelectorAll('[data-rf]');
+    for (var i = 0; i < panes.length; i++) panes[i].hidden = +panes[i].getAttribute('data-rf') !== rf.step;
+    setText('rf-step', rf.step <= 5 ? 'Step ' + rf.step + ' of 5' : 'Done');
+    setText('rf-next', rf.step < 5 ? 'Next' : 'Finish');
+  }
+  function rfNext() {
+    var need = { 1: 'rf-situation', 2: 'rf-thought', 5: 'rf-kinder' }[rf.step];
+    if (need && !($(need).value || '').trim()) { toast('Write a few words first. Any words are welcome.'); return; }
+    if (rf.step === 5) {
+      var b = +$('rf-before').value, a = +$('rf-after').value;
+      rf.kinder = ($('rf-kinder').value || '').trim().slice(0, 200);
+      state.reframes = (state.reframes || 0) + 1;
+      var got = toolXp(3);
+      save();
+      setText('rf-result', a < b ? 'From ' + b + ' to ' + a + '. That is a real shift, and you made it.' + (got ? ' +3 XP' : '')
+        : 'Some thoughts take a few tries. You did the work, and that counts.' + (got ? ' +3 XP' : ''));
+      $('rf-result').hidden = false; $('rf-keep').hidden = false; $('rf-next').hidden = true;
+      var panes = document.querySelectorAll('[data-rf]');
+      for (var i = 0; i < panes.length; i++) panes[i].hidden = true;
+      setText('rf-step', 'Done');
+      var areas = document.querySelectorAll('.rf');
+      for (var j = 0; j < areas.length; j++) areas[j].value = '';
+      haptic('success');
+      return;
+    }
+    rf.step++;
+    showRf();
+  }
+  function keepKinder() {
+    if (!rf.kinder) return;
+    state.goodThings.push({ day: dayKey(now()), text: 'Kinder thought: ' + rf.kinder });
+    rf.kinder = '';
+    save();
+    $('rf-keep').hidden = true;
+    toast('Kept in your Good things jar.');
+  }
+  function onRfInput(e) {
+    if (isCrisis(e.target.value)) { e.target.value = ''; openSupport(); }
+  }
+
+  // Calm sounds, generated with Web Audio (no files, works offline).
+  var audio = null;
+  function noiseBuffer(ctx, brown) {
+    var len = ctx.sampleRate * 4, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0), last = 0;
+    for (var i = 0; i < len; i++) {
+      var w = Math.random() * 2 - 1;
+      if (brown) { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; } else d[i] = w;
+    }
+    return buf;
+  }
+  function soundVolume() { return Math.max(0, Math.min(1, +$('sound-volume').value / 100)) * 0.6; }
+  function playSound(kind) {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) { setText('sound-status', 'Sounds are not available on this device.'); return false; }
+    stopSound(true);
+    var ctx = new AC();
+    var src = ctx.createBufferSource();
+    src.buffer = noiseBuffer(ctx, kind === 'brown' || kind === 'ocean');
+    src.loop = true;
+    var out = ctx.createGain();
+    out.gain.value = 0;
+    var node = src;
+    if (kind === 'rain') {
+      var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 500;
+      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6000;
+      node.connect(hp); hp.connect(lp); node = lp;
+    } else if (kind === 'breeze') {
+      var bp = ctx.createBiquadFilter(); bp.type = 'lowpass'; bp.frequency.value = 900;
+      var lfo = ctx.createOscillator(); lfo.frequency.value = 0.07;
+      var depth = ctx.createGain(); depth.gain.value = 500;
+      lfo.connect(depth); depth.connect(bp.frequency); lfo.start();
+      node.connect(bp); node = bp;
+    }
+    var swell = ctx.createGain(); swell.gain.value = 1;
+    if (kind === 'ocean') {
+      var wave = ctx.createOscillator(); wave.frequency.value = 0.09;
+      var wdepth = ctx.createGain(); wdepth.gain.value = 0.45;
+      wave.connect(wdepth); wdepth.connect(swell.gain); wave.start();
+    }
+    node.connect(swell); swell.connect(out); out.connect(ctx.destination);
+    src.start();
+    out.gain.linearRampToValueAtTime(soundVolume(), ctx.currentTime + 2.5);
+    audio = { ctx: ctx, out: out, kind: kind, timer: null };
+    var btns = document.querySelectorAll('[data-sound]');
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', String(btns[i].getAttribute('data-sound') === kind));
+    setSleepTimer(currentTimer);
+    setText('sound-status', 'Playing. Keep LoosenUp open while it plays.');
+    return true;
+  }
+  function stopSound(quick) {
+    if (!audio) return;
+    var a = audio;
+    audio = null;
+    clearTimeout(a.timer);
+    try {
+      a.out.gain.cancelScheduledValues(a.ctx.currentTime);
+      a.out.gain.setValueAtTime(a.out.gain.value, a.ctx.currentTime);
+      a.out.gain.linearRampToValueAtTime(0, a.ctx.currentTime + (quick ? 0.2 : 3));
+      setTimeout(function () { try { a.ctx.close(); } catch (e) { /* already closed */ } }, quick ? 300 : 3200);
+    } catch (e) { /* audio already gone */ }
+    var btns = document.querySelectorAll('[data-sound]');
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', 'false');
+    setText('sound-status', 'Stopped. Tap a sound to begin again.');
+  }
+  var currentTimer = 0;
+  function setSleepTimer(min) {
+    currentTimer = min;
+    var chips = document.querySelectorAll('[data-timer]');
+    for (var i = 0; i < chips.length; i++) chips[i].setAttribute('aria-pressed', String(+chips[i].getAttribute('data-timer') === min));
+    if (audio) {
+      clearTimeout(audio.timer);
+      if (min > 0) audio.timer = setTimeout(function () { stopSound(false); }, min * 60 * 1000);
+    }
+  }
+
+  // Wellbeing check: WHO-5 Wellbeing Index (0 to 100).
+  var WHO5 = ['I have felt cheerful and in good spirits', 'I have felt calm and relaxed', 'I have felt active and full of energy',
+    'I woke up feeling fresh and rested', 'My daily life has been filled with things that interest me'];
+  var WHO5_SCALE = ['At no time', 'Some of the time', 'Less than half of the time', 'More than half of the time', 'Most of the time', 'All of the time'];
+  var wbAnswers = [];
+  function renderWellbeing() {
+    wbAnswers = [null, null, null, null, null];
+    var box = $('wb-items');
+    box.textContent = '';
+    var legend = document.createElement('p');
+    legend.className = 'fine';
+    legend.textContent = '0 = at no time, 5 = all of the time';
+    box.appendChild(legend);
+    WHO5.forEach(function (q, qi) {
+      var card = document.createElement('div');
+      card.className = 'card wb-item';
+      var t = document.createElement('p');
+      t.className = 'field-label';
+      t.textContent = (qi + 1) + '. ' + q;
+      var row = document.createElement('div');
+      row.className = 'wb-scale';
+      row.setAttribute('role', 'group');
+      row.setAttribute('aria-label', q);
+      for (var v = 0; v <= 5; v++) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'wb-opt';
+        b.setAttribute('data-wb', qi + ':' + v);
+        b.setAttribute('aria-pressed', 'false');
+        b.setAttribute('aria-label', WHO5_SCALE[v]);
+        b.textContent = String(v);
+        row.appendChild(b);
+      }
+      card.appendChild(t); card.appendChild(row);
+      box.appendChild(card);
+    });
+    $('wb-result').hidden = true;
+    renderWbTrend();
+  }
+  function answerWb(qi, v) {
+    wbAnswers[qi] = v;
+    var btns = document.querySelectorAll('[data-wb^="' + qi + ':"]');
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', String(btns[i].getAttribute('data-wb') === qi + ':' + v));
+  }
+  function wellbeingNote(score) {
+    if (score >= 72) return 'Your wellbeing looks bright. Keep the small habits that got you here.';
+    if (score >= 52) return 'Steady. Calm breaks and Small steps help keep it that way.';
+    if (score > 28) return 'Your wellbeing has been lower than usual. Talking to a professional can really help, and reaching out early makes a difference.';
+    return 'These two weeks have been really heavy. Please consider talking to a professional soon. Tele-MANAS (14416) is free and open 24x7.';
+  }
+  function submitWb() {
+    if (wbAnswers.some(function (a) { return a == null; })) { toast('Answer all five. Every answer is welcome.'); return; }
+    var score = wbAnswers.reduce(function (x, y) { return x + y; }, 0) * 4;
+    var dk = dayKey(now());
+    state.wellbeing = state.wellbeing.filter(function (w) { return w.day !== dk; });
+    state.wellbeing.push({ day: dk, score: score });
+    toolXp(5);
+    save();
+    setText('wb-score', String(score));
+    setText('wb-note', wellbeingNote(score));
+    $('wb-support').hidden = score > 50;
+    $('wb-result').hidden = false;
+    renderWbTrend();
+    haptic('success');
+    if (score <= 28) openSupport();
+  }
+  function renderWbTrend() {
+    var ul = $('wb-trend');
+    ul.textContent = '';
+    var list = state.wellbeing.slice(-6).reverse();
+    if (!list.length) { var li0 = document.createElement('li'); li0.textContent = 'Your first check will appear here.'; ul.appendChild(li0); return; }
+    list.forEach(function (w) {
+      var li = document.createElement('li');
+      var a = document.createElement('span'); a.textContent = new Date(w.day + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      var g = document.createElement('span'); g.className = 'g'; g.textContent = w.score + ' / 100';
+      li.appendChild(a); li.appendChild(g); ul.appendChild(li);
+    });
+  }
+  function checkDue() {
+    if (breaksDone() < 2) return false;
+    var last = state.wellbeing[state.wellbeing.length - 1];
+    return !last || daysBetween(last.day, dayKey(now())) >= 14;
+  }
+
+  // Backup and restore
+  function exportBackup() {
+    var data = JSON.stringify({ app: 'LoosenUp', version: VERSION, exportedAt: now().toISOString(), state: state }, null, 2);
+    var name = 'loosenup-backup-' + dayKey(now()) + '.json';
+    var done = function () { setText('backup-status', 'Backup saved as ' + name + '. Keep it somewhere safe.'); };
+    try {
+      var file = typeof File === 'function' ? new File([data], name, { type: 'application/json' }) : null;
+      if (file && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+        return navigator.share({ files: [file], title: 'LoosenUp backup' }).then(done, function () {});
+      }
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+      a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      done();
+    } catch (e) { setText('backup-status', 'Could not create the file on this device.'); }
+    return Promise.resolve();
+  }
+  function restoreBackup(text) {
+    var obj;
+    try { obj = JSON.parse(text); } catch (e) { setText('backup-status', 'That file is not a LoosenUp backup.'); return false; }
+    if (!obj || obj.app !== 'LoosenUp' || !obj.state || typeof obj.state !== 'object' || !Array.isArray(obj.state.sessions)) {
+      setText('backup-status', 'That file is not a LoosenUp backup.'); return false;
+    }
+    try { window.localStorage.setItem(KEY + '.before-restore', JSON.stringify(state)); } catch (e) { /* storage full */ }
+    var fresh = freshState();
+    for (var k in fresh) if (Object.prototype.hasOwnProperty.call(obj.state, k)) fresh[k] = obj.state[k];
+    state = fresh;
+    save();
+    setText('backup-status', 'Restored. Welcome back' + (state.name ? ', ' + state.name : '') + '.');
+    renderSeedPill();
+    return true;
+  }
+  function onImport(e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function () { restoreBackup(String(r.result)); e.target.value = ''; };
+    r.readAsText(f);
+  }
+
   /* ---------- Live updates (iPhone and Android apps) ---------- */
   // The native apps check our own domain for a newer web bundle, download it in the
   // background (checksum verified) and switch to it the next time LoosenUp opens.
@@ -1735,6 +2085,15 @@
     var sku = el.getAttribute('data-sku');
     var gameId = el.getAttribute('data-game');
     var card = el.getAttribute('data-card');
+    var tool = el.getAttribute('data-tool');
+    if (tool) { closeSheets(true); go(tool); return; }
+    if (el.hasAttribute('data-back')) { if (current === 'sounds') { /* sounds keep playing */ } go(lastTab || 'today'); return; }
+    var wb = el.getAttribute('data-wb');
+    if (wb) { var parts = wb.split(':'); answerWb(+parts[0], +parts[1]); haptic('light'); return; }
+    var snd = el.getAttribute('data-sound');
+    if (snd) { if (audio && audio.kind === snd) stopSound(false); else playSound(snd); haptic('light'); return; }
+    var tmr = el.getAttribute('data-timer');
+    if (tmr !== null) { setSleepTimer(+tmr); return; }
     var spaceTab = el.getAttribute('data-space-tab');
     var unpick = el.getAttribute('data-unpick');
     if (spaceTab) {
@@ -1817,6 +2176,15 @@
       case 'support-card-step': if ($('steps-card').scrollIntoView) $('steps-card').scrollIntoView({ behavior: 'smooth', block: 'center' }); break;
       case 'step-another': stepOffset++; renderSteps(); break;
       case 'jar-add': openJar(); break;
+      case 'care-save': saveCare(); break;
+      case 'care-edit': renderCare(true); break;
+      case 'copy-script': copyScript(); break;
+      case 'sp-save': saveSafety(); break;
+      case 'rf-next': rfNext(); break;
+      case 'rf-keep': keepKinder(); break;
+      case 'sound-stop': stopSound(false); break;
+      case 'wb-submit': submitWb(); break;
+      case 'backup-export': exportBackup(); break;
       case 'good-save': saveGood(); break;
       case 'good-close': $('good-text').value = ''; closeSheets(); break;
       case 'golden-save': saveGoldenHour(); break;
@@ -1868,6 +2236,11 @@
     $('welcome-form').addEventListener('submit', onWelcome);
     $('letitout-text').addEventListener('input', onJournal);
     $('good-text').addEventListener('input', onGoodInput);
+    var rfs = document.querySelectorAll('.rf');
+    for (var ri = 0; ri < rfs.length; ri++) rfs[ri].addEventListener('input', onRfInput);
+    ['rf-before', 'rf-after'].forEach(function (id) { $(id).addEventListener('input', function () { setText(id + '-out', $(id).value); }); });
+    $('sound-volume').addEventListener('input', function () { if (audio) audio.out.gain.setTargetAtTime(soundVolume(), audio.ctx.currentTime, 0.3); });
+    $('backup-import').addEventListener('change', onImport);
     $('scrim').addEventListener('click', function () { closeSheets(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('scrim').hidden) closeSheets(); });
     addPetals($('orb-petals'), 0, 0, 1);
@@ -1899,6 +2272,10 @@
     recommend: recommend,
     recommendFor: recommendFor,
     newerVersion: newerVersion,
+    restoreBackup: restoreBackup,
+    wellbeingNote: wellbeingNote,
+    checkDue: checkDue,
+    playSound: playSound,
     liveUpdate: liveUpdate,
     updateManifest: UPDATE_MANIFEST,
     isUnlocked: isUnlocked,

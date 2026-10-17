@@ -327,6 +327,23 @@
           </div>
         </article>
 
+        <article id="check-due" class="card check-due" hidden>
+          <p class="tag">Two-week wellbeing check</p>
+          <p class="muted">Five quick questions that show how your days have really been going.</p>
+          <button class="btn btn-soft btn-small" type="button" data-tool="wellbeing">Take the check</button>
+        </article>
+
+        <section class="block" aria-labelledby="toolkit-title">
+          <div class="block-head"><h2 class="subtitle" id="toolkit-title">Your toolkit</h2><span class="tag">Free</span></div>
+          <div class="toolkit">
+            <button class="tool tool-support" type="button" data-tool="support"><span class="tool-ic" aria-hidden="true">&#9742;</span><strong>Find support</strong><span>Therapists, psychiatrists, helplines</span></button>
+            <button class="tool tool-safety" type="button" data-tool="safety"><span class="tool-ic" aria-hidden="true">&#9729;</span><strong>Safety plan</strong><span>Your steps for hard moments</span></button>
+            <button class="tool tool-reframe" type="button" data-tool="reframe"><span class="tool-ic" aria-hidden="true">&#10227;</span><strong>Reframe a thought</strong><span>Find a kinder, truer view</span></button>
+            <button class="tool tool-sounds" type="button" data-tool="sounds"><span class="tool-ic" aria-hidden="true">&#9835;</span><strong>Calm sounds</strong><span>Rain, ocean, sleep timer</span></button>
+            <button class="tool tool-check" type="button" data-tool="wellbeing"><span class="tool-ic" aria-hidden="true">&#9728;</span><strong>Wellbeing check</strong><span>Track how you are really doing</span></button>
+          </div>
+        </section>
+
         <article class="card progress-strip" aria-label="Your progress">
           <div class="ps-item"><span class="stat-k">Sunny days</span><span id="today-streak" class="stat-v"></span></div>
           <div class="ps-item"><span class="stat-k">Seeds</span><span id="today-seeds" class="stat-v"></span></div>
@@ -338,6 +355,164 @@
 
         <h2 class="subtitle">Recent breaks</h2>
         <ul id="today-recent" class="recent"></ul>
+      </section>
+
+      <!-- Find support -->
+      <section id="screen-support" class="screen tool-screen" data-screen="support" hidden aria-labelledby="support-screen-title">
+        <button class="btn btn-ghost back-btn" type="button" data-back>Back</button>
+        <p class="eyebrow">You deserve support</p>
+        <h1 id="support-screen-title" class="title">Find support</h1>
+        <p class="muted">Trained people are ready to help. Every number here was checked against its official source.</p>
+
+        <article class="card">
+          <h2 class="subtitle">Talk to someone now</h2>
+          <div class="help-line">
+            <div><strong>Tele-MANAS</strong> <span class="tag">Govt. of India</span><p class="fine">24x7, free, English and 20 Indian languages. Can connect you to a psychiatrist.</p></div>
+            <a class="btn btn-sun btn-small" href="tel:14416">Call 14416</a>
+          </div>
+          <div class="help-line">
+            <div><strong>Vandrevala Foundation</strong><p class="fine">24x7, free, call or WhatsApp.</p></div>
+            <div class="row"><a class="btn btn-soft btn-small" href="tel:+919999666555">Call</a><a class="btn btn-soft btn-small" href="https://wa.me/919999666555" target="_blank" rel="noopener">WhatsApp</a></div>
+          </div>
+          <div class="help-line">
+            <div><strong>iCall (TISS)</strong><p class="fine">Mon to Sat, 8am to 9pm, free counselling by phone and email.</p></div>
+            <div class="row"><a class="btn btn-soft btn-small" href="tel:02225521111">Call</a><a class="btn btn-soft btn-small" href="mailto:icall@tiss.edu">Email</a></div>
+          </div>
+          <div class="help-line">
+            <div><strong>Emergency</strong><p class="fine">If you might act on thoughts of ending your life.</p></div>
+            <a class="btn btn-sos btn-small" href="tel:112">Call 112</a>
+          </div>
+          <p class="fine">Outside India: <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a></p>
+        </article>
+
+        <article class="card">
+          <h2 class="subtitle">Find a professional near you</h2>
+          <p class="fine">Opens your maps app. LoosenUp never sees or stores your location.</p>
+          <div class="near-grid">
+            <a class="btn btn-soft" data-near="psychiatrist" href="https://www.google.com/maps/search/psychiatrist+near+me" target="_blank" rel="noopener">Psychiatrist</a>
+            <a class="btn btn-soft" data-near="clinical psychologist" href="https://www.google.com/maps/search/clinical+psychologist+near+me" target="_blank" rel="noopener">Psychologist</a>
+            <a class="btn btn-soft" data-near="counsellor" href="https://www.google.com/maps/search/counsellor+near+me" target="_blank" rel="noopener">Counsellor</a>
+            <a class="btn btn-soft" data-near="government hospital psychiatry OPD" href="https://www.google.com/maps/search/government+hospital+psychiatry+OPD+near+me" target="_blank" rel="noopener">Low-cost hospital OPD</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2 class="subtitle">Which professional do I need?</h2>
+          <details class="explain"><summary>Psychiatrist</summary><p>A medical doctor (MBBS plus MD in psychiatry, registered with the NMC). Can assess, diagnose and prescribe medicine. A good first step if heavy days have lasted more than two weeks, if sleep, eating or work are badly affected, or if you have thoughts of harming yourself.</p></details>
+          <details class="explain"><summary>Clinical psychologist</summary><p>Trained in talk therapies such as CBT and in assessments. In India, look for registration with the Rehabilitation Council of India (RCI).</p></details>
+          <details class="explain"><summary>Counsellor or psychotherapist</summary><p>Talk support for everyday challenges: work, relationships, grief, changes in life. Ask about their training and supervision.</p></details>
+          <p class="fine">Not sure? Start with Tele-MANAS. They listen first and can connect you with the right professional, free.</p>
+        </article>
+
+        <article class="card">
+          <h2 class="subtitle">Your first call</h2>
+          <p class="script" id="first-call-script">Hi, I would like to book a first appointment. I have been feeling low and tense for a few weeks and it is affecting my sleep and work. Do you have time this week, do you offer online sessions, and what is the fee?</p>
+          <button id="copy-script" class="btn btn-soft btn-small" type="button">Copy this script</button>
+          <details class="explain"><summary>Good questions to ask</summary><ul class="ask-list"><li>Are you registered with the RCI (psychologists) or the NMC (psychiatrists)?</li><li>What kind of therapy do you use, and how many sessions is usual?</li><li>What is the fee, and is there a reduced fee option?</li><li>Do you offer online or phone sessions?</li><li>How do you keep what I share private?</li></ul></details>
+        </article>
+
+        <article class="card" id="care-card">
+          <h2 class="subtitle">My care team</h2>
+          <p class="fine">Keep your therapist or doctor handy. Saved only on this device.</p>
+          <div id="care-view" class="care-view" hidden>
+            <p><strong id="care-name"></strong> <span id="care-role" class="tag"></span></p>
+            <p id="care-next" class="muted"></p>
+            <div class="row"><a id="care-call" class="btn btn-sun btn-small" href="#">Call</a><button id="care-edit" class="btn btn-ghost btn-small" type="button">Edit</button></div>
+          </div>
+          <div id="care-form" class="stack">
+            <label class="field-label" for="care-name-input">Name</label>
+            <input id="care-name-input" class="text-input" type="text" maxlength="60" autocomplete="off" placeholder="For example, Dr. Rao">
+            <label class="field-label" for="care-role-input">Role</label>
+            <select id="care-role-input" class="text-input"><option>Therapist</option><option>Psychiatrist</option><option>Psychologist</option><option>Counsellor</option><option>Doctor</option></select>
+            <label class="field-label" for="care-phone-input">Phone</label>
+            <input id="care-phone-input" class="text-input" type="tel" inputmode="tel" maxlength="20" autocomplete="off" placeholder="+91 ...">
+            <label class="field-label" for="care-next-input">Next session (optional)</label>
+            <input id="care-next-input" class="text-input" type="datetime-local">
+            <button id="care-save" class="btn btn-soft" type="button">Save to my care team</button>
+          </div>
+        </article>
+      </section>
+
+      <!-- Safety plan -->
+      <section id="screen-safety" class="screen tool-screen" data-screen="safety" hidden aria-labelledby="safety-plan-title">
+        <button class="btn btn-ghost back-btn" type="button" data-back>Back</button>
+        <p class="eyebrow">For hard moments</p>
+        <h1 id="safety-plan-title" class="title">My safety plan</h1>
+        <p class="muted">Write this on a calmer day, so it is ready when you need it. Saved only on this device. Based on the Stanley-Brown safety plan used by clinicians.</p>
+        <div class="card stack" id="safety-form">
+          <label class="field-label" for="sp-signs">1. My warning signs</label>
+          <textarea id="sp-signs" class="journal sp" data-sp="signs" rows="2" placeholder="Thoughts, feelings or situations that tell me a hard moment may be starting"></textarea>
+          <label class="field-label" for="sp-coping">2. Things I can do on my own</label>
+          <textarea id="sp-coping" class="journal sp" data-sp="coping" rows="2" placeholder="A walk, a Sigh of relief break, music, a shower"></textarea>
+          <label class="field-label" for="sp-places">3. People and places that lift me</label>
+          <textarea id="sp-places" class="journal sp" data-sp="places" rows="2" placeholder="A friend's home, a temple, the park, a cafe"></textarea>
+          <label class="field-label" for="sp-people">4. People I can ask for help</label>
+          <textarea id="sp-people" class="journal sp" data-sp="people" rows="2" placeholder="Names and phone numbers"></textarea>
+          <label class="field-label" for="sp-pros">5. Professionals and helplines</label>
+          <textarea id="sp-pros" class="journal sp" data-sp="pros" rows="2"></textarea>
+          <label class="field-label" for="sp-safe">6. Making my space safer</label>
+          <textarea id="sp-safe" class="journal sp" data-sp="safe" rows="2" placeholder="Ways to keep things I could use to hurt myself out of reach"></textarea>
+          <label class="field-label" for="sp-reasons">What matters most to me</label>
+          <textarea id="sp-reasons" class="journal sp" data-sp="reasons" rows="2" placeholder="People, pets, plans, places I love"></textarea>
+          <button id="sp-save" class="btn btn-sun" type="button">Save my safety plan</button>
+          <p id="sp-saved" class="fine" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- Reframe a thought -->
+      <section id="screen-reframe" class="screen tool-screen" data-screen="reframe" hidden aria-labelledby="reframe-title">
+        <button class="btn btn-ghost back-btn" type="button" data-back>Back</button>
+        <p class="eyebrow" id="rf-step">Step 1 of 5</p>
+        <h1 id="reframe-title" class="title">Reframe a thought</h1>
+        <div class="card stack">
+          <div class="rf-pane" data-rf="1"><label class="field-label" for="rf-situation">What happened?</label><textarea id="rf-situation" class="journal rf" rows="3" autocomplete="off" placeholder="Just the facts, in a line or two"></textarea></div>
+          <div class="rf-pane" data-rf="2" hidden><label class="field-label" for="rf-thought">What thought showed up?</label><textarea id="rf-thought" class="journal rf" rows="3" autocomplete="off" placeholder="For example: I always mess things up"></textarea></div>
+          <div class="rf-pane" data-rf="3" hidden><label class="field-label" for="rf-before">How heavy does it feel right now?</label><output id="rf-before-out" class="slider-value">6</output><input id="rf-before" class="range" type="range" min="1" max="10" value="6" aria-label="How heavy it feels, 1 to 10"></div>
+          <div class="rf-pane" data-rf="4" hidden><label class="field-label" for="rf-friend">If a dear friend had this thought, what would you tell them?</label><textarea id="rf-friend" class="journal rf" rows="3" autocomplete="off"></textarea><label class="field-label" for="rf-evidence">What tells you the thought is not the whole story?</label><textarea id="rf-evidence" class="journal rf" rows="2" autocomplete="off"></textarea></div>
+          <div class="rf-pane" data-rf="5" hidden><label class="field-label" for="rf-kinder">A kinder, balanced thought</label><textarea id="rf-kinder" class="journal rf" rows="3" autocomplete="off" placeholder="For example: I made one mistake, and I also got a lot right today"></textarea><label class="field-label" for="rf-after">How heavy does it feel now?</label><output id="rf-after-out" class="slider-value">6</output><input id="rf-after" class="range" type="range" min="1" max="10" value="6" aria-label="How heavy it feels now, 1 to 10"></div>
+          <p id="rf-result" class="kind-note" hidden></p>
+          <div class="row"><button id="rf-next" class="btn btn-sun" type="button">Next</button></div>
+          <button id="rf-keep" class="btn btn-soft" type="button" hidden>Keep the kinder thought in my jar</button>
+          <p class="fine">Only the kinder thought is ever saved, and only if you choose to keep it.</p>
+        </div>
+      </section>
+
+      <!-- Calm sounds -->
+      <section id="screen-sounds" class="screen tool-screen" data-screen="sounds" hidden aria-labelledby="sounds-title">
+        <button class="btn btn-ghost back-btn" type="button" data-back>Back</button>
+        <p class="eyebrow">Made on your device, works offline</p>
+        <h1 id="sounds-title" class="title">Calm sounds</h1>
+        <div class="sound-grid">
+          <button class="sound" type="button" data-sound="rain" aria-pressed="false"><strong>Rain</strong><span>Soft and steady</span></button>
+          <button class="sound" type="button" data-sound="ocean" aria-pressed="false"><strong>Ocean</strong><span>Slow waves</span></button>
+          <button class="sound" type="button" data-sound="brown" aria-pressed="false"><strong>Deep hush</strong><span>Warm brown noise</span></button>
+          <button class="sound" type="button" data-sound="breeze" aria-pressed="false"><strong>Breeze</strong><span>Gentle airflow</span></button>
+        </div>
+        <div class="card stack">
+          <label class="field-label" for="sound-volume">Volume</label>
+          <input id="sound-volume" class="range" type="range" min="0" max="100" value="60" aria-label="Volume">
+          <p class="field-label">Sleep timer</p>
+          <div class="chips" role="group" aria-label="Sleep timer"><button class="chip" type="button" data-timer="0" aria-pressed="true">Off</button><button class="chip" type="button" data-timer="15" aria-pressed="false">15 min</button><button class="chip" type="button" data-timer="30" aria-pressed="false">30 min</button><button class="chip" type="button" data-timer="60" aria-pressed="false">60 min</button></div>
+          <p id="sound-status" class="fine" aria-live="polite">Tap a sound to begin. Keep LoosenUp open while it plays.</p>
+          <button id="sound-stop" class="btn btn-soft" type="button">Stop</button>
+        </div>
+      </section>
+
+      <!-- Wellbeing check -->
+      <section id="screen-wellbeing" class="screen tool-screen" data-screen="wellbeing" hidden aria-labelledby="wb-title">
+        <button class="btn btn-ghost back-btn" type="button" data-back>Back</button>
+        <p class="eyebrow">Every two weeks</p>
+        <h1 id="wb-title" class="title">Wellbeing check</h1>
+        <p class="muted">Over the last two weeks, how often has each of these been true? This is a check-in, not a diagnosis.</p>
+        <div id="wb-items" class="stack"></div>
+        <button id="wb-submit" class="btn btn-sun" type="button">See my result</button>
+        <article id="wb-result" class="card" hidden>
+          <p class="gain"><span id="wb-score" class="gain-num">0</span><span class="gain-label">Wellbeing out of 100</span></p>
+          <p id="wb-note" class="kind-note"></p>
+          <button id="wb-support" class="btn btn-soft" type="button" data-tool="support" hidden>Find support</button>
+        </article>
+        <article class="card"><h2 class="subtitle">Your trend</h2><ul id="wb-trend" class="recent"></ul></article>
+        <p class="fine">Uses the WHO-5 Wellbeing Index (World Health Organization).</p>
       </section>
 
       <!-- Play -->
@@ -452,6 +627,14 @@
           <button id="open-support" class="btn btn-ghost" type="button">Open SOS and helplines</button>
         </article>
         <article class="card">
+          <h2 class="subtitle">Backup and restore</h2>
+          <p class="muted">Your data lives only on this device. Save a backup file before changing phones.</p>
+          <button id="backup-export" class="btn btn-soft" type="button">Save a backup file</button>
+          <label class="btn btn-ghost file-btn" for="backup-import">Restore from a backup file</label>
+          <input id="backup-import" class="sr-only" type="file" accept="application/json,.json">
+          <p id="backup-status" class="fine" aria-live="polite"></p>
+        </article>
+        <article class="card">
           <h2 class="subtitle">Start fresh</h2>
           <p class="muted">Your data lives only on this device.</p>
           <button id="reset-btn" class="btn btn-ghost" type="button">Start fresh</button>
@@ -521,6 +704,8 @@
     <a class="btn btn-sun" href="tel:14416">Call Tele-MANAS 14416 (India, free, 24x7)</a>
     <a class="btn btn-soft" href="tel:112">Emergency: call 112</a>
     <a class="btn btn-soft" href="https://findahelpline.com" target="_blank" rel="noopener">Find a helpline anywhere: findahelpline.com</a>
+    <button class="btn btn-soft" type="button" data-tool="safety">Open my safety plan</button>
+    <button class="btn btn-soft" type="button" data-tool="support">Find a therapist or psychiatrist</button>
     <button id="sos-breathe" class="btn btn-soft" type="button">Breathe with me for 60 seconds</button>
     <button id="trusted-edit" class="btn btn-ghost" type="button" hidden>Change trusted person</button>
     <div id="trusted-setup" class="card trusted-setup">
