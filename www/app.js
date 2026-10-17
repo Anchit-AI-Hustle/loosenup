@@ -1,15 +1,17 @@
-/* Brightside - 2-minute guided calm breaks. Data stays on this device (localStorage). */
+/* Sunpetal - 2-minute guided calm breaks. Data stays on this device (localStorage). */
 (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
-  var KEY = 'brightside.v1';
-  var PUBLIC_URL = 'https://brightside-calm.vercel.app';
+  var VERSION = '1.1.0';
+  var KEY = 'sunpetal.v1';
+  var PUBLIC_URL = 'https://sunpetal.vercel.app';
   var WEEKLY_FREE_SEEDS = 2;
   var DAILY_NUDGES = 2;
   var MILESTONES = [3, 7, 21, 30];
+  var GAME_XP = 5;
+  var DAILY_GAME_REWARDS = 3;
 
-  var TEST = window.__BRIGHTSIDE_TEST__ || {};
+  var TEST = window.__SUNPETAL_TEST__ || {};
   var nowOverride = TEST.now ? new Date(TEST.now) : null;
   var rng = TEST.rng || Math.random;
   function now() { return nowOverride ? new Date(nowOverride.getTime()) : new Date(); }
@@ -76,8 +78,9 @@
     bigLift: ['Big lift', 'A Calm gain of +5 or more'],
     explorer: ['Explorer', 'Tried every technique'],
     sunbeam: ['Sunbeam', 'Caught a Sunbeam surprise'],
-    sharer: ['Sunbeam sharer', 'Shared Brightside'],
-    golden: ['Golden hour', 'Set a daily time']
+    sharer: ['Sunbeam sharer', 'Shared Sunpetal'],
+    golden: ['Golden hour', 'Set a daily time'],
+    playful: ['Playful', 'Played a calm game']
   };
 
   var NOTES = [
@@ -139,7 +142,8 @@
       v: 1, name: '', createdAt: null, onboarded: false, seeds: 0, xp: 0, plan: 'free',
       sessions: [], streak: { count: 0, lastDay: null, best: 0 }, rainDayWeek: null,
       rewardSeeds: { week: null, count: 0 }, milestones: [], sunbeamDay: null, referralDay: null,
-      nudges: { day: null, count: 0, shown: [] }, goldenHour: null, voice: false, badges: [], purchases: []
+      nudges: { day: null, count: 0, shown: [] }, goldenHour: null, voice: false, badges: [], purchases: [],
+      games: { day: null, count: 0 }, gameBest: { pairs: null, catch: 0, bloom: 0 }
     };
   }
   function load() {
@@ -324,10 +328,11 @@
   /* ---------- Navigation ---------- */
 
   var current = null;
-  var TABS = ['today', 'garden', 'week', 'me'];
+  var TABS = ['today', 'play', 'garden', 'week', 'me'];
   var flow = { mode: 'guided', before: 5, context: null, technique: null };
 
   function go(name) {
+    if (name !== 'game') stopGame();
     var screens = document.querySelectorAll('.screen');
     for (var i = 0; i < screens.length; i++) screens[i].hidden = screens[i].getAttribute('data-screen') !== name;
     current = name;
@@ -398,7 +403,13 @@
     'Fairly settled', 'Fairly calm', 'Calm', 'Very calm', 'Wonderfully calm'];
   function bindSlider(id) {
     var el = $(id);
-    var upd = function () { setText(id + '-out', el.value); setText(id + '-word', CALM_WORDS[+el.value] || ''); };
+    var sun = $(id + '-sun');
+    var upd = function () {
+      setText(id + '-out', el.value);
+      setText(id + '-word', CALM_WORDS[+el.value] || '');
+      // The petal sun opens wider as calm rises.
+      if (sun) sun.style.transform = 'scale(' + (0.62 + 0.04 * +el.value).toFixed(2) + ') rotate(' + (+el.value * 9) + 'deg)';
+    };
     el.addEventListener('input', upd);
     el.addEventListener('change', upd);
     upd();
@@ -434,7 +445,7 @@
     setText('pick-desc', t.desc);
     setText('pick-reason', flow.reason);
     setText('pick-meta', Math.round(t.seconds / 60) + ' minutes');
-    $('pick-icon').style.setProperty('--badge', t.color);
+    $('pick-card').style.setProperty('--badge', t.color);
     var box = $('pick-chips');
     box.textContent = '';
     CHOOSABLE.forEach(function (id) {
@@ -496,6 +507,9 @@
     var orb = $('orb');
     orb.style.transitionDuration = '0s';
     orb.style.transform = 'scale(0.62)';
+    $('orb-petals').style.transitionDuration = '0s';
+    $('orb-petals').style.transform = 'scale(0.55)';
+    setText('session-kicker', t.free ? 'Always free' : 'Guided break');
     if (t.kind === 'steps') { run.stepLeft = Math.floor(t.seconds / t.steps.length); showStep(0); }
     if (t.kind === 'journal') { setText('cue', ''); }
     if (t.kind === 'breath') nextPhase();
@@ -511,10 +525,16 @@
     setText('cue', ph[0]);
     speak(ph[0]);
     var orb = $('orb');
-    if (prefersReducedMotion()) { orb.style.transform = ''; return; }
+    var pet = $('orb-petals');
+    if (prefersReducedMotion()) { orb.style.transform = ''; pet.style.transform = ''; return; }
     orb.style.transitionDuration = ph[1] + 's';
+    pet.style.transitionDuration = ph[1] + 's';
     clearTimeout(orbTimer);
-    orbTimer = setTimeout(function () { orb.style.transform = 'scale(' + ph[2] + ')'; }, 30);
+    orbTimer = setTimeout(function () {
+      orb.style.transform = 'scale(' + ph[2] + ')';
+      // Petals open wide and turn a little on the in-breath, fold in on the out-breath.
+      pet.style.transform = 'scale(' + (ph[2] >= 1 ? 1.02 : 0.55) + ') rotate(' + (ph[2] >= 1 ? 18 : 0) + 'deg)';
+    }, 30);
   }
 
   function showStep(i) {
@@ -525,7 +545,10 @@
     speak(t.steps[i]);
     $('step-next').hidden = i >= t.steps.length - 1;
     var orb = $('orb');
-    if (!prefersReducedMotion()) { orb.style.transitionDuration = '1.2s'; orb.style.transform = 'scale(' + (0.7 + 0.06 * i) + ')'; }
+    if (!prefersReducedMotion()) {
+      orb.style.transitionDuration = '1.2s'; orb.style.transform = 'scale(' + (0.7 + 0.06 * i) + ')';
+      $('orb-petals').style.transitionDuration = '1.2s'; $('orb-petals').style.transform = 'scale(' + (0.6 + 0.09 * i) + ') rotate(' + (i * 14) + 'deg)';
+    }
   }
 
   function tick() {
@@ -643,12 +666,50 @@
   function greeting() {
     var b = bucketOf(now().getTime());
     var name = state.name || 'friend';
-    return { Mornings: 'Good morning, ', Afternoons: 'Good afternoon, ', Evenings: 'Good evening, ', 'Quiet nights': 'Hello, night owl ' }[b] + name;
+    return { Mornings: 'Good morning, ', Afternoons: 'Good afternoon, ', Evenings: 'Good evening, ', 'Quiet nights': 'Quiet night, ' }[b] + name;
+  }
+
+  var PETAL = 'M0-44C17-52 18-78 0-94-18-78-17-52 0-44Z';
+  function addPetals(parent, cx, cy, scale, cls) {
+    for (var i = 0; i < 10; i++) {
+      var g = svg('g', { transform: 'translate(' + cx + ' ' + cy + ') rotate(' + (i * 36) + ') scale(' + scale + ')' }, parent);
+      var pth = svg('path', { d: PETAL, fill: i % 2 ? '#FFB088' : '#FFC857' }, g);
+      if (cls) { pth.setAttribute('class', cls); pth.style.setProperty('--i', String(i)); }
+    }
+  }
+  function miniFlower(parent, x, y, r, color) {
+    for (var k = 0; k < 5; k++) {
+      var a = k * 72 * Math.PI / 180;
+      svg('circle', { cx: (x + Math.cos(a) * r * 0.8).toFixed(1), cy: (y + Math.sin(a) * r * 0.8).toFixed(1), r: (r * 0.62).toFixed(1), fill: color }, parent);
+    }
+    svg('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: (r * 0.45).toFixed(1), fill: '#FFC857' }, parent);
+  }
+  function renderSky() {
+    var d = now();
+    var b = bucketOf(d.getTime());
+    var card = $('today-sky');
+    card.setAttribute('data-time', b);
+    // The sun travels an arc from 6:00 to 20:00.
+    var hrs = d.getHours() + d.getMinutes() / 60;
+    var t = Math.max(0, Math.min(1, (hrs - 6) / 14));
+    card.style.setProperty('--sx', (16 + t * 68).toFixed(1) + '%');
+    card.style.setProperty('--sy', (62 - Math.sin(t * Math.PI) * 44).toFixed(1) + '%');
+    setText('today-date', d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
+    setText('today-sky-streak', state.sessions.length
+      ? plural(state.streak.count, 'Sunny day', 'Sunny days') + ' · ' + plural(state.sessions.length, 'flower', 'flowers')
+      : 'Your first flower is one break away');
+    var fl = $('today-flowers');
+    while (fl.firstChild) fl.removeChild(fl.firstChild);
+    state.sessions.slice(-16).forEach(function (s, i) {
+      var r = seeded(i + 7);
+      miniFlower(fl, 14 + r() * 332, 54 + r() * 20, 4.2, (TECH[s.technique] || TECH.breeze).color);
+    });
   }
 
   function renderToday() {
+    renderSky();
     setText('today-title', greeting());
-    setText('today-streak', plural(state.streak.count, 'Sunny day', 'Sunny days'));
+    setText('today-streak', state.streak.count ? plural(state.streak.count, 'Sunny day', 'Sunny days') : 'Starts today');
     setText('today-seeds', state.plan === 'fullbloom' ? 'Full Bloom' : String(state.seeds));
     var lv = level();
     setText('today-level-name', lv.name);
@@ -850,7 +911,7 @@
     renderInstall();
   }
 
-  var RENDER = { today: renderToday, garden: renderGarden, week: renderWeek, me: renderMe, pick: renderPick, checkin: renderContextChips };
+  var RENDER = { today: renderToday, play: renderPlay, garden: renderGarden, week: renderWeek, me: renderMe, pick: renderPick, checkin: renderContextChips };
 
   /* ---------- Golden hour, sharing, install ---------- */
 
@@ -893,7 +954,7 @@
   function shareUrl() { return /^https?:$/.test(location.protocol) && !isNative() && location.hostname !== 'localhost' ? location.origin : PUBLIC_URL; }
   function shareSunbeam() {
     var url = shareUrl();
-    var text = 'Two calm minutes that brighten my day. Grow a garden with me on Brightside.';
+    var text = 'Two calm minutes that brighten my day. Grow a garden with me on Sunpetal.';
     var rewardShare = function () {
       var dk = dayKey(now());
       addBadge('sharer');
@@ -914,7 +975,7 @@
       return Promise.resolve();
     };
     if (navigator.share) {
-      return navigator.share({ title: 'Brightside', text: text, url: url }).then(rewardShare, function (e) {
+      return navigator.share({ title: 'Sunpetal', text: text, url: url }).then(rewardShare, function (e) {
         if (e && e.name === 'AbortError') return;
         return copy();
       });
@@ -931,8 +992,8 @@
     var ua = navigator.userAgent || '';
     var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
     $('install-btn').hidden = !installEvt;
-    if (isStandalone()) setText('install-text', 'Brightside is installed. Lovely to have you here.');
-    else if (installEvt) setText('install-text', 'Add Brightside to your home screen for quick, offline breaks.');
+    if (isStandalone()) setText('install-text', 'Sunpetal is installed. Lovely to have you here.');
+    else if (installEvt) setText('install-text', 'Add Sunpetal to your home screen for quick, offline breaks.');
     else if (ios) setText('install-text', 'On iPhone: open this page in Safari, tap Share, then Add to Home Screen.');
     else setText('install-text', 'On Android: open the Chrome menu, then Install app. On iPhone: Safari Share, then Add to Home Screen.');
   }
@@ -941,6 +1002,340 @@
     if (!('serviceWorker' in navigator) || isNative() || !/^https?:$/.test(location.protocol)) return;
     var reg = function () { navigator.serviceWorker.register('/sw.js').catch(function () { /* offline support is optional */ }); };
     if (document.readyState === 'complete') reg(); else window.addEventListener('load', reg);
+  }
+
+  /* ---------- Play: calm mini-games (every round ends kindly, never cost Seeds) ---------- */
+
+  var GAMES = {
+    pairs: { name: 'Petal Pairs', help: 'Turn two cards at a time. Matching flowers stay open. Take all the time you like.' },
+    catch: { name: 'Sunbeam Catch', help: 'Tap the sunbeams and petals as they drift by. Every catch fills your jar.' },
+    bloom: { name: 'Breath Bloom', help: 'Press and hold while the ring grows to breathe in. Let go as it shrinks to breathe out. Six breaths, six flowers.' }
+  };
+  var FLOWERS = [['Sunflower', '#FFC857'], ['Peach rose', '#FFB088'], ['Fern bell', '#4FA67C'], ['Sky poppy', '#8CC8F0'], ['Lilac', '#C9A7F2'], ['Blush daisy', '#F28FA0']];
+  var game = null;
+
+  function renderPlay() {
+    var dk = dayKey(now());
+    var played = state.games.day === dk ? state.games.count : 0;
+    setText('play-note', played >= DAILY_GAME_REWARDS
+      ? 'You have gathered today\'s game XP. Play on just for the joy of it.'
+      : 'Game XP today: ' + played + ' of ' + DAILY_GAME_REWARDS + '.');
+  }
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  function openGame(id) {
+    stopGame();
+    game = { id: id, timers: [], done: false };
+    setText('game-title', GAMES[id].name);
+    setText('game-help', GAMES[id].help);
+    setText('game-score', '');
+    $('game-done').hidden = true;
+    var stage = $('game-stage');
+    stage.textContent = '';
+    go('game');
+    ({ pairs: startPairs, catch: startCatch, bloom: startBloom })[id](stage);
+  }
+
+  function stopGame() {
+    if (!game) return;
+    game.timers.forEach(function (t) { clearInterval(t); clearTimeout(t); });
+    if (game.raf && window.cancelAnimationFrame) window.cancelAnimationFrame(game.raf);
+    game = null;
+  }
+
+  function finishGame(title, text, best) {
+    if (!game || game.done) return;
+    game.done = true;
+    game.timers.forEach(function (t) { clearInterval(t); clearTimeout(t); });
+    var dk = dayKey(now());
+    if (state.games.day !== dk) state.games = { day: dk, count: 0 };
+    var rewarded = state.games.count < DAILY_GAME_REWARDS;
+    if (rewarded) { state.games.count++; state.xp += GAME_XP; }
+    var nb = [];
+    addBadge('playful', nb);
+    if (best) best();
+    save();
+    renderSeedPill();
+    setText('game-done-title', title);
+    setText('game-done-text', text + (rewarded ? ' +' + GAME_XP + ' XP for your garden.' : ' Today\'s game XP is all gathered, so this round was just for fun.'));
+    $('game-done').hidden = false;
+    var again = $('game-again');
+    if (again && again.focus) again.focus();
+  }
+
+  // Petal Pairs: a gentle memory match.
+  function flowerSvg(color) {
+    var s0 = document.createElementNS(SVGNS, 'svg');
+    s0.setAttribute('viewBox', '0 0 40 40');
+    s0.setAttribute('aria-hidden', 'true');
+    miniFlower(s0, 20, 20, 12, color);
+    return s0;
+  }
+  function startPairs(stage) {
+    var deck = shuffle([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5]).map(function (k) { return { kind: k, open: false, done: false }; });
+    game.deck = deck;
+    game.moves = 0;
+    game.openIdx = [];
+    var grid = document.createElement('div');
+    grid.className = 'pairs';
+    deck.forEach(function (c, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pcard';
+      b.setAttribute('data-card', String(i));
+      b.setAttribute('aria-label', 'Card ' + (i + 1) + ', face down');
+      b.appendChild(flowerSvg(FLOWERS[c.kind][1]));
+      grid.appendChild(b);
+    });
+    stage.appendChild(grid);
+    updatePairsScore();
+  }
+  function updatePairsScore() {
+    var matched = game.deck.filter(function (c) { return c.done; }).length / 2;
+    setText('game-score', matched + ' of 6 pairs');
+  }
+  function flipCard(i) {
+    if (!game || game.id !== 'pairs' || game.done) return;
+    var c = game.deck[i];
+    if (!c || c.open || c.done || game.openIdx.length >= 2) return;
+    c.open = true;
+    game.openIdx.push(i);
+    paintCard(i);
+    if (game.openIdx.length === 2) {
+      game.moves++;
+      var a = game.deck[game.openIdx[0]], b = game.deck[game.openIdx[1]];
+      if (a.kind === b.kind) {
+        a.done = b.done = true; a.open = b.open = false;
+        var pair = game.openIdx; game.openIdx = [];
+        pair.forEach(paintCard);
+        updatePairsScore();
+        if (game.deck.every(function (x) { return x.done; })) {
+          var moves = game.moves;
+          var prev = state.gameBest.pairs;
+          finishGame('All pairs bloomed', 'You matched 6 pairs in ' + plural(moves, 'move', 'moves') + (prev && moves < prev ? ', your best yet!' : '.'),
+            function () { if (!prev || moves < prev) state.gameBest.pairs = moves; });
+        }
+      } else {
+        var g0 = game;
+        g0.timers.push(setTimeout(function () {
+          if (game !== g0) return;
+          g0.openIdx.forEach(function (j) { g0.deck[j].open = false; paintCard(j); });
+          g0.openIdx = [];
+        }, 900));
+      }
+    }
+  }
+  function paintCard(i) {
+    var el = document.querySelector('[data-card="' + i + '"]');
+    var c = game.deck[i];
+    if (!el) return;
+    el.setAttribute('data-open', String(c.open));
+    el.setAttribute('data-done', String(c.done));
+    el.setAttribute('aria-label', 'Card ' + (i + 1) + (c.open || c.done ? ', ' + FLOWERS[c.kind][0] + (c.done ? ', matched' : '') : ', face down'));
+  }
+
+  // Sunbeam Catch: tap what drifts by. Nothing is ever dropped or counted against you.
+  var CATCH_SECONDS = 45;
+  function startCatch(stage) {
+    var field = document.createElement('div');
+    field.className = 'catch-field';
+    field.id = 'catch-field';
+    var jar = document.createElement('p');
+    jar.className = 'jar';
+    jar.id = 'catch-jar';
+    field.appendChild(jar);
+    stage.appendChild(field);
+    game.caught = 0;
+    game.left = CATCH_SECONDS;
+    game.beams = [];
+    updateCatch();
+    game.timers.push(setInterval(function () {
+      if (!game || game.done) return;
+      game.left--;
+      updateCatch();
+      if (game.left <= 0) endCatch();
+    }, 1000));
+    game.timers.push(setInterval(spawnBeam, 850));
+    spawnBeam();
+    var last = 0;
+    var step = function (ts) {
+      if (!game || game.id !== 'catch' || game.done) return;
+      var dt = last ? Math.min(0.05, (ts - last) / 1000) : 0;
+      last = ts;
+      game.beams.forEach(function (bm) {
+        if (bm.caught) return;
+        bm.y += bm.v * dt;
+        bm.x += Math.sin((ts / 1000) * bm.w) * 0.05;
+        bm.el.style.top = bm.y.toFixed(2) + '%';
+        bm.el.style.left = bm.x.toFixed(2) + '%';
+        if (bm.y > 112) { bm.caught = true; if (bm.el.parentNode) bm.el.parentNode.removeChild(bm.el); }
+      });
+      game.beams = game.beams.filter(function (bm) { return !bm.caught || bm.el.parentNode; });
+      game.raf = window.requestAnimationFrame ? window.requestAnimationFrame(step) : 0;
+    };
+    if (window.requestAnimationFrame && !prefersReducedMotion()) game.raf = window.requestAnimationFrame(step);
+  }
+  function updateCatch() {
+    setText('game-score', plural(game.caught, 'sunbeam', 'sunbeams'));
+    setText('catch-jar', 'In your jar: ' + game.caught + (game.left > 0 ? '   ' + Math.floor(game.left / 60) + ':' + pad(game.left % 60) : ''));
+  }
+  function spawnBeam() {
+    if (!game || game.id !== 'catch' || game.done) return null;
+    var field = $('catch-field');
+    var petal = rng() < 0.4;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'beam';
+    b.setAttribute('aria-label', petal ? 'Catch a petal' : 'Catch a sunbeam');
+    var icon = document.createElementNS(SVGNS, 'svg');
+    icon.setAttribute('viewBox', '0 0 40 40');
+    if (petal) svg('path', { d: 'M20 6C30 12 30 28 20 34 10 28 10 12 20 6Z', fill: '#FFB088' }, icon);
+    else {
+      svg('circle', { cx: 20, cy: 20, r: 15, fill: '#FFE29A', opacity: 0.6 }, icon);
+      svg('circle', { cx: 20, cy: 20, r: 9, fill: '#FFC857' }, icon);
+    }
+    b.appendChild(icon);
+    var bm = { el: b, x: 10 + rng() * 80, y: prefersReducedMotion() ? 15 + rng() * 70 : -8, v: 9 + rng() * 7, w: 0.6 + rng(), caught: false };
+    b.style.left = bm.x + '%';
+    b.style.top = bm.y + '%';
+    b.addEventListener('click', function () { catchBeam(bm); });
+    field.appendChild(b);
+    game.beams.push(bm);
+    if (prefersReducedMotion()) {
+      game.timers.push(setTimeout(function () { if (!bm.caught && b.parentNode) { bm.caught = true; b.parentNode.removeChild(b); } }, 3000));
+    }
+    return b;
+  }
+  function catchBeam(bm) {
+    if (!game || game.done || bm.caught) return;
+    bm.caught = true;
+    game.caught++;
+    bm.el.classList.add('caught');
+    setTimeout(function () { if (bm.el.parentNode) bm.el.parentNode.removeChild(bm.el); }, 450);
+    updateCatch();
+  }
+  function endCatch() {
+    var n = game.caught;
+    var prev = state.gameBest.catch || 0;
+    finishGame('Your jar is glowing', 'You caught ' + plural(n, 'sunbeam', 'sunbeams') + (n > prev && prev > 0 ? ', your brightest jar yet!' : '.'),
+      function () { if (n > prev) state.gameBest.catch = n; });
+  }
+
+  // Breath Bloom: hold to breathe in with the ring, let go to breathe out.
+  var BLOOM_IN = 4, BLOOM_OUT = 4, BLOOM_ROUNDS = 6;
+  function startBloom(stage) {
+    var wrap = document.createElement('div');
+    wrap.className = 'bloom-stage';
+    var ring = document.createElement('div');
+    ring.className = 'bloom-ring';
+    var guide = document.createElement('div');
+    guide.className = 'bloom-guide';
+    guide.id = 'bloom-guide';
+    var fl = document.createElementNS(SVGNS, 'svg');
+    fl.setAttribute('viewBox', '-100 -100 200 200');
+    fl.setAttribute('class', 'bloom-flower');
+    fl.id = 'bloom-flower';
+    addPetals(fl, 0, 0, 1);
+    svg('circle', { r: 40, fill: 'url(#g-sun)' }, fl);
+    ring.appendChild(guide);
+    ring.appendChild(fl);
+    var cue = document.createElement('p');
+    cue.className = 'cue';
+    cue.id = 'bloom-cue';
+    cue.textContent = 'Press and hold to begin';
+    var hold = document.createElement('button');
+    hold.type = 'button';
+    hold.className = 'bloom-hold';
+    hold.id = 'bloom-hold';
+    hold.setAttribute('aria-pressed', 'false');
+    hold.textContent = 'Hold to breathe in';
+    var row = document.createElement('div');
+    row.className = 'bloom-row';
+    row.id = 'bloom-row';
+    row.setAttribute('aria-label', 'Flowers bloomed');
+    wrap.appendChild(ring); wrap.appendChild(cue); wrap.appendChild(hold); wrap.appendChild(row);
+    stage.appendChild(wrap);
+    game.holding = false;
+    game.started = false;
+    game.round = 0;
+    game.phaseT = 0;
+    game.inSync = 0;
+    game.samples = 0;
+    var down = function (e) { if (e) e.preventDefault(); setHold(true); };
+    var up = function () { setHold(false); };
+    hold.addEventListener('pointerdown', down);
+    hold.addEventListener('pointerup', up);
+    hold.addEventListener('pointerleave', up);
+    hold.addEventListener('pointercancel', up);
+    hold.addEventListener('keydown', function (e) { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); setHold(true); } });
+    hold.addEventListener('keyup', function (e) { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setHold(false); } });
+    hold.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    setText('game-score', '0 of ' + BLOOM_ROUNDS + ' blooms');
+  }
+  function setHold(on) {
+    if (!game || game.id !== 'bloom' || game.done) return;
+    game.holding = on;
+    var hold = $('bloom-hold');
+    hold.setAttribute('aria-pressed', String(on));
+    hold.textContent = on ? 'Breathing in...' : 'Hold to breathe in';
+    $('bloom-flower').style.transform = on ? 'scale(1)' : 'scale(0.45)';
+    $('bloom-flower').style.transitionDuration = on ? BLOOM_IN + 's' : '1.2s';
+    if (on && !game.started) {
+      game.started = true;
+      bloomPhase();
+      game.timers.push(setInterval(bloomTick, 100));
+    }
+  }
+  function bloomPhase() {
+    var inhale = game.phaseT < BLOOM_IN;
+    setText('bloom-cue', inhale ? 'Breathe in' : 'Breathe out');
+    var g = $('bloom-guide');
+    g.style.transitionDuration = (inhale ? BLOOM_IN : BLOOM_OUT) + 's';
+    g.style.transform = inhale ? 'scale(1)' : 'scale(0.5)';
+    speak(inhale ? 'Breathe in' : 'Breathe out');
+  }
+  function bloomTick() {
+    if (!game || game.id !== 'bloom' || game.done) return;
+    var wasIn = game.phaseT < BLOOM_IN;
+    game.phaseT += 0.1;
+    var inhale = game.phaseT < BLOOM_IN;
+    game.samples++;
+    if (inhale === game.holding) game.inSync++;
+    if (wasIn && !inhale) bloomPhase();
+    if (game.phaseT >= BLOOM_IN + BLOOM_OUT) {
+      game.phaseT = 0;
+      bloomRound();
+      if (game && !game.done) bloomPhase();
+    }
+  }
+  function bloomRound() {
+    game.round++;
+    var row = $('bloom-row');
+    var f = document.createElementNS(SVGNS, 'svg');
+    f.setAttribute('viewBox', '0 0 40 40');
+    miniFlower(f, 20, 20, 12, FLOWERS[(game.round - 1) % FLOWERS.length][1]);
+    row.appendChild(f);
+    setText('game-score', game.round + ' of ' + BLOOM_ROUNDS + ' blooms');
+    if (game.round >= BLOOM_ROUNDS) endBloom();
+  }
+  function endBloom() {
+    var pct = game.samples ? Math.round(game.inSync / game.samples * 100) : 0;
+    var prev = state.gameBest.bloom || 0;
+    finishGame('Six breaths, six blooms', 'You moved with the ring ' + pct + '% of the time. Every breath counted.',
+      function () { if (pct > prev) state.gameBest.bloom = pct; });
+  }
+  function finishCurrentGame() {
+    if (!game) return;
+    if (game.id === 'pairs') {
+      game.deck.forEach(function (c, i) { c.done = true; c.open = false; paintCard(i); });
+      updatePairsScore();
+      finishGame('All pairs bloomed', 'You matched 6 pairs in ' + plural(game.moves, 'move', 'moves') + '.');
+    } else if (game.id === 'catch') endCatch();
+    else endBloom();
   }
 
   /* ---------- Events ---------- */
@@ -954,6 +1349,10 @@
     var pick = el.getAttribute('data-pick');
     var tab = el.getAttribute('data-tab');
     var sku = el.getAttribute('data-sku');
+    var gameId = el.getAttribute('data-game');
+    var card = el.getAttribute('data-card');
+    if (gameId) { openGame(gameId); return; }
+    if (card !== null) { flipCard(+card); return; }
     if (ctx) {
       flow.context = ctx;
       var chips = document.querySelectorAll('[data-context]');
@@ -987,6 +1386,8 @@
       case 'step-next': if (run && TECH[run.id].steps && run.step < TECH[run.id].steps.length - 1) { run.stepLeft = Math.floor(TECH[run.id].seconds / TECH[run.id].steps.length); showStep(run.step + 1); } break;
       case 'after-next': finishAfter(); break;
       case 'result-done': go('today'); break;
+      case 'game-back': go('play'); break;
+      case 'game-again': if (game) openGame(game.id); break;
       case 'start-break': startCheckin('guided'); break;
       case 'quick-breeze': startCheckin('quick'); break;
       case 'seed-pill': case 'open-shop': openShop(); break;
@@ -1047,10 +1448,12 @@
     $('letitout-text').addEventListener('input', onJournal);
     $('scrim').addEventListener('click', function () { closeSheets(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('scrim').hidden) closeSheets(); });
+    addPetals($('orb-petals'), 0, 0, 1);
+    addPetals($('rs-petals'), 180, 132, 0.9, 'rp');
     bindSlider('calm-before');
     bindSlider('calm-after');
     window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; if (current === 'me') renderInstall(); });
-    window.addEventListener('appinstalled', function () { installEvt = null; toast('Brightside is on your home screen.'); });
+    window.addEventListener('appinstalled', function () { installEvt = null; toast('Sunpetal is on your home screen.'); });
     document.addEventListener('visibilitychange', function () { if (!document.hidden && current === 'today') renderGoldenBanner(); });
     go(state.onboarded ? 'today' : 'welcome');
     registerSW();
@@ -1059,7 +1462,7 @@
 
   /* ---------- Public API (used by the app shell and the test suite) ---------- */
 
-  window.Brightside = {
+  window.Sunpetal = {
     version: VERSION,
     state: function () { return JSON.parse(JSON.stringify(state)); },
     setState: function (patch) { for (var k in patch) state[k] = patch[k]; save(); if (current && RENDER[current]) RENDER[current](); renderSeedPill(); },
@@ -1079,6 +1482,11 @@
     weekKey: weekKey,
     prefersReducedMotion: prefersReducedMotion,
     shareSunbeam: shareSunbeam,
+    openGame: openGame,
+    game: function () { return game; },
+    flipCard: flipCard,
+    spawnBeam: spawnBeam,
+    finishCurrentGame: finishCurrentGame,
     techniques: TECH
   };
 

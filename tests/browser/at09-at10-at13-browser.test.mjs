@@ -63,11 +63,21 @@ async function walkScreens(page, width, label) {
   await page.waitForTimeout(1600);
   await check('result');
   await page.click('#result-done');
-  for (const tab of ['today', 'garden', 'week', 'me']) {
+  for (const tab of ['today', 'play', 'garden', 'week', 'me']) {
     await page.click(`[data-tab="${tab}"]`);
     await check(tab);
   }
-  await page.evaluate(() => window.Brightside.openShop());
+  for (const g of ['pairs', 'catch', 'bloom']) {
+    await page.click('[data-tab="play"]');
+    await page.click(`[data-game="${g}"]`);
+    if (g === 'pairs') { await page.click('[data-card="0"]'); await page.click('[data-card="1"]'); }
+    if (g === 'bloom') { await page.locator('#bloom-hold').dispatchEvent('pointerdown'); await page.waitForTimeout(1500); }
+    await check('game-' + g);
+    await page.evaluate(() => window.Sunpetal.finishCurrentGame());
+    await check('game-' + g + '-done');
+    await page.click('#game-back');
+  }
+  await page.evaluate(() => window.Sunpetal.openShop());
   await check('shop');
   return shots;
 }
@@ -76,7 +86,7 @@ for (const width of [390, 820, 1440]) {
   test(`AT9 no console errors and no horizontal scroll at ${width}px`, async () => {
     const { ctx, page, errors } = await newPage(width);
     const shots = await walkScreens(page, width, `${width}px`);
-    assert.ok(shots.length >= 11, 'screenshots taken');
+    assert.ok(shots.length >= 18, 'screenshots taken');
     assert.deepEqual(errors, []);
     await ctx.close();
   });
@@ -92,10 +102,10 @@ test('AT10 offline shell works after first load', async () => {
   await page.reload();
   await page.waitForSelector('#screen-welcome:not([hidden])');
   const title = await page.title();
-  assert.equal(title, 'Brightside');
+  assert.equal(title, 'Sunpetal');
   const cssOk = await page.evaluate(() => getComputedStyle(document.body).fontFamily.includes('Nunito'));
   assert.ok(cssOk, 'styles.css served from cache');
-  const fontOk = await page.evaluate(async () => { await document.fonts.ready; return document.fonts.check('16px Nunito'); });
+  const fontOk = await page.evaluate(async () => { await document.fonts.ready; return document.fonts.check('16px Nunito') && document.fonts.check('16px Fraunces'); });
   assert.ok(fontOk, 'self-hosted Nunito available offline');
   await page.screenshot({ path: path.join(SHOTS, 'offline-390.png') });
   assert.deepEqual(errors.filter((e) => !/ERR_INTERNET_DISCONNECTED/.test(e)), []);
@@ -123,8 +133,9 @@ test('AT13 every visible button and tab is at least 48px tall and wide', async (
   await page.click('#session-finish'); await measure('after');
   await page.click('#after-next'); await page.waitForTimeout(400); await measure('result');
   await page.click('#result-done');
-  for (const tab of ['today', 'garden', 'week', 'me']) { await page.click(`[data-tab="${tab}"]`); await measure(tab); }
-  await page.evaluate(() => window.Brightside.openShop()); await measure('shop');
+  for (const tab of ['today', 'play', 'garden', 'week', 'me']) { await page.click(`[data-tab="${tab}"]`); await measure(tab); }
+  for (const g of ['pairs', 'catch', 'bloom']) { await page.click('[data-tab="play"]'); await page.click(`[data-game="${g}"]`); await measure('game-' + g); await page.click('#game-back'); }
+  await page.evaluate(() => window.Sunpetal.openShop()); await measure('shop');
   assert.deepEqual(small, []);
   await ctx.close();
 });
@@ -156,7 +167,7 @@ test('AT13 prefers-reduced-motion stops the breathing orb animation', async () =
   const r = await page.evaluate(() => {
     const orb = document.querySelector('#orb');
     const s = getComputedStyle(orb);
-    return { transition: s.transitionDuration, anim: s.animationName, rm: window.Brightside.prefersReducedMotion() };
+    return { transition: s.transitionDuration, anim: s.animationName, rm: window.Sunpetal.prefersReducedMotion() };
   });
   assert.equal(r.rm, true);
   assert.ok(['0s', '0.00001s', '1e-05s'].includes(r.transition) || parseFloat(r.transition) < 0.01, `orb transition ${r.transition}`);

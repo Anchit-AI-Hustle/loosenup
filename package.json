@@ -1,8 +1,8 @@
 {
-  "name": "brightside",
-  "version": "1.0.0",
+  "name": "sunpetal",
+  "version": "1.1.0",
   "private": true,
-  "description": "Brightside - 2-minute guided calm breaks with a before and after Calm gain. A wellbeing companion, not medical care.",
+  "description": "Sunpetal - 2-minute guided calm breaks with a before and after Calm gain. A wellbeing companion, not medical care.",
   "type": "module",
   "scripts": {
     "test": "node --test --test-concurrency=1 tests/",

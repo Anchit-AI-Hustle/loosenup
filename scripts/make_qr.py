@@ -1,6 +1,6 @@
-"""Make a QR code PNG for the live Brightside URL.
+"""Make a QR code PNG for the live Sunpetal URL.
 
-Usage: .venv/bin/python scripts/make_qr.py https://brightside-calm.vercel.app
+Usage: .venv/bin/python scripts/make_qr.py https://sunpetal.vercel.app
 """
 import sys
 from pathlib import Path
@@ -9,7 +9,7 @@ import qrcode
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
-url = sys.argv[1] if len(sys.argv) > 1 else "https://brightside-calm.vercel.app"
+url = sys.argv[1] if len(sys.argv) > 1 else "https://sunpetal.vercel.app"
 
 qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=16, border=3)
 qr.add_data(url)
@@ -37,10 +37,10 @@ except OSError:
         font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Rounded Bold.ttf", 32)
     except OSError:
         font = ImageFont.load_default()
-text = "Brightside  " + url.replace("https://", "")
+text = "Sunpetal  " + url.replace("https://", "")
 tw = d.textlength(text, font=font)
 d.text(((W - tw) / 2, code.size[1] + 18), text, fill="#2E7D5B", font=font)
 
-dest = ROOT / "brightside-live-qr.png"
+dest = ROOT / "sunpetal-live-qr.png"
 out.save(dest, optimize=True)
 print("wrote", dest.name, out.size, "->", url)

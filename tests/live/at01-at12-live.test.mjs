@@ -9,7 +9,7 @@ const LIVE = (process.env.LIVE_URL || '').replace(/\/$/, '');
 const skip = !LIVE && 'LIVE_URL not set';
 
 const FILES = ['/', '/index.html', '/styles.css', '/app.js', '/sw.js', '/manifest.json', '/apple-touch-icon.png',
-  '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png', '/fonts/nunito-latin.woff2', '/favicon.png'];
+  '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png', '/fonts/nunito-latin.woff2', '/fonts/fraunces-latin.woff2', '/favicon.png'];
 
 test('AT1 live: every shell file returns 200', { skip }, async () => {
   for (const f of FILES) {
@@ -38,6 +38,6 @@ test('AT12 live: production URL loads the app over HTTPS from Vercel', { skip },
   assert.equal(r.status, 200);
   assert.ok(r.headers.get('x-vercel-id'), 'served by Vercel');
   const html = await r.text();
-  assert.match(html, /<title>Brightside<\/title>/);
+  assert.match(html, /<title>Sunpetal<\/title>/);
   assert.match(html, /A wellbeing companion, not medical care\./);
 });

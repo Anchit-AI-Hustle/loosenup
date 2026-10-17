@@ -1,5 +1,5 @@
-/* Brightside service worker: precache the shell, cache-first for same-origin GET. */
-var CACHE = 'brightside-v1.0.0';
+/* Sunpetal service worker: precache the shell, cache-first for same-origin GET. */
+var CACHE = 'sunpetal-v1.1.0';
 var SHELL = [
   '/',
   '/index.html',
@@ -7,6 +7,7 @@ var SHELL = [
   '/app.js',
   '/manifest.json',
   '/fonts/nunito-latin.woff2',
+  '/fonts/fraunces-latin.woff2',
   '/favicon.png',
   '/apple-touch-icon.png',
   '/icons/icon-192.png',

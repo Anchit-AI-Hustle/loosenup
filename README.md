@@ -1,12 +1,14 @@
-# Brightside
+# Sunpetal
 
-Two calm minutes, whenever you want them. Rate how calm you feel, take a 2-minute guided break, rate again, and see your **Calm gain**. A garden grows with every break.
+Two calm minutes, whenever you want them. Rate how calm you feel, breathe with a sun that opens like a flower, rate again, and see your **Calm gain**. A garden grows with every break, and the Play tab has three gentle mini-games.
+
+The brand mark is a petal sun: a sun whose rays are petals. It opens on every in-breath, unfurls on the result screen and sits in the app icon.
 
 > A wellbeing companion, not medical care.
 
-- **Live app:** https://brightside-calm.vercel.app
-- **QR code:** [brightside-live-qr.png](brightside-live-qr.png)
-- **Android debug APK:** `android/app/build/outputs/apk/debug/app-debug.apk` (also exported as `dist/brightside-android-debug-v1.0.0.apk`)
+- **Live app:** https://sunpetal.vercel.app
+- **QR code:** [sunpetal-live-qr.png](sunpetal-live-qr.png)
+- **Android debug APK:** `android/app/build/outputs/apk/debug/app-debug.apk` (also exported as `dist/sunpetal-android-debug-v1.1.0.apk`)
 
 ## Install on your phone
 
@@ -24,10 +26,12 @@ The app works offline after the first load.
 | Techniques | Sigh of relief, Slow breeze, Here and now, Soft release (opens after 3 breaks), Let it out (opens after 5 breaks). Quick breeze is a 60s preset that is always free. |
 | Recommender | Rule based by context on day one. After 2 or more breaks with a technique in a context, the technique with the best average Calm gain for that context is preferred. Techniques that are not open yet are never picked. |
 | Gamification | Sunny days (once per calendar day), one Rain day per week bridges a single quiet day, milestones at 3, 7, 21 and 30 days, a daily 25 percent Sunbeam surprise, XP = 10 + 2 x positive Calm gain, levels Seedling, Sprout, Bud, Bloom, Full Bloom, Meadow, badges, a garden that only grows. |
+| Play | Three calm mini-games where every round ends kindly and nothing costs Seeds. **Petal Pairs** (memory match, 6 flower pairs), **Sunbeam Catch** (45 seconds of tapping drifting sunbeams into a jar, nothing is ever dropped), **Breath Bloom** (hold to breathe in with a growing ring, let go to breathe out, six breaths bloom six flowers). Each finished game gives 5 XP, up to 3 games a day, plus a Playful badge. Games never give free Seeds, so paid Seeds stay protected. |
+| Design | Morning sky palette, Fraunces (soft serif) for headlines and numbers with Nunito for UI text, both self-hosted. Glass cards, a floating pill tab bar, a living sky on Today that follows the real time of day (sun arc by hour, golden evenings, starry quiet nights), the breathing petal sun, and the rising sun with unfurling petals on the result screen. |
 | Fair rewards | At most 2 free Seeds per week from all rewards combined (milestones, Sunbeam surprise, sharing, "You showed up"). At most 2 nudges per day. |
 | Money | Seeds (credits) and Full Bloom (subscription). Checkout is a clearly labelled **DEMO**: nothing is charged and no payment details are asked for. At 0 Seeds on the free plan, a guided break opens the Seed shop. Quick breeze never uses a Seed. |
 | Safety | Let it out checks typed text for crisis phrases and opens a support sheet: India Tele-MANAS 14416, findahelpline.com, emergency 112. Journal text is never stored anywhere. Support lines are always available from Me. |
-| Privacy | All data stays on the device in localStorage (`brightside.v1`). No accounts, no analytics, fonts are self-hosted. |
+| Privacy | All data stays on the device in localStorage (`sunpetal.v1`). No accounts, no analytics, fonts are self-hosted. |
 | Golden hour | A daily time you choose. On the web it shows a gentle in-app note. On the Android and iOS apps it schedules one real local notification per day. |
 
 ### Prices (placeholders)
@@ -45,14 +49,15 @@ Exchange rate check on 17 Oct 2026 (open.er-api.com, updated 00:02 UTC): **USD 1
 
 ```
 www/            the web app (PWA). Also the Capacitor webDir.
+  fonts/        Nunito and Fraunces (self-hosted woff2)
   index.html    screens, sheets and tab bar
   styles.css    morning sky theme, safe areas, reduced motion
   app.js        engine (Seeds, XP, Sunny days, recommender) and UI
   sw.js         precaches the shell, cache-first for same-origin GET
   manifest.json standalone, id "/", 192, 512 and maskable icons
 tests/          acceptance tests AT1 to AT13 (jsdom + Playwright)
-scripts/        icon and QR generators (Python Pillow and qrcode)
-android/ ios/   Capacitor native projects (appId com.brightside.calm)
+scripts/        icon, splash and QR generators (Python Pillow and qrcode), native-setup.sh
+android/ ios/   Capacitor native projects (appId com.sunpetal.calm)
 vercel.json     static hosting from www/ with sw.js no-cache and the manifest content type
 ```
 
@@ -62,7 +67,7 @@ vercel.json     static hosting from www/ with sw.js no-cache and the manifest co
 npm install
 npm run serve            # http://127.0.0.1:4173
 npm test                 # unit (jsdom) + browser (Playwright) suites
-LIVE_URL=https://brightside-calm.vercel.app npm run test:live
+LIVE_URL=https://sunpetal.vercel.app npm run test:live
 ```
 
 The first browser run needs `npx playwright install chromium`. Screenshots from the browser suite land in `tests/screenshots/` at 390, 820 and 1440 px.
@@ -72,10 +77,12 @@ Regenerate icons and the QR code:
 ```bash
 python3 -m venv .venv && .venv/bin/pip install pillow qrcode
 .venv/bin/python scripts/make_icons.py --native
-.venv/bin/python scripts/make_qr.py https://brightside-calm.vercel.app
+.venv/bin/python scripts/make_qr.py https://sunpetal.vercel.app
 ```
 
 ## Native apps (Capacitor 8)
+
+After `npx cap add android` or `npx cap add ios`, run `./scripts/native-setup.sh` to re-apply the icons, splash screens, notification icon and Android notification permission.
 
 ### Android
 

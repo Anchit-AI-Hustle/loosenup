@@ -1,6 +1,6 @@
 {
-  "appId": "com.brightside.calm",
-  "appName": "Brightside",
+  "appId": "com.sunpetal.calm",
+  "appName": "Sunpetal",
   "webDir": "www",
   "backgroundColor": "#EDF7FF",
   "android": {
@@ -12,7 +12,7 @@
   },
   "plugins": {
     "LocalNotifications": {
-      "smallIcon": "ic_stat_brightside",
+      "smallIcon": "ic_stat_sunpetal",
       "iconColor": "#F2A72B"
     }
   }

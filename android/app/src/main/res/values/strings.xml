@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Brightside</string>
-    <string name="title_activity_main">Brightside</string>
-    <string name="package_name">com.brightside.calm</string>
-    <string name="custom_url_scheme">com.brightside.calm</string>
+    <string name="app_name">Sunpetal</string>
+    <string name="title_activity_main">Sunpetal</string>
+    <string name="package_name">com.sunpetal.calm</string>
+    <string name="custom_url_scheme">com.sunpetal.calm</string>
 </resources>

@@ -1,4 +1,4 @@
-"""Generate Brightside icons: a rising sun over a sprout on sky blue.
+"""Generate Sunpetal icons: a petal sun rising over green hills on sky blue.
 
 Usage:
   .venv/bin/python scripts/make_icons.py          # web icons into www/
@@ -22,6 +22,7 @@ LEAF = (79, 166, 124)
 LEAF_DARK = (46, 125, 91)
 HILL = (79, 166, 124)
 HILL_BACK = (122, 196, 152)
+PEACH = (255, 176, 136)
 
 
 def lerp(a, b, t):
@@ -36,74 +37,61 @@ def sky(size):
     return img.convert("RGBA")
 
 
+def bezier(p0, p1, p2, p3, n=24):
+    out = []
+    for i in range(n + 1):
+        t = i / n
+        a = (1 - t) ** 3
+        b = 3 * (1 - t) ** 2 * t
+        c = 3 * (1 - t) * t ** 2
+        d = t ** 3
+        out.append((a * p0[0] + b * p1[0] + c * p2[0] + d * p3[0], a * p0[1] + b * p1[1] + c * p2[1] + d * p3[1]))
+    return out
+
+
+# Same petal as the in-app mark: M0-44 C17-52 18-78 0-94 C-18-78 -17-52 0-44Z (sun core radius 40).
+PETAL = bezier((0, -44), (17, -52), (18, -78), (0, -94)) + bezier((0, -94), (-18, -78), (-17, -52), (0, -44))
+
+
+def petal_sun(layer, cx, cy, unit, glow=True):
+    """Draw the Sunpetal mark centred at (cx, cy); unit = pixels per mark unit (mark spans -100..100)."""
+    if glow:
+        # Blur only the alpha so the glow stays warm instead of fading through grey.
+        mask = Image.new("L", layer.size, 0)
+        r = 120 * unit
+        ImageDraw.Draw(mask).ellipse([cx - r, cy - r, cx + r, cy + r], fill=190)
+        g = Image.new("RGBA", layer.size, (255, 226, 154, 0))
+        g.putalpha(mask.filter(ImageFilter.GaussianBlur(40 * unit)))
+        layer.alpha_composite(g)
+    d = ImageDraw.Draw(layer)
+    for k in range(10):
+        a = math.radians(k * 36)
+        pts = [(cx + (x * math.cos(a) - y * math.sin(a)) * unit, cy + (x * math.sin(a) + y * math.cos(a)) * unit) for x, y in PETAL]
+        d.polygon(pts, fill=(PEACH if k % 2 else SUN_A) + (255,))
+    core = Image.new("RGBA", layer.size, (0, 0, 0, 0))
+    cd = ImageDraw.Draw(core)
+    r = 40 * unit
+    for i in range(int(r), 0, -1):
+        t = 1 - i / r
+        col = lerp(SUN_B, (255, 243, 207), t ** 0.8)
+        ox, oy = cx - r * 0.16 * t, cy - r * 0.2 * t
+        cd.ellipse([ox - i, oy - i, ox + i, oy + i], fill=col + (255,))
+    layer.alpha_composite(core)
+
+
 def artwork(scale=1.0):
-    """Transparent layer with sun, hills and sprout. scale < 1 shrinks into the maskable safe zone."""
+    """Transparent layer: petal sun rising over two hills. scale < 1 shrinks into the maskable safe zone."""
     layer = Image.new("RGBA", (S, S), (0, 0, 0, 0))
     c = S / 2
 
     def sx(v):
         return c + (v - c) * scale
 
-    # Sun glow
-    glow = Image.new("RGBA", (S, S), (0, 0, 0, 0))
-    gd = ImageDraw.Draw(glow)
-    r = 300 * scale
-    cy = sx(470)
-    gd.ellipse([c - r, cy - r, c + r, cy + r], fill=(255, 214, 120, 150))
-    glow = glow.filter(ImageFilter.GaussianBlur(60 * scale))
-    layer = Image.alpha_composite(layer, glow)
-
-    # Sun disc with a soft vertical gradient
-    sun = Image.new("RGBA", (S, S), (0, 0, 0, 0))
-    r = 225 * scale
-    for i in range(int(r * 2)):
-        t = i / (r * 2)
-        y = cy - r + i
-        half = math.sqrt(max(0.0, r * r - (y - cy) ** 2))
-        ImageDraw.Draw(sun).line([(c - half, y), (c + half, y)], fill=lerp(SUN_A, SUN_B, t) + (255,))
-    layer = Image.alpha_composite(layer, sun)
-
+    petal_sun(layer, c, sx(470), 3.5 * scale)
     d = ImageDraw.Draw(layer)
-    # Rays
-    for k in range(12):
-        a = math.radians(k * 30 - 90)
-        r1, r2 = 262 * scale, 320 * scale
-        w = int(22 * scale)
-        if math.sin(a) > 0.55:
-            continue  # hidden behind the hills
-        d.line([(c + r1 * math.cos(a), cy + r1 * math.sin(a)), (c + r2 * math.cos(a), cy + r2 * math.sin(a))],
-               fill=SUN_A + (255,), width=w)
-        for (px, py) in [(c + r1 * math.cos(a), cy + r1 * math.sin(a)), (c + r2 * math.cos(a), cy + r2 * math.sin(a))]:
-            d.ellipse([px - w / 2, py - w / 2, px + w / 2, py + w / 2], fill=SUN_A + (255,))
-
-    # Hills
-    d.ellipse([sx(-260), sx(690), sx(700), sx(1300)], fill=HILL_BACK + (255,))
-
-    # Sprout stem
-    stem_w = int(30 * scale)
-    pts = []
-    for i in range(40):
-        t = i / 39
-        x = c + math.sin(t * math.pi) * 18 * scale
-        y = sx(900) - t * (sx(900) - sx(560))
-        pts.append((x, y))
-    d.line(pts, fill=LEAF_DARK + (255,), width=stem_w, joint="curve")
-    d.ellipse([sx(330), sx(720), sx(1290), sx(1340)], fill=HILL + (255,))  # front hill hides the stem base
-    top = pts[-1]
-    d.ellipse([top[0] - stem_w / 2, top[1] - stem_w / 2, top[0] + stem_w / 2, top[1] + stem_w / 2], fill=LEAF_DARK + (255,))
-
-    def leaf(base, length, angle, color):
-        lw = length * 0.46
-        leaf_img = Image.new("RGBA", (int(length * 2), int(length * 2)), (0, 0, 0, 0))
-        ld = ImageDraw.Draw(leaf_img)
-        cx2, cy2 = length, length
-        ld.ellipse([cx2, cy2 - lw / 2, cx2 + length, cy2 + lw / 2], fill=color + (255,))
-        ld.line([(cx2 + length * 0.08, cy2), (cx2 + length * 0.86, cy2)], fill=(255, 255, 255, 90), width=max(2, int(6 * scale)))
-        leaf_img = leaf_img.rotate(angle, resample=Image.BICUBIC, center=(cx2, cy2))
-        layer.alpha_composite(leaf_img, (int(base[0] - cx2), int(base[1] - cy2)))
-
-    leaf((top[0], top[1] + 8 * scale), 190 * scale, 32, LEAF)
-    leaf((top[0], top[1] + 8 * scale), 170 * scale, 148, LEAF_DARK)
+    d.ellipse([sx(-300), sx(700), sx(720), sx(1340)], fill=HILL_BACK + (255,))
+    d.ellipse([sx(300), sx(740), sx(1330), sx(1380)], fill=HILL + (255,))
+    d.ellipse([sx(-200), sx(880), sx(1220), sx(1500)], fill=LEAF_DARK + (255,))
     return layer
 
 
@@ -161,10 +149,36 @@ def native():
     if ios.exists():
         for f in ios.glob("*.png"):
             img = Image.open(f)
-            save(mask if False else full, f, img.size[0], "RGB")
+            save(full, f, img.size[0], "RGB")
+
+
+def splash_image(w, h):
+    """Sky gradient with the petal sun rising over the hills, sized for a native splash screen."""
+    img = Image.new("RGB", (w, h))
+    d = ImageDraw.Draw(img)
+    for y in range(h):
+        t = y / h
+        d.line([(0, y), (w, y)], fill=lerp(SKY_TOP, (255, 246, 227), t))
+    s = min(w, h)
+    layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    petal_sun(layer, w / 2, h / 2 - s * 0.04, s * 0.0016)
+    img = Image.alpha_composite(img.convert("RGBA"), layer)
+    return img.convert("RGB")
+
+
+def splashes():
+    n = 0
+    targets = list((ROOT / "android" / "app" / "src" / "main" / "res").rglob("splash.png"))
+    targets += list((ROOT / "ios" / "App" / "App" / "Assets.xcassets").rglob("splash*.png"))
+    for f in targets:
+        w, h = Image.open(f).size
+        splash_image(w, h).save(f, optimize=True)
+        n += 1
+    print("branded splash images:", n)
 
 
 if __name__ == "__main__":
     web()
     if "--native" in sys.argv:
         native()
+        splashes()
