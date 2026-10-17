@@ -24,3 +24,15 @@ android/.kotlin/
 .env*
 # Vercel build output
 site/
+
+# Android Studio project scaffold at the repo root (not part of LoosenUp; the real native project is android/)
+/.gradle/
+/.idea/
+/app/
+/gradle/
+/build.gradle.kts
+/settings.gradle.kts
+/gradle.properties
+/gradlew
+/gradlew.bat
+/local.properties
