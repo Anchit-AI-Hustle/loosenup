@@ -69,6 +69,7 @@ async function walkScreens(page, width, label) {
   }
   for (const g of ['pairs', 'catch', 'bloom']) {
     await page.click('[data-tab="play"]');
+    await page.click('[data-seg="games"]');
     await page.click(`[data-game="${g}"]`);
     if (g === 'pairs') { await page.click('[data-card="0"]'); await page.click('[data-card="1"]'); }
     if (g === 'bloom') { await page.locator('#bloom-hold').dispatchEvent('pointerdown'); await page.waitForTimeout(1500); }
@@ -87,11 +88,17 @@ async function walkScreens(page, width, label) {
   await check('jar');
   await page.click('#good-close');
   await page.click('[data-tab="today"]');
-  for (const tool of ['support', 'safety', 'reframe', 'sounds', 'learn', 'wellbeing']) {
+  for (const tool of ['support', 'safety', 'reframe', 'learn', 'wellbeing']) {
     await page.click(`#screen-today .toolkit [data-tool="${tool}"]`);
     await check('tool-' + tool);
     await page.click(`#screen-${tool} [data-back]`);
   }
+  for (const seg of ['breathe', 'games', 'sounds']) {
+    await page.click('[data-tab="play"]');
+    await page.click(`[data-seg="${seg}"]`);
+    await check('calm-' + seg);
+  }
+  await page.click('[data-tab="today"]');
   await page.click('#sos-btn');
   await check('sos');
   await page.click('#support-close');
@@ -135,6 +142,7 @@ test('AT13 every visible button and tab is at least 48px tall and wide', async (
   await page.goto(server.url + '/');
   const small = [];
   const measure = async (where) => {
+    await page.waitForTimeout(450); // let screen and tab transitions settle before measuring
     const r = await page.evaluate(() => [...document.querySelectorAll('button, a.btn, [role="tab"], input[type="range"], .chip, input[type="time"], input[type="text"]')]
       .filter((e) => e.offsetParent !== null && !e.closest('[hidden]'))
       .map((e) => { const b = e.getBoundingClientRect(); return { id: e.id || e.className || e.textContent.trim().slice(0, 20), w: b.width, h: b.height }; })
@@ -152,10 +160,12 @@ test('AT13 every visible button and tab is at least 48px tall and wide', async (
   await page.click('#after-next'); await page.waitForTimeout(400); await measure('result');
   await page.click('#result-done');
   for (const tab of ['today', 'play', 'garden', 'week', 'me']) { await page.click(`[data-tab="${tab}"]`); await measure(tab); }
-  for (const g of ['pairs', 'catch', 'bloom']) { await page.click('[data-tab="play"]'); await page.click(`[data-game="${g}"]`); await measure('game-' + g); await page.click('#game-back'); }
+  for (const g of ['pairs', 'catch', 'bloom']) { await page.click('[data-tab="play"]'); await page.click('[data-seg="games"]'); await page.click(`[data-game="${g}"]`); await measure('game-' + g); await page.click('#game-back'); }
   await page.click('[data-tab="today"]'); await page.click('[data-mood="3"]'); await measure('today-mood');
   await page.click('[data-tab="today"]');
-  for (const tool of ['support', 'safety', 'reframe', 'sounds', 'learn', 'wellbeing']) { await page.click(`#screen-today .toolkit [data-tool="${tool}"]`); await measure('tool-' + tool); await page.click(`#screen-${tool} [data-back]`); }
+  for (const seg of ['breathe', 'games', 'sounds']) { await page.click('[data-tab="play"]'); await page.click(`[data-seg="${seg}"]`); await measure('calm-' + seg); }
+  await page.click('[data-tab="today"]');
+  for (const tool of ['support', 'safety', 'reframe', 'learn', 'wellbeing']) { await page.click(`#screen-today .toolkit [data-tool="${tool}"]`); await measure('tool-' + tool); await page.click(`#screen-${tool} [data-back]`); }
   await page.click('#sos-btn'); await measure('sos'); await page.click('#support-close');
   await page.click('#jar-add'); await measure('jar'); await page.click('#good-close');
   await page.click('[data-space="relationships"]'); await measure('space-relationships'); await page.click('#checkin-back');

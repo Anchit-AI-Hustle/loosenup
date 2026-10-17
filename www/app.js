@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.8.0';
+  var VERSION = '1.8.1';
   var KEY = 'loosenup.v1';
   var PUBLIC_URL = 'https://loosenup-ios.anchit-tandon.com';
   var ANDROID_URL = 'https://loosenup-android.anchit-tandon.com';
@@ -447,6 +447,7 @@
 
   var lastTab = 'today';
   function go(name) {
+    if (name === 'sounds') { calmSeg = 'sounds'; name = 'play'; }
     if (name !== 'game') stopGame();
     if (TABS.indexOf(name) !== -1) lastTab = name;
     var screens = document.querySelectorAll('.screen');
@@ -1428,7 +1429,86 @@
   var FLOWERS = [['Sunflower', '#FFC857'], ['Peach rose', '#FFB088'], ['Fern bell', '#4FA67C'], ['Sky poppy', '#8CC8F0'], ['Lilac', '#C9A7F2'], ['Blush daisy', '#F28FA0']];
   var game = null;
 
+  /* ---------- Calm: breathing, games and sounds in one screen ---------- */
+  var SEGS = ['breathe', 'games', 'sounds'];
+  var calmSeg = 'breathe';
+  var BREATH_LIST = ['quick', 'sigh', 'breeze', 'square', 'cooldown'];
+  var MIND_LIST = ['here', 'release', 'letitout', 'kind', 'desk', 'pause', 'warmth'];
+  function setSeg(seg, focus) {
+    if (SEGS.indexOf(seg) === -1) seg = 'breathe';
+    calmSeg = seg;
+    var bar = document.querySelector('#screen-play .seg');
+    if (!bar) return;
+    bar.setAttribute('data-active', seg);
+    SEGS.forEach(function (k) {
+      var on = k === seg;
+      $('seg-' + k).setAttribute('aria-selected', String(on));
+      $('seg-' + k).tabIndex = on ? 0 : -1;
+      $('panel-' + k).hidden = !on;
+    });
+    if (focus) $('seg-' + seg).focus();
+  }
+  function stepSeg(dir) {
+    var i = SEGS.indexOf(calmSeg) + dir;
+    if (i >= 0 && i < SEGS.length) { setSeg(SEGS[i], true); haptic('light'); }
+  }
+  function practiceCard(id) {
+    var t = TECH[id];
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'practice' + (id === 'quick' ? ' featured' : '');
+    b.setAttribute('data-practice', id);
+    b.style.setProperty('--c', t.color);
+    var orb = document.createElement('span'); orb.className = 'practice-orb'; orb.setAttribute('aria-hidden', 'true');
+    var body = document.createElement('span'); body.className = 'practice-body';
+    var nm = document.createElement('strong'); nm.textContent = t.name;
+    var ds = document.createElement('span'); ds.className = 'practice-desc'; ds.textContent = t.desc;
+    var meta = document.createElement('span'); meta.className = 'practice-meta';
+    if (!isUnlocked(id)) {
+      b.disabled = true;
+      meta.textContent = 'Opens in ' + plural(TECH[id].unlockAt - breaksDone(), 'more break', 'more breaks');
+    } else if (id === 'quick') meta.textContent = '1 min · Always free';
+    else meta.textContent = Math.round(t.seconds / 60) + ' min' + (t.space ? ' · ' + SPACES[t.space].name : '');
+    body.appendChild(nm); body.appendChild(ds); body.appendChild(meta);
+    b.appendChild(orb); b.appendChild(body);
+    return b;
+  }
+  function renderPractice() {
+    [['practice-breath', BREATH_LIST], ['practice-mind', MIND_LIST]].forEach(function (g) {
+      var box = $(g[0]);
+      box.textContent = '';
+      g[1].forEach(function (id) { box.appendChild(practiceCard(id)); });
+    });
+  }
+  function startPractice(id) {
+    if (!TECH[id] || !isUnlocked(id)) return;
+    if (id === 'quick') { startCheckin('quick'); flow.chosen = true; return; }
+    startCheckin('guided', TECH[id].space || null);
+    flow.technique = id; flow.picked = true; flow.chosen = true; flow.reason = 'You picked this one yourself.';
+  }
+  function bindCalmGestures() {
+    var bar = document.querySelector('#screen-play .seg');
+    bar.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); stepSeg(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); stepSeg(-1); }
+    });
+    var scr = $('screen-play'), x0 = null, y0 = 0;
+    scr.addEventListener('touchstart', function (e) {
+      var t = e.target;
+      x0 = t.closest && t.closest('input, .seg') ? null : e.touches[0].clientX;
+      y0 = e.touches[0].clientY;
+    }, { passive: true });
+    scr.addEventListener('touchend', function (e) {
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+      x0 = null;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) stepSeg(dx < 0 ? 1 : -1);
+    }, { passive: true });
+  }
+
   function renderPlay() {
+    renderPractice();
+    setSeg(calmSeg);
     var dk = dayKey(now());
     var played = state.games.day === dk ? state.games.count : 0;
     setText('play-note', played >= DAILY_GAME_REWARDS
@@ -1755,7 +1835,7 @@
 
   /* ---------- Toolkit: support, safety plan, reframe, sounds, wellbeing, backup ---------- */
 
-  var TOOL_SCREENS = ['support', 'safety', 'reframe', 'sounds', 'wellbeing'];
+  var TOOL_SCREENS = ['support', 'safety', 'reframe', 'wellbeing'];
   function toolXp(points) {
     var dk = dayKey(now());
     if (state.toolXp.day !== dk) state.toolXp = { day: dk, count: 0 };
@@ -2438,11 +2518,15 @@
     if (lessonId) { openLesson(lessonId); return; }
     var themeChoice = el.getAttribute('data-theme-choice');
     if (themeChoice) { setTheme(themeChoice); haptic('light'); return; }
+    var seg = el.getAttribute('data-seg');
+    if (seg) { setSeg(seg); haptic('light'); return; }
+    var practice = el.getAttribute('data-practice');
+    if (practice) { startPractice(practice); haptic('light'); return; }
     var langChoice = el.getAttribute('data-lang-choice');
     if (langChoice) { setLang(langChoice); haptic('light'); return; }
     var tool = el.getAttribute('data-tool');
     if (tool) { closeSheets(true); go(tool); return; }
-    if (el.hasAttribute('data-back')) { if (current === 'sounds') { /* sounds keep playing */ } go(lastTab || 'today'); return; }
+    if (el.hasAttribute('data-back')) { go(lastTab || 'today'); return; }
     var wb = el.getAttribute('data-wb');
     if (wb) { var parts = wb.split(':'); answerWb(+parts[0], +parts[1]); haptic('light'); return; }
     var snd = el.getAttribute('data-sound');
@@ -2489,9 +2573,9 @@
         flow.before = clampScore($('calm-before').value);
         if (!flow.context) { flow.context = 'Just a quick lift'; flow.contexts = [flow.context]; }
         if (flow.mode === 'quick') beginBreak('quick');
-        else { flow.picked = !!flow.fromLesson; go('pick'); }
+        else { flow.picked = !!(flow.fromLesson || flow.chosen); go('pick'); }
         break;
-      case 'checkin-back': go(state.onboarded ? 'today' : 'gift'); break;
+      case 'checkin-back': go(flow.chosen ? 'play' : state.onboarded ? 'today' : 'gift'); break;
       case 'pick-begin': beginBreak(flow.technique); break;
       case 'pick-quick': beginBreak('quick'); break;
       case 'session-finish': endSession(false); break;
@@ -2631,6 +2715,7 @@
     document.addEventListener('visibilitychange', function () { if (!document.hidden && current === 'today') renderGoldenBanner(); });
     applyTheme();
     applyLang();
+    bindCalmGestures();
     $('lock-pin').addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) hiddenAt = Date.now();
@@ -2668,6 +2753,9 @@
     isLocked: isLocked,
     showLock: showLock,
     setLang: setLang,
+    setSeg: setSeg,
+    calmSeg: function () { return calmSeg; },
+    startPractice: startPractice,
     tr: tr,
     translateDom: translateDom,
     sha256: sha256,

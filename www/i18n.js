@@ -418,6 +418,14 @@
     'Listen, ask directly, and connect them to support.': 'सुनें, सीधे पूछें, और उन्हें मदद से जोड़ें।',
     'Not sure where to start? Tele-MANAS is free, kind and open 24x7.': 'पता नहीं कहाँ से शुरू करें? Tele-MANAS मुफ़्त, दयालु और 24x7 खुला है।',
 
+    /* ---- Calm screen: Breathe, Games, Sounds ---- */
+    'Breathe, play, listen': 'साँस लें, खेलें, सुनें', 'Breathe': 'साँस', 'Games': 'खेल', 'Sounds': 'आवाज़ें',
+    'Breathing': 'साँस के अभ्यास', 'Body and mind': 'तन और मन', 'You picked this one yourself.': 'यह आपने खुद चुना।',
+    'Pick any exercise. You rate how you feel before and after, so your Calm gain keeps growing.':
+      'कोई भी अभ्यास चुनें। आप पहले और बाद में बताते हैं कि कैसा लग रहा है, ताकि आपका Calm gain बढ़ता रहे।',
+    'Made on your device, works offline. Keep LoosenUp open while a sound plays.':
+      'आपके डिवाइस पर बनी, बिना इंटरनेट चलती हैं। आवाज़ चलते समय LoosenUp खुला रखें।',
+
     /* ---- Play ---- */
     'Calm little games': 'शांत छोटे खेल',
     'Gentle games with nothing to rush. Each one adds a little XP, up to 3 games a day.': 'कोमल खेल, बिना किसी जल्दी के। हर खेल थोड़ा XP जोड़ता है, दिन में 3 खेल तक।',

@@ -504,26 +504,6 @@
       </section>
 
       <!-- Calm sounds -->
-      <section id="screen-sounds" class="screen tool-screen" data-screen="sounds" hidden aria-labelledby="sounds-title">
-        <button class="btn btn-ghost back-btn" type="button" data-back>Back</button>
-        <p class="eyebrow">Made on your device, works offline</p>
-        <h1 id="sounds-title" class="title">Calm sounds</h1>
-        <div class="sound-grid">
-          <button class="sound" type="button" data-sound="rain" aria-pressed="false"><strong>Rain</strong><span>Soft and steady</span></button>
-          <button class="sound" type="button" data-sound="ocean" aria-pressed="false"><strong>Ocean</strong><span>Slow waves</span></button>
-          <button class="sound" type="button" data-sound="brown" aria-pressed="false"><strong>Deep hush</strong><span>Warm brown noise</span></button>
-          <button class="sound" type="button" data-sound="breeze" aria-pressed="false"><strong>Breeze</strong><span>Gentle airflow</span></button>
-        </div>
-        <div class="card stack">
-          <label class="field-label" for="sound-volume">Volume</label>
-          <input id="sound-volume" class="range" type="range" min="0" max="100" value="60" aria-label="Volume">
-          <p class="field-label">Sleep timer</p>
-          <div class="chips" role="group" aria-label="Sleep timer"><button class="chip" type="button" data-timer="0" aria-pressed="true">Off</button><button class="chip" type="button" data-timer="15" aria-pressed="false">15 min</button><button class="chip" type="button" data-timer="30" aria-pressed="false">30 min</button><button class="chip" type="button" data-timer="60" aria-pressed="false">60 min</button></div>
-          <p id="sound-status" class="fine" aria-live="polite">Tap a sound to begin. Keep LoosenUp open while it plays.</p>
-          <button id="sound-stop" class="btn btn-soft" type="button">Stop</button>
-        </div>
-      </section>
-
       <!-- Wellbeing check -->
       <section id="screen-wellbeing" class="screen tool-screen" data-screen="wellbeing" hidden aria-labelledby="wb-title">
         <button class="btn btn-ghost back-btn" type="button" data-back>Back</button>
@@ -562,25 +542,63 @@
       </section>
 
       <!-- Play -->
-      <section id="screen-play" class="screen" data-screen="play" hidden aria-labelledby="play-title">
-        <p class="eyebrow">Calm little games</p>
-        <h1 id="play-title" class="title">Play</h1>
-        <p class="muted">Gentle games with nothing to rush. Each one adds a little XP, up to 3 games a day.</p>
-        <div class="games">
-          <button id="game-pairs-open" class="game-card" type="button" data-game="pairs">
-            <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><rect x="4" y="8" width="20" height="28" rx="6" fill="#FFB088"/><rect x="30" y="18" width="20" height="28" rx="6" fill="#fff" stroke="#4FA67C" stroke-width="2"/><circle cx="40" cy="32" r="5" fill="#FFC857"/></svg></span>
-            <span><strong>Petal Pairs</strong><span>Turn the cards and match the flowers.</span></span>
-          </button>
-          <button id="game-catch-open" class="game-card" type="button" data-game="catch">
-            <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><circle cx="18" cy="16" r="8" fill="#FFC857"/><circle cx="36" cy="30" r="6" fill="#FFB088"/><path d="M14 40h26l-3 10H17z" fill="#4FA67C"/></svg></span>
-            <span><strong>Sunbeam Catch</strong><span>Tap drifting sunbeams into your jar.</span></span>
-          </button>
-          <button id="game-bloom-open" class="game-card" type="button" data-game="bloom">
-            <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><use href="#petal-sun" x="7" y="7" width="40" height="40"/></svg></span>
-            <span><strong>Breath Bloom</strong><span>Hold to breathe in, let go to breathe out.</span></span>
-          </button>
+      <section id="screen-play" class="screen calm-studio" data-screen="play" hidden aria-labelledby="play-title">
+        <p class="eyebrow">Breathe, play, listen</p>
+        <h1 id="play-title" class="title">Calm</h1>
+        <div class="seg" role="tablist" aria-label="Calm" data-active="breathe">
+          <span class="seg-thumb" aria-hidden="true"></span>
+          <button id="seg-breathe" class="seg-btn" type="button" role="tab" data-seg="breathe" aria-selected="true" aria-controls="panel-breathe">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9c3 0 3-3 6-3s3 3 6 3 3-3 6-3M3 15c3 0 3-3 6-3s3 3 6 3 3-3 6-3M3 21c3 0 3-3 6-3s3 3 6 3 3-3 6-3"/></svg>Breathe</button>
+          <button id="seg-games" class="seg-btn" type="button" role="tab" data-seg="games" aria-selected="false" aria-controls="panel-games" tabindex="-1">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8.5h12a3.5 3.5 0 0 1 3.4 4.3l-1 4a2.6 2.6 0 0 1-4.5 1l-1.6-2H9.7l-1.6 2a2.6 2.6 0 0 1-4.5-1l-1-4A3.5 3.5 0 0 1 6 8.5zM8 11v3M6.5 12.5h3M16 12h.01"/></svg>Games</button>
+          <button id="seg-sounds" class="seg-btn" type="button" role="tab" data-seg="sounds" aria-selected="false" aria-controls="panel-sounds" tabindex="-1">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14v-4M8 18V6M12 15V9M16 20V4M20 14v-4"/></svg>Sounds</button>
         </div>
-        <p id="play-note" class="fine center"></p>
+
+        <div id="panel-breathe" class="seg-panel" role="tabpanel" aria-labelledby="seg-breathe">
+          <p class="muted">Pick any exercise. You rate how you feel before and after, so your Calm gain keeps growing.</p>
+          <h2 class="panel-head">Breathing</h2>
+          <div id="practice-breath" class="practice-grid"></div>
+          <h2 class="panel-head">Body and mind</h2>
+          <div id="practice-mind" class="practice-grid"></div>
+        </div>
+
+        <div id="panel-games" class="seg-panel" role="tabpanel" aria-labelledby="seg-games" hidden>
+          <p class="muted">Gentle games with nothing to rush. Each one adds a little XP, up to 3 games a day.</p>
+          <div class="games">
+            <button id="game-pairs-open" class="game-card" type="button" data-game="pairs">
+              <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><rect x="4" y="8" width="20" height="28" rx="6" fill="#FFB088"/><rect x="30" y="18" width="20" height="28" rx="6" fill="#fff" stroke="#4FA67C" stroke-width="2"/><circle cx="40" cy="32" r="5" fill="#FFC857"/></svg></span>
+              <span><strong>Petal Pairs</strong><span>Turn the cards and match the flowers.</span></span>
+            </button>
+            <button id="game-catch-open" class="game-card" type="button" data-game="catch">
+              <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><circle cx="18" cy="16" r="8" fill="#FFC857"/><circle cx="36" cy="30" r="6" fill="#FFB088"/><path d="M14 40h26l-3 10H17z" fill="#4FA67C"/></svg></span>
+              <span><strong>Sunbeam Catch</strong><span>Tap drifting sunbeams into your jar.</span></span>
+            </button>
+            <button id="game-bloom-open" class="game-card" type="button" data-game="bloom">
+              <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><use href="#petal-sun" x="7" y="7" width="40" height="40"/></svg></span>
+              <span><strong>Breath Bloom</strong><span>Hold to breathe in, let go to breathe out.</span></span>
+            </button>
+          </div>
+          <p id="play-note" class="fine center"></p>
+        </div>
+
+        <div id="panel-sounds" class="seg-panel" role="tabpanel" aria-labelledby="seg-sounds" hidden>
+          <p class="muted">Made on your device, works offline. Keep LoosenUp open while a sound plays.</p>
+          <div class="sound-grid">
+            <button class="sound" type="button" data-sound="rain" aria-pressed="false"><strong>Rain</strong><span>Soft and steady</span></button>
+            <button class="sound" type="button" data-sound="ocean" aria-pressed="false"><strong>Ocean</strong><span>Slow waves</span></button>
+            <button class="sound" type="button" data-sound="brown" aria-pressed="false"><strong>Deep hush</strong><span>Warm brown noise</span></button>
+            <button class="sound" type="button" data-sound="breeze" aria-pressed="false"><strong>Breeze</strong><span>Gentle airflow</span></button>
+          </div>
+          <div class="card stack">
+            <label class="field-label" for="sound-volume">Volume</label>
+            <input id="sound-volume" class="range" type="range" min="0" max="100" value="60" aria-label="Volume">
+            <p class="field-label">Sleep timer</p>
+            <div class="chips" role="group" aria-label="Sleep timer"><button class="chip" type="button" data-timer="0" aria-pressed="true">Off</button><button class="chip" type="button" data-timer="15" aria-pressed="false">15 min</button><button class="chip" type="button" data-timer="30" aria-pressed="false">30 min</button><button class="chip" type="button" data-timer="60" aria-pressed="false">60 min</button></div>
+            <p id="sound-status" class="fine" aria-live="polite">Tap a sound to begin. Keep LoosenUp open while it plays.</p>
+            <button id="sound-stop" class="btn btn-soft" type="button">Stop</button>
+          </div>
+        </div>
       </section>
 
       <!-- Game -->
@@ -731,7 +749,7 @@
       <button type="button" role="tab" data-tab="today" aria-selected="true">
         <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>Today</button>
       <button type="button" role="tab" data-tab="play" aria-selected="false">
-        <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="1.2"/><path d="M6 8.5h12a3.5 3.5 0 0 1 3.4 4.3l-1 4a2.6 2.6 0 0 1-4.5 1l-1.6-2H9.7l-1.6 2a2.6 2.6 0 0 1-4.5-1l-1-4A3.5 3.5 0 0 1 6 8.5zM16 11v2M15 12h2"/></svg>Play</button>
+        <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6.5" opacity=".55"/><circle cx="12" cy="12" r="10" opacity=".3"/></svg>Calm</button>
       <button type="button" role="tab" data-tab="garden" aria-selected="false">
         <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="2.2"/><path d="M12 5.8c0-2.5 3.2-3 3.2-.4M12 5.8c0-2.5-3.2-3-3.2-.4M14.2 8c2.5 0 3 3.2.4 3.2M9.8 8c-2.5 0-3 3.2-.4 3.2M12 10.2V21M12 17c-2.5 0-4.5-1.5-5-4 2.5 0 4.5 1.5 5 4zM12 15.5c2-.2 3.8-1.5 4.2-3.6-2 .2-3.8 1.5-4.2 3.6z"/></svg>Garden</button>
       <button type="button" role="tab" data-tab="week" aria-selected="false">

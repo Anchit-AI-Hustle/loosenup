@@ -11,12 +11,15 @@ const ready = (opts = {}) => {
 
 test('AT22 Today shows the toolkit and each tool opens its screen with a way back', () => {
   const app = ready();
-  for (const t of ['support', 'safety', 'reframe', 'sounds', 'wellbeing']) {
+  for (const t of ['support', 'safety', 'reframe', 'wellbeing']) {
     app.click(`#screen-today [data-tool="${t}"]`);
     assert.equal(app.B.currentScreen(), t);
     app.click(`#screen-${t} [data-back]`);
     assert.equal(app.B.currentScreen(), 'today');
   }
+  app.click('#screen-today [data-tool="sounds"]');
+  assert.equal(app.B.currentScreen(), 'play', 'Calm sounds opens the Sounds tab of Calm');
+  assert.equal(app.visible('#panel-sounds'), true);
 });
 
 test('AT22 Find support lists verified helplines with working links', () => {

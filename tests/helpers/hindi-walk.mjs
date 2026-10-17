@@ -45,6 +45,7 @@ export async function walkAll({ lang = 'hi' } = {}) {
   app.click('[data-context="Busy mind"]'); app.click('[data-context="Tight shoulders"]'); app.click('#checkin-next'); await grab();
   app.click('#pick-begin'); await grab(); app.click('#session-finish'); await grab(); app.click('#after-next'); await grab();
   for (const s of ['today', 'play', 'garden', 'week', 'me', 'support', 'safety', 'reframe', 'sounds', 'wellbeing', 'learn']) { B.go(s); await grab(); }
+  for (const sg of ['breathe', 'games', 'sounds']) { B.go('play'); app.click(`[data-seg="${sg}"]`); await grab(); }
   for (const l of B.lessons) { B.openLesson(l.id); await grab(); }
   for (const g of ['pairs', 'catch', 'bloom']) { B.openGame(g); await grab(); B.finishCurrentGame(); await grab(); }
   for (let m = 1; m <= 5; m++) { B.go('today'); app.click(`[data-mood="${m}"]`); await grab(); }
