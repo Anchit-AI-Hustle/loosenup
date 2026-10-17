@@ -1,0 +1,19 @@
+{
+  "appId": "com.brightside.calm",
+  "appName": "Brightside",
+  "webDir": "www",
+  "backgroundColor": "#EDF7FF",
+  "android": {
+    "backgroundColor": "#EDF7FF"
+  },
+  "ios": {
+    "backgroundColor": "#EDF7FF",
+    "contentInset": "never"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_brightside",
+      "iconColor": "#F2A72B"
+    }
+  }
+}

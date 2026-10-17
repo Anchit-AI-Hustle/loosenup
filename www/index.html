@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Brightside</title>
+  <meta name="description" content="Two calm minutes, whenever you want them. Rate how you feel, breathe, and watch your Calm gain grow.">
+  <meta name="theme-color" content="#EDF7FF">
+  <meta name="color-scheme" content="light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Brightside">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">
+  <link rel="preload" href="/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="sky" aria-hidden="true"><span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span></div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-sun" aria-hidden="true"></span><span>Brightside</span></div>
+      <button id="seed-pill" class="seed-pill" type="button" hidden aria-label="Seeds and plan">
+        <span class="seed-dot" aria-hidden="true"></span><span id="seed-pill-count">0</span><span>Seeds</span>
+      </button>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <!-- Welcome -->
+      <section id="screen-welcome" class="screen" data-screen="welcome" hidden aria-labelledby="welcome-title">
+        <div class="hero-sun" aria-hidden="true">
+          <svg viewBox="0 0 200 120"><defs><linearGradient id="hs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFC857"/><stop offset="1" stop-color="#F2A72B"/></linearGradient>
+            <clipPath id="hs-clip"><rect x="0" y="0" width="200" height="98"/></clipPath></defs>
+            <g clip-path="url(#hs-clip)"><g class="rays"><path d="M100 8v18M38 34l12 12M162 34l-12 12M16 92h18M166 92h18" stroke="#FFC857" stroke-width="7" stroke-linecap="round"/></g>
+            <circle cx="100" cy="96" r="52" fill="url(#hs)"/></g>
+            <path d="M0 102 Q100 82 200 102 Q170 120 100 120 Q30 120 0 102Z" fill="#4FA67C"/></svg>
+        </div>
+        <h1 id="welcome-title" class="display">Hello, sunshine.</h1>
+        <p class="lead">Brightside is two calm minutes, whenever you want them. Rate how you feel, breathe with us, and watch your Calm gain grow.</p>
+        <form id="welcome-form" class="stack" novalidate>
+          <label class="field-label" for="name-input">What should we call you?</label>
+          <input id="name-input" class="text-input" type="text" autocomplete="given-name" maxlength="24" placeholder="Your first name" required>
+          <button id="welcome-go" class="btn btn-sun" type="submit">Let's begin</button>
+        </form>
+        <p class="fine">Everything stays on this device.</p>
+      </section>
+
+      <!-- Gift -->
+      <section id="screen-gift" class="screen" data-screen="gift" hidden aria-labelledby="gift-title">
+        <div class="gift" aria-hidden="true">
+          <svg viewBox="0 0 200 170" class="gift-svg">
+            <g class="gift-glow"><circle cx="100" cy="90" r="70" fill="#FFF0C7"/></g>
+            <g class="gift-lid"><rect x="44" y="52" width="112" height="26" rx="8" fill="#FFB088"/><rect x="92" y="52" width="16" height="26" fill="#FFC857"/>
+              <path d="M100 52c-14-26-40-20-30-4 6 8 30 4 30 4zm0 0c14-26 40-20 30-4-6 8-30 4-30 4z" fill="#F2A72B"/></g>
+            <rect x="52" y="78" width="96" height="70" rx="10" fill="#FFB088"/><rect x="92" y="78" width="16" height="70" fill="#FFC857"/>
+            <g class="gift-seeds"><circle cx="70" cy="40" r="7" fill="#4FA67C"/><circle cx="130" cy="34" r="6" fill="#2E7D5B"/><circle cx="100" cy="22" r="8" fill="#4FA67C"/></g>
+          </svg>
+        </div>
+        <h1 id="gift-title" class="display">A welcome gift, <span class="name-slot"></span></h1>
+        <div class="gift-grid">
+          <div class="gift-chip"><strong>+5 Seeds</strong><span>for guided breaks</span></div>
+          <div class="gift-chip"><strong>+25 XP</strong><span>a head start</span></div>
+        </div>
+        <div class="card level-card">
+          <div class="level-row"><span class="level-name">Seedling</span><span class="level-pct">50%</span></div>
+          <div class="bar" role="progressbar" aria-label="Seedling progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><span id="gift-level-fill" class="bar-fill" style="width:50%"></span></div>
+          <p class="fine">You are already halfway to Sprout.</p>
+        </div>
+        <button id="gift-go" class="btn btn-sun" type="button">Start my first break</button>
+      </section>
+
+      <!-- Check-in -->
+      <section id="screen-checkin" class="screen" data-screen="checkin" hidden aria-labelledby="checkin-title">
+        <p class="step-label" id="checkin-step">Step 1 of 3</p>
+        <h1 id="checkin-title" class="title">How calm do you feel right now?</h1>
+        <div class="card slider-card">
+          <output id="calm-before-out" class="slider-value" for="calm-before">5</output>
+          <p id="calm-before-word" class="slider-word">Somewhere in the middle</p>
+          <input id="calm-before" class="range" type="range" min="1" max="10" step="1" value="5" aria-label="Calm right now, 1 to 10">
+          <div class="range-ends" aria-hidden="true"><span>1 a bit tangled</span><span>10 very calm</span></div>
+        </div>
+        <h2 class="subtitle" id="context-title">What is going on?</h2>
+        <div id="context-chips" class="chips" role="group" aria-labelledby="context-title"></div>
+        <button id="checkin-next" class="btn btn-sun" type="button">Next</button>
+        <button id="checkin-back" class="btn btn-ghost" type="button">Back</button>
+      </section>
+
+      <!-- Pick -->
+      <section id="screen-pick" class="screen" data-screen="pick" hidden aria-labelledby="pick-title">
+        <p class="step-label">Step 2 of 3</p>
+        <h1 id="pick-title" class="title">Your break for right now</h1>
+        <article class="card pick-card">
+          <div class="pick-badge" id="pick-icon" aria-hidden="true"></div>
+          <h2 id="pick-name" class="pick-name"></h2>
+          <p id="pick-desc" class="pick-desc"></p>
+          <p class="pick-reason"><span class="tag">Why this one</span> <span id="pick-reason"></span></p>
+          <p class="fine" id="pick-meta">2 minutes</p>
+        </article>
+        <h2 class="subtitle">Or choose another</h2>
+        <div id="pick-chips" class="chips"></div>
+        <button id="pick-begin" class="btn btn-sun" type="button">Begin</button>
+        <button id="pick-quick" class="btn btn-ghost" type="button">Quick breeze instead, 60s, always free</button>
+      </section>
+
+      <!-- Session -->
+      <section id="screen-session" class="screen session" data-screen="session" hidden aria-labelledby="session-title">
+        <h1 id="session-title" class="title center"></h1>
+        <div class="orb-wrap" id="orb-wrap">
+          <div class="orb-ring" aria-hidden="true"></div>
+          <div id="orb" class="orb" aria-hidden="true"></div>
+          <p id="cue" class="cue" aria-live="polite"></p>
+        </div>
+        <div id="step-box" class="card step-box" hidden>
+          <p id="step-count" class="step-label"></p>
+          <p id="step-text" class="step-text" aria-live="polite"></p>
+          <button id="step-next" class="btn btn-soft" type="button">Next step</button>
+        </div>
+        <div id="journal-box" class="card journal-box" hidden>
+          <label class="field-label" for="letitout-text">Type whatever is on your mind. It is never saved, and it clears when you finish.</label>
+          <textarea id="letitout-text" class="journal" rows="6" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Let it out here..."></textarea>
+        </div>
+        <p class="timer"><span id="session-time">2:00</span> <span class="fine">left</span></p>
+        <div class="session-controls">
+          <button id="session-pause" class="btn btn-soft" type="button" aria-pressed="false">Pause</button>
+          <button id="session-voice" class="btn btn-soft" type="button" aria-pressed="false">Voice off</button>
+        </div>
+        <button id="session-finish" class="btn btn-ghost" type="button">Finish early</button>
+      </section>
+
+      <!-- After -->
+      <section id="screen-after" class="screen" data-screen="after" hidden aria-labelledby="after-title">
+        <p class="step-label">Step 3 of 3</p>
+        <h1 id="after-title" class="title">How calm do you feel now?</h1>
+        <div class="card slider-card">
+          <output id="calm-after-out" class="slider-value" for="calm-after">5</output>
+          <p id="calm-after-word" class="slider-word">Somewhere in the middle</p>
+          <input id="calm-after" class="range" type="range" min="1" max="10" step="1" value="5" aria-label="Calm now, 1 to 10">
+          <div class="range-ends" aria-hidden="true"><span>1 a bit tangled</span><span>10 very calm</span></div>
+        </div>
+        <button id="after-next" class="btn btn-sun" type="button">See my Calm gain</button>
+      </section>
+
+      <!-- Result -->
+      <section id="screen-result" class="screen result" data-screen="result" hidden aria-labelledby="result-headline">
+        <div class="sunrise" aria-hidden="true">
+          <svg id="result-sun" viewBox="0 0 320 170">
+            <defs>
+              <linearGradient id="rs-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CFE8FF"/><stop offset="1" stop-color="#FFF6E3"/></linearGradient>
+              <radialGradient id="rs-sun" cx="0.5" cy="0.4" r="0.6"><stop offset="0" stop-color="#FFE29A"/><stop offset="0.6" stop-color="#FFC857"/><stop offset="1" stop-color="#F2A72B"/></radialGradient>
+              <clipPath id="rs-clip"><rect x="0" y="0" width="320" height="132"/></clipPath>
+            </defs>
+            <rect width="320" height="170" rx="24" fill="url(#rs-sky)"/>
+            <g clip-path="url(#rs-clip)"><g class="rs-rise">
+              <g class="rs-rays">
+                <path d="M160 18v-20M160 222v20M58 120h-20M282 120h-20M88 48l-14-14M232 48l14-14M88 192l-14 14M232 192l14 14" stroke="#FFC857" stroke-width="8" stroke-linecap="round"/>
+              </g>
+              <circle cx="160" cy="120" r="62" fill="url(#rs-sun)"/>
+            </g></g>
+            <path d="M0 132 Q80 112 160 128 T320 124 V170 H0Z" fill="#4FA67C"/>
+            <path d="M0 146 Q110 130 200 146 T320 142 V170 H0Z" fill="#2E7D5B" opacity=".85"/>
+          </svg>
+        </div>
+        <p id="result-headline" class="result-headline"></p>
+        <p class="gain"><span id="result-gain" class="gain-num">+0</span><span class="gain-label">Calm gain</span></p>
+        <div class="stat-grid">
+          <div class="stat"><span class="stat-k">Garden</span><span id="result-garden" class="stat-v">+1 flower</span></div>
+          <div class="stat"><span class="stat-k">Seeds</span><span id="result-seeds" class="stat-v"></span></div>
+          <div class="stat"><span class="stat-k">Sunny days</span><span id="result-streak" class="stat-v"></span></div>
+          <div class="stat"><span class="stat-k">Level</span><span id="result-level" class="stat-v"></span></div>
+        </div>
+        <ul id="result-rewards" class="rewards"></ul>
+        <p id="result-note" class="kind-note"></p>
+        <button id="result-done" class="btn btn-sun" type="button">Back to Today</button>
+      </section>
+
+      <!-- Today -->
+      <section id="screen-today" class="screen" data-screen="today" hidden aria-labelledby="today-title">
+        <h1 id="today-title" class="display small"></h1>
+        <div id="golden-banner" class="banner" hidden>
+          <span class="banner-sun" aria-hidden="true"></span>
+          <p><strong>Golden hour is here.</strong> Two calm minutes, whenever you like.</p>
+        </div>
+        <article class="card hero-card">
+          <div class="hero-card-art" aria-hidden="true"></div>
+          <h2 class="title">Ready for two calm minutes?</h2>
+          <p class="muted">Tell us how you feel and we will pick a break that suits you.</p>
+          <button id="start-break" class="btn btn-sun" type="button">Start a break</button>
+          <button id="quick-breeze" class="btn btn-ghost" type="button">Quick breeze, 60s, always free</button>
+        </article>
+        <div class="stat-grid">
+          <div class="stat"><span class="stat-k">Sunny days</span><span id="today-streak" class="stat-v"></span></div>
+          <div class="stat"><span class="stat-k">Seeds</span><span id="today-seeds" class="stat-v"></span></div>
+          <div class="stat wide"><span class="stat-k" id="today-level-name"></span>
+            <div class="bar" role="progressbar" aria-label="Level progress" aria-valuemin="0" aria-valuemax="100" id="today-level-bar"><span id="today-level-fill" class="bar-fill"></span></div>
+            <span id="today-level-pct" class="fine"></span></div>
+        </div>
+        <p id="today-rain" class="fine center"></p>
+        <h2 class="subtitle">Recent breaks</h2>
+        <ul id="today-recent" class="recent"></ul>
+      </section>
+
+      <!-- Garden -->
+      <section id="screen-garden" class="screen" data-screen="garden" hidden aria-labelledby="garden-title">
+        <h1 id="garden-title" class="title">Your garden</h1>
+        <div class="card garden-card"><svg id="garden-svg" viewBox="0 0 360 260" role="img" aria-label="Your garden"></svg></div>
+        <p id="garden-caption" class="muted center"></p>
+        <div class="card level-card">
+          <div class="level-row"><span id="garden-level" class="level-name"></span><span id="garden-level-pct" class="level-pct"></span></div>
+          <div class="bar"><span id="garden-level-fill" class="bar-fill"></span></div>
+          <p id="garden-next" class="fine"></p>
+        </div>
+        <h2 class="subtitle">Badges</h2>
+        <ul id="badges" class="badges"></ul>
+      </section>
+
+      <!-- Week -->
+      <section id="screen-week" class="screen" data-screen="week" hidden aria-labelledby="week-title">
+        <h1 id="week-title" class="title">Your Sunny week</h1>
+        <div class="card"><svg id="week-chart" viewBox="0 0 340 190" role="img" aria-label="Calm gain for the last 7 days"></svg></div>
+        <div class="stat-grid">
+          <div class="stat"><span class="stat-k">Breaks</span><span id="week-count" class="stat-v"></span></div>
+          <div class="stat"><span class="stat-k">Avg Calm gain</span><span id="week-avg" class="stat-v"></span></div>
+        </div>
+        <article class="card insight">
+          <h2 class="subtitle">What lifts you most</h2>
+          <p id="insight-tech"></p>
+          <p id="insight-time"></p>
+        </article>
+      </section>
+
+      <!-- Me -->
+      <section id="screen-me" class="screen" data-screen="me" hidden aria-labelledby="me-title">
+        <h1 id="me-title" class="title"></h1>
+        <article class="card">
+          <h2 class="subtitle">Seeds and plan</h2>
+          <p><strong id="me-seeds"></strong> <span id="me-plan" class="muted"></span></p>
+          <button id="open-shop" class="btn btn-soft" type="button">Visit the Seed shop</button>
+        </article>
+        <article class="card">
+          <h2 class="subtitle">Golden hour</h2>
+          <p class="muted" id="golden-help">Pick a daily time for a gentle reminder.</p>
+          <div class="row">
+            <label class="sr-only" for="golden-time">Golden hour time</label>
+            <input id="golden-time" class="text-input time" type="time" value="19:00">
+            <button id="golden-save" class="btn btn-soft" type="button">Save</button>
+          </div>
+          <button id="golden-clear" class="btn btn-ghost" type="button" hidden>Turn off Golden hour</button>
+        </article>
+        <article class="card">
+          <h2 class="subtitle">Voice guide</h2>
+          <p class="muted">Your device voice can read the breathing cues.</p>
+          <button id="voice-toggle" class="btn btn-soft" type="button" aria-pressed="false">Voice is off</button>
+        </article>
+        <article class="card sunbeam-card">
+          <h2 class="subtitle">Share a Sunbeam</h2>
+          <p class="muted">Invite a friend to Brightside. Sharing earns you a Seed (up to 2 free Seeds a week).</p>
+          <button id="sunbeam-share" class="btn btn-sun" type="button">Share a Sunbeam</button>
+        </article>
+        <article class="card" id="install-card">
+          <h2 class="subtitle">Install Brightside</h2>
+          <p id="install-text" class="muted"></p>
+          <button id="install-btn" class="btn btn-soft" type="button" hidden>Install app</button>
+        </article>
+        <article class="card">
+          <h2 class="subtitle">Support lines</h2>
+          <p class="muted">Kind people are ready to listen, any time.</p>
+          <button id="open-support" class="btn btn-soft" type="button">Open support lines</button>
+        </article>
+        <article class="card">
+          <h2 class="subtitle">Start fresh</h2>
+          <p class="muted">Your data lives only on this device.</p>
+          <button id="reset-btn" class="btn btn-ghost" type="button">Start fresh</button>
+        </article>
+      </section>
+    </main>
+
+    <p class="footnote">A wellbeing companion, not medical care.</p>
+  </div>
+
+  <nav class="tabbar" id="tabbar" aria-label="Main" hidden>
+    <div class="tabbar-inner" role="tablist">
+      <button type="button" role="tab" data-tab="today" aria-selected="true"><span class="ti ti-today" aria-hidden="true"></span>Today</button>
+      <button type="button" role="tab" data-tab="garden" aria-selected="false"><span class="ti ti-garden" aria-hidden="true"></span>Garden</button>
+      <button type="button" role="tab" data-tab="week" aria-selected="false"><span class="ti ti-week" aria-hidden="true"></span>Week</button>
+      <button type="button" role="tab" data-tab="me" aria-selected="false"><span class="ti ti-me" aria-hidden="true"></span>Me</button>
+    </div>
+  </nav>
+
+  <div id="scrim" class="scrim" hidden></div>
+
+  <section id="shop-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="shop-title" hidden>
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <h2 id="shop-title" class="title">Seed shop</h2>
+    <p class="demo-flag">DEMO checkout. Nothing is charged.</p>
+    <p id="shop-note" class="muted"></p>
+    <p class="muted">You have <strong id="shop-seeds">0</strong> Seeds. Each guided break plants 1 Seed.</p>
+    <article class="card plan-card">
+      <h3 class="plan-name">Full Bloom</h3>
+      <p class="muted">Every guided break with no Seeds needed, every technique as it opens.</p>
+      <p class="price">₹299/mo <span class="or">or</span> USD 6.99/mo</p>
+      <button class="btn btn-sun" type="button" data-sku="fullbloom">Choose Full Bloom (demo)</button>
+    </article>
+    <div class="packs">
+      <button class="pack" type="button" data-sku="seeds10"><strong>10 Seeds</strong><span>₹99 or USD 1.99</span></button>
+      <button class="pack" type="button" data-sku="seeds30"><em class="ribbon">Popular</em><strong>30 Seeds</strong><span>₹249 or USD 4.99</span></button>
+      <button class="pack" type="button" data-sku="seeds100"><em class="ribbon">Best value</em><strong>100 Seeds</strong><span>₹699 or USD 12.99</span></button>
+    </div>
+    <p class="fine">Quick breeze is always free. Prices are placeholders while Brightside is in preview.</p>
+    <button id="shop-quick" class="btn btn-soft" type="button">Take a Quick breeze</button>
+    <button id="shop-close" class="btn btn-ghost" type="button">Close</button>
+  </section>
+
+  <section id="checkout-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="checkout-title" hidden>
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <h2 id="checkout-title" class="title">DEMO checkout</h2>
+    <p class="demo-flag">This is a demo. Nothing is charged and no payment details are asked for.</p>
+    <div class="card"><p><strong id="checkout-item"></strong></p><p id="checkout-price" class="muted"></p></div>
+    <button id="checkout-confirm" class="btn btn-sun" type="button">Complete demo purchase</button>
+    <button id="checkout-cancel" class="btn btn-ghost" type="button">Not now</button>
+  </section>
+
+  <section id="support-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="support-title" hidden>
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <h2 id="support-title" class="title">You matter. Support is here.</h2>
+    <p class="muted">Talking to someone can help. These lines are free and kind.</p>
+    <a class="btn btn-sun" href="tel:14416">Call Tele-MANAS 14416 (India, 24x7)</a>
+    <a class="btn btn-soft" href="https://findahelpline.com" target="_blank" rel="noopener">Find a helpline anywhere: findahelpline.com</a>
+    <a class="btn btn-soft" href="tel:112">Emergency: call 112</a>
+    <p class="fine">Brightside is a wellbeing companion, not medical care. What you typed was not saved.</p>
+    <button id="support-close" class="btn btn-ghost" type="button">Back to Brightside</button>
+  </section>
+
+  <section id="confirm-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirm-title" hidden>
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <h2 id="confirm-title" class="title">Start fresh?</h2>
+    <p class="muted">This clears your garden, Seeds and history on this device so you can begin again.</p>
+    <button id="reset-confirm" class="btn btn-soft" type="button">Yes, start fresh</button>
+    <button id="reset-cancel" class="btn btn-ghost" type="button">Keep my garden</button>
+  </section>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+android/
+ios/
+node_modules/
+.venv/
+tests/
+dist/
+assets/
+scripts/
+*.zip
+*.apk

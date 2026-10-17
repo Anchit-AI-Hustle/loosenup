@@ -1,0 +1,19 @@
+node_modules/
+.venv/
+.vercel/
+.DS_Store
+tests/screenshots/
+*.log
+# Capacitor native build outputs
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/.idea/
+android/captures/
+ios/App/build/
+ios/App/Pods/
+ios/DerivedData/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/App.xcworkspace/xcuserdata/
+dist/
