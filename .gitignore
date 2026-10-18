@@ -39,3 +39,5 @@ site/
 .voice/
 .agents/
 skills-lock.json
+.claude/skills/
+.claude/launch.json
