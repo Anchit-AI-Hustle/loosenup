@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "loosenup",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tests/helpers/serve.mjs"],
+      "port": 4173
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>LoosenUp for organisations</title>
+  <meta name="description" content="LoosenUp for colleges and companies: calm breaks, SOS support and a privacy-first weekly dashboard.">
+  <meta name="theme-color" content="#EDF7FF">
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .org-page { display: flex; flex-direction: column; gap: 16px; padding: 6px 0 24px; }
+    .org-page ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+    .org-page .field { display: grid; gap: 6px; }
+    .org-page select { min-height: 48px; border-radius: 14px; border: 1px solid var(--line); padding: 0 12px; font: inherit; background: var(--glass); color: var(--ink); }
+    .code-box { font: 800 30px/1.1 var(--display); letter-spacing: .08em; padding: 14px; border-radius: 16px; background: var(--dawn); text-align: center; color: var(--ink); }
+    .key-box { font: 600 14px/1.4 ui-monospace, Menlo, monospace; word-break: break-all; padding: 12px; border-radius: 12px; background: var(--glass); border: 1px dashed var(--line); }
+    .price-row { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding: 8px 0; }
+    .weeks { display: grid; gap: 10px; }
+    .week { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .week h3 { grid-column: 1 / -1; margin: 0; font: 800 15px/1.2 var(--ui); }
+    .stat { padding: 10px; border-radius: 14px; background: var(--glass); border: 1px solid var(--line); }
+    .stat b { display: block; font: 700 22px/1.1 var(--display); }
+    .stat span { font-size: 13px; color: var(--ink-2); }
+    .stat.wide { grid-column: 1 / -1; }
+  </style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true"><span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span></div>
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="/" style="color: inherit; text-decoration: none;">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M20 2.5C28.6 2.5 34.5 8.4 34.5 15.6 34.5 21.6 28.9 25.4 24.3 29.6H15.7C11.1 25.4 5.5 21.6 5.5 15.6 5.5 8.4 11.4 2.5 20 2.5Z" fill="#F2A72B"/>
+          <path d="M20 2.5C25.4 2.5 29 8.4 29 15.6 29 21.4 25.9 25.4 23.2 29.6H16.8C14.1 25.4 11 21.4 11 15.6 11 8.4 14.6 2.5 20 2.5Z" fill="#FFC857"/>
+          <path d="M20 2.5C23.3 2.5 25 8.4 25 15.6 25 21.4 23.1 25.4 21.6 29.6H18.4C16.9 25.4 15 21.4 15 15.6 15 8.4 16.7 2.5 20 2.5Z" fill="#FFB088"/>
+          <rect x="15.4" y="29" width="9.2" height="2.2" rx="1" fill="#F2A72B"/>
+          <path d="M16.2 31.2l1 3.3M23.8 31.2l-1 3.3" stroke="#8A6B4A" stroke-width="0.9" stroke-linecap="round"/>
+          <rect x="16.4" y="34.2" width="7.2" height="4.3" rx="1.2" fill="#2E7D5B"/>
+        </svg>
+        <span class="wordmark">LoosenUp</span>
+      </a>
+    </header>
+    <main class="org-page">
+      <p class="eyebrow">For colleges and companies</p>
+      <h1 class="title">LoosenUp for your people</h1>
+      <p class="lead">Two calm minutes, SOS support one tap away, and a privacy-first view of how your people are doing.</p>
+
+      <article class="card">
+        <h2 class="subtitle">What your members get</h2>
+        <ul>
+          <li>Every calm break, the Calm screen and the toolkit, free</li>
+          <li>Guided programmes, including Exam calm and Recovering from burnout</li>
+          <li>SOS with Tele-MANAS, 112 and your own counselling line</li>
+          <li>English and Hindi, on Android, iPhone and the web</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2 class="subtitle">What you see</h2>
+        <ul>
+          <li>An anonymous weekly dashboard: how many people shared, average mood, average Calm gain, breaks taken and the top feelings</li>
+          <li>A week appears only when 5 or more people shared it, so nobody can be singled out</li>
+          <li>Never names, notes, journal text or anything about SOS</li>
+          <li>Sharing is off until each member turns it on</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2 class="subtitle">Pricing (preview)</h2>
+        <div class="price-row"><span>Colleges and schools</span><strong>₹29 per member a month</strong></div>
+        <div class="price-row"><span>Companies</span><strong>₹79 per member a month</strong></div>
+        <p class="fine">The first 3 months are a free pilot. Nothing is charged while LoosenUp is in preview.</p>
+      </article>
+
+      <article class="card" id="create-card">
+        <h2 class="subtitle">Create your organisation</h2>
+        <form id="create-form" class="stack" novalidate>
+          <label class="field"><span class="field-label">Organisation name</span><input id="f-name" class="text-input" required maxlength="80" placeholder="For example, Riverside College"></label>
+          <label class="field"><span class="field-label">Type</span>
+            <select id="f-kind"><option value="college">College</option><option value="school">School</option><option value="company">Company</option><option value="ngo">NGO</option><option value="other">Other</option></select></label>
+          <label class="field"><span class="field-label">Your counselling or support line (optional)</span><input id="f-support-name" class="text-input" maxlength="80" placeholder="For example, Student Wellness Centre"></label>
+          <label class="field"><span class="field-label">Its phone number (optional)</span><input id="f-support-phone" class="text-input" inputmode="tel" maxlength="20" placeholder="+91 80 1234 5678"></label>
+          <button class="btn btn-sun" type="submit">Create and get a join code</button>
+          <p id="create-status" class="fine" aria-live="polite"></p>
+        </form>
+      </article>
+
+      <article class="card" id="created-card" hidden>
+        <h2 class="subtitle">Your join code</h2>
+        <p class="muted">Share this with your members. They add it in LoosenUp, under Me, Your organisation.</p>
+        <p id="out-code" class="code-box"></p>
+        <h2 class="subtitle">Your admin key</h2>
+        <p class="muted">Save this key somewhere safe. It is the only way into your dashboard, and it cannot be recovered.</p>
+        <p id="out-key" class="key-box"></p>
+        <a id="out-dash" class="btn btn-sun" href="/org.html">Open your dashboard</a>
+      </article>
+
+      <a class="btn btn-ghost" href="/org.html">Already set up? Open your dashboard</a>
+    </main>
+    <p class="footnote">A wellbeing companion, not medical care.</p>
+  </div>
+  <script>
+    (function () {
+      var form = document.getElementById('create-form');
+      var status = document.getElementById('create-status');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var name = document.getElementById('f-name').value.trim();
+        if (name.length < 2) { status.textContent = 'Add the organisation name.'; return; }
+        status.textContent = 'Creating...';
+        fetch('/api/org', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+          action: 'create', name: name, kind: document.getElementById('f-kind').value,
+          supportName: document.getElementById('f-support-name').value, supportPhone: document.getElementById('f-support-phone').value
+        }) }).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error); return j; }); })
+          .then(function (j) {
+            document.getElementById('out-code').textContent = j.joinCode;
+            document.getElementById('out-key').textContent = j.adminKey;
+            document.getElementById('out-dash').href = '/org.html#key=' + encodeURIComponent(j.adminKey);
+            document.getElementById('create-card').hidden = true;
+            document.getElementById('created-card').hidden = false;
+          })
+          .catch(function (err) { status.textContent = (err && err.message) || 'Please try again in a moment.'; });
+      });
+    })();
+  </script>
+</body>
+</html>

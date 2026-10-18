@@ -26,7 +26,7 @@ test('AT7 shop lists Full Bloom and Seed packs in INR and USD', () => {
   onboard(app);
   app.B.openShop();
   const t = app.$('#shop-sheet').textContent.replace(/\s+/g, ' ');
-  for (const p of ['₹299', 'USD 6.99', '₹99', 'USD 1.99', '₹249', 'USD 4.99', '₹699', 'USD 12.99']) {
+  for (const p of ['₹149', 'USD 4.99/mo', '₹799', 'USD 34.99', '₹99', 'USD 1.99', '₹249', 'USD 4.99', '₹699', 'USD 12.99']) {
     assert.ok(t.includes(p), `price ${p}`);
   }
   for (const n of ['10 Seeds', '30 Seeds', '100 Seeds', 'Full Bloom']) assert.ok(t.includes(n), n);

@@ -1,10 +1,11 @@
 /* LoosenUp service worker: precache the shell, cache-first for same-origin GET. */
-var CACHE = 'loosenup-v1.8.1';
+var CACHE = 'loosenup-v1.9.0';
 var SHELL = [
   '/',
   '/index.html',
   '/styles.css',
   '/i18n.js',
+  '/partners.js',
   '/app.js',
   '/manifest.json',
   '/fonts/nunito-latin.woff2',

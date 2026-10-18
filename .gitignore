@@ -36,3 +36,6 @@ site/
 /gradlew
 /gradlew.bat
 /local.properties
+.voice/
+.agents/
+skills-lock.json

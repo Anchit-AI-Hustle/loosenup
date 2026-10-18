@@ -9,7 +9,7 @@ export const KEEP_EN = [
   'Kind words', 'Desk reset', 'Steady square', 'Pause before replying', 'Cool down', 'Warm wishes', 'Quick breeze',
   'findahelpline.com', 'Vandrevala Foundation', 'iCall (TISS)', 'iCall', 'Stanley-Brown', 'WHO-5', 'RCI', 'NMC', 'MBBS', 'MD', 'CBT', 'OPD',
   'USD', 'Android', 'iPhone', 'Safari', 'Chrome', 'Share', 'Add to Home Screen', 'Install app', 'loosenup-ios.anchit-tandon.com',
-  'English', 'Asha', 'Rao', 'Dr', 'Meera', 'Seed shop', 'x7'
+  'English', 'Asha', 'Rao', 'Dr', 'Meera', 'Seed shop', 'x7', 'LUAB12CD', 'Amaha', 'Mpower', 'BMC', 'NCR', 'AI', 'WhatsApp', 'NGO', 'OPD', 'Anchit'
 ];
 
 export function leftovers(text) {
@@ -46,6 +46,12 @@ export async function walkAll({ lang = 'hi' } = {}) {
   app.click('#pick-begin'); await grab(); app.click('#session-finish'); await grab(); app.click('#after-next'); await grab();
   for (const s of ['today', 'play', 'garden', 'week', 'me', 'support', 'safety', 'reframe', 'sounds', 'wellbeing', 'learn']) { B.go(s); await grab(); }
   for (const sg of ['breathe', 'games', 'sounds']) { B.go('play'); app.click(`[data-seg="${sg}"]`); await grab(); }
+  for (const id of Object.keys(B.programs)) { B.openProgram(id); await grab(); }
+  B.go('programs'); await grab();
+  for (const id of Object.keys(B.programs)) { B.openProgram(id); B.startProgramDay(); await grab(); }
+  B.setState({ plan: 'fullbloom' }); B.openProgram('sleep'); await grab(); B.setState({ plan: 'free' });
+  B.go('support'); B.useLocation({ lat: 28.6, lon: 77.2 }); await grab();
+  for (const c of ['Mumbai', 'Bengaluru', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow', 'Chandigarh', 'Kochi']) { B.setCity(c); await grab(); }
   for (const l of B.lessons) { B.openLesson(l.id); await grab(); }
   for (const g of ['pairs', 'catch', 'bloom']) { B.openGame(g); await grab(); B.finishCurrentGame(); await grab(); }
   for (let m = 1; m <= 5; m++) { B.go('today'); app.click(`[data-mood="${m}"]`); await grab(); }

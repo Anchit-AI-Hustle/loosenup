@@ -8,7 +8,7 @@ const BANNED = ['stress', 'anxiety', 'danger', 'fail', 'lose', 'lost', 'wilt', '
 const BANNED_RE = new RegExp(`\\b(${BANNED.join('|')})\\b`, 'i');
 const DASH_RE = /[\u2013\u2014]/;
 
-const SKIP_DIRS = new Set(['node_modules', '.git', '.venv', 'build', '.gradle', 'Pods', 'DerivedData', '.idea', 'xcuserdata', 'screenshots', '.build', 'SourcePackages']);
+const SKIP_DIRS = new Set(['node_modules', '.git', '.venv', '.voice', '.agents', '.claude', 'build', '.gradle', 'Pods', 'DerivedData', '.idea', 'xcuserdata', 'screenshots', '.build', 'SourcePackages']);
 const TEXT_EXT = new Set(['.html', '.css', '.js', '.mjs', '.json', '.md', '.txt', '.xml', '.gradle', '.kts', '.java', '.kt', '.swift', '.plist', '.yml', '.yaml', '.py', '.properties', '.pro', '.storyboard', '.xcconfig', '.pbxproj', '.gitignore', '.vercelignore', '']);
 
 function walk(dir, out = []) {
@@ -23,7 +23,7 @@ function walk(dir, out = []) {
 }
 
 const COPY_FILES = [
-  'www/index.html', 'www/install.html', 'www/app.js', 'www/i18n.js', 'www/styles.css', 'www/sw.js', 'www/manifest.json',
+  'www/index.html', 'www/install.html', 'www/teams.html', 'www/org.html', 'api/org.js', 'www/app.js', 'www/i18n.js', 'www/styles.css', 'www/sw.js', 'www/manifest.json',
   'README.md', 'capacitor.config.json', 'android/app/src/main/res/values/strings.xml',
 ].filter((f) => existsSync(path.join(ROOT, f)));
 

@@ -25,6 +25,7 @@
       document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light'); } catch (e) {} })();
   </script>
   <script src="/i18n.js" defer></script>
+  <script src="/partners.js" defer></script>
   <script src="/app.js" defer></script>
 </head>
 <body>
@@ -137,12 +138,17 @@
         <p class="eyebrow" id="checkin-step">Step 1 of 3</p>
         <h1 id="checkin-title" class="title">How calm do you feel right now?</h1>
         <div class="card slider-card">
-          <div class="slider-top">
-            <svg id="calm-before-sun" class="slider-sun" viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg>
-            <output id="calm-before-out" class="slider-value" for="calm-before">5</output>
+          <div id="calm-before-sky" class="mood-sky" style="--v: .44">
+            <span class="ms-glow" aria-hidden="true"></span>
+            <svg id="calm-before-sun" class="ms-sun" viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg>
+            <span class="ms-cloud ms-c1" aria-hidden="true"></span>
+            <span class="ms-cloud ms-c2" aria-hidden="true"></span>
+            <span class="ms-cloud ms-c3" aria-hidden="true"></span>
+            <span class="ms-rain" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <output id="calm-before-out" class="ms-value" for="calm-before">5</output>
           </div>
           <p id="calm-before-word" class="slider-word">Somewhere in the middle</p>
-          <input id="calm-before" class="range" type="range" min="1" max="10" step="1" value="5" aria-label="Calm right now, 1 to 10">
+          <input id="calm-before" class="range mood-range" type="range" min="1" max="10" step="1" value="5" aria-label="Calm right now, 1 to 10">
           <div class="range-ends" aria-hidden="true"><span>1 a bit tangled</span><span>10 very calm</span></div>
         </div>
         <div class="context-head">
@@ -220,12 +226,17 @@
         <p class="eyebrow">Step 3 of 3</p>
         <h1 id="after-title" class="title">How calm do you feel now?</h1>
         <div class="card slider-card">
-          <div class="slider-top">
-            <svg id="calm-after-sun" class="slider-sun" viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg>
-            <output id="calm-after-out" class="slider-value" for="calm-after">5</output>
+          <div id="calm-after-sky" class="mood-sky" style="--v: .44">
+            <span class="ms-glow" aria-hidden="true"></span>
+            <svg id="calm-after-sun" class="ms-sun" viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg>
+            <span class="ms-cloud ms-c1" aria-hidden="true"></span>
+            <span class="ms-cloud ms-c2" aria-hidden="true"></span>
+            <span class="ms-cloud ms-c3" aria-hidden="true"></span>
+            <span class="ms-rain" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <output id="calm-after-out" class="ms-value" for="calm-after">5</output>
           </div>
           <p id="calm-after-word" class="slider-word">Somewhere in the middle</p>
-          <input id="calm-after" class="range" type="range" min="1" max="10" step="1" value="5" aria-label="Calm now, 1 to 10">
+          <input id="calm-after" class="range mood-range" type="range" min="1" max="10" step="1" value="5" aria-label="Calm now, 1 to 10">
           <div class="range-ends" aria-hidden="true"><span>1 a bit tangled</span><span>10 very calm</span></div>
         </div>
         <button id="after-next" class="btn btn-sun" type="button">See my Calm gain</button>
@@ -358,6 +369,11 @@
           <button class="btn btn-soft btn-small" type="button" data-tool="wellbeing">Take the check</button>
         </article>
 
+        <button id="program-today" class="card program-today" type="button" hidden>
+          <span class="eyebrow">Your programme</span>
+          <strong id="program-today-name"></strong>
+          <span id="program-today-day" class="muted"></span>
+        </button>
         <section class="block" aria-labelledby="toolkit-title">
           <div class="block-head"><h2 class="subtitle" id="toolkit-title">Your toolkit</h2><span class="tag">Free</span></div>
           <div class="toolkit">
@@ -365,6 +381,7 @@
             <button class="tool tool-safety" type="button" data-tool="safety"><span class="tool-ic" aria-hidden="true">&#9729;</span><strong>Safety plan</strong><span>Your steps for hard moments</span></button>
             <button class="tool tool-reframe" type="button" data-tool="reframe"><span class="tool-ic" aria-hidden="true">&#10227;</span><strong>Reframe a thought</strong><span>Find a kinder, truer view</span></button>
             <button class="tool tool-sounds" type="button" data-tool="sounds"><span class="tool-ic" aria-hidden="true">&#9835;</span><strong>Calm sounds</strong><span>Rain, ocean, sleep timer</span></button>
+            <button class="tool tool-programs" type="button" data-tool="programs"><span class="tool-ic" aria-hidden="true">&#9673;</span><strong>Programmes</strong><span>Sleep, exams, burnout</span></button>
             <button class="tool tool-learn" type="button" data-tool="learn"><span class="tool-ic" aria-hidden="true">&#10070;</span><strong>Learn</strong><span>One-minute lessons</span></button>
             <button class="tool tool-check" type="button" data-tool="wellbeing"><span class="tool-ic" aria-hidden="true">&#9728;</span><strong>Wellbeing check</strong><span>Track how you are really doing</span></button>
           </div>
@@ -411,6 +428,28 @@
           <p class="fine">Outside India: <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a></p>
         </article>
 
+        <article class="card" id="book-card">
+          <h2 class="subtitle">Book a session online</h2>
+          <p class="muted">Real services you can book today, by video, phone or chat. Prices are as listed on their sites.</p>
+          <div class="chips" role="group" aria-label="Show">
+            <button class="chip" type="button" data-pfilter="all" aria-pressed="true">All</button>
+            <button class="chip" type="button" data-pfilter="free" aria-pressed="false">Free</button>
+            <button class="chip" type="button" data-pfilter="therapy" aria-pressed="false">Therapy</button>
+            <button class="chip" type="button" data-pfilter="psychiatry" aria-pressed="false">Psychiatry</button>
+            <button class="chip" type="button" data-pfilter="hindi" aria-pressed="false">Hindi</button>
+          </div>
+          <div id="partner-list" class="partner-list"></div>
+          <p id="partner-note" class="fine"></p>
+        </article>
+        <article class="card" id="inperson-card">
+          <h2 class="subtitle">In person, in your city</h2>
+          <p class="muted">Government hospitals with low-cost psychiatry OPDs, plus trusted clinics and NGOs.</p>
+          <button id="inperson-locate" class="btn btn-soft" type="button">Use my location</button>
+          <label class="field-label" for="inperson-city">Or choose a city</label>
+          <select id="inperson-city" class="select"></select>
+          <p id="inperson-status" class="fine" aria-live="polite"></p>
+          <div id="inperson-list" class="partner-list"></div>
+        </article>
         <article class="card">
           <h2 class="subtitle">Find a professional near you</h2>
           <p class="fine">Opens your maps app. LoosenUp never sees or stores your location.</p>
@@ -519,6 +558,32 @@
         </article>
         <article class="card"><h2 class="subtitle">Your trend</h2><ul id="wb-trend" class="recent"></ul></article>
         <p class="fine">Uses the WHO-5 Wellbeing Index (World Health Organization).</p>
+      </section>
+
+      <!-- Programmes -->
+      <section id="screen-programs" class="screen tool-screen" data-screen="programs" hidden aria-labelledby="programs-title">
+        <button class="btn btn-ghost back-btn" type="button" data-back>Back</button>
+        <p class="eyebrow">A little each day</p>
+        <h1 id="programs-title" class="title">Programmes</h1>
+        <p class="muted">Short daily plans with one tip and one exercise a day. The first 3 days of each are free; Full Bloom opens the rest.</p>
+        <div id="program-list" class="program-list"></div>
+      </section>
+
+      <section id="screen-program" class="screen tool-screen program-screen" data-screen="program" hidden aria-labelledby="program-name">
+        <button class="btn btn-ghost back-btn" type="button" data-tool="programs">Back</button>
+        <p class="eyebrow">Programme</p>
+        <h1 id="program-name" class="title"></h1>
+        <p id="program-desc" class="muted"></p>
+        <article class="card program-day">
+          <p id="program-day-label" class="eyebrow"></p>
+          <h2 id="program-day-title" class="subtitle"></h2>
+          <p id="program-day-tip"></p>
+          <p id="program-day-tech" class="fine"></p>
+          <button id="program-start" class="btn btn-sun" type="button"></button>
+          <p id="program-wait" class="kind-note" hidden></p>
+        </article>
+        <div id="program-days" class="program-days" aria-label="Your days"></div>
+        <p id="program-paywall" class="fine">Days 1 to 3 are free. Day 4 onwards is part of Full Bloom.</p>
       </section>
 
       <!-- Learn -->
@@ -705,7 +770,8 @@
         </article>
         <article class="card">
           <h2 class="subtitle">Voice guide</h2>
-          <p class="muted">Your device voice can read the breathing cues.</p>
+          <p class="muted">A calm human voice guides each break, in English or Hindi.</p>
+          <p class="fine">The voice is Anchit, the maker of LoosenUp, recreated from Anchit's own recording with an open AI voice model. Lines not yet recorded use your device voice.</p>
           <button id="voice-toggle" class="btn btn-soft" type="button" aria-pressed="false">Voice is off</button>
         </article>
         <article class="card sunbeam-card">
@@ -718,6 +784,23 @@
           <p id="install-text" class="muted"></p>
           <button id="install-btn" class="btn btn-soft" type="button" hidden>Install app</button>
           <a id="install-page-link" class="btn btn-ghost" href="/install.html">Android app download and iPhone steps</a>
+        </article>
+        <article id="org-card" class="card">
+          <h2 class="subtitle">Your organisation</h2>
+          <div id="org-join">
+            <p class="muted">If your college or company uses LoosenUp, add its join code. Your notes and breaks stay on this phone.</p>
+            <label class="field-label" for="org-code">Join code</label>
+            <input id="org-code" class="text-input" type="text" autocomplete="off" autocapitalize="characters" maxlength="12" placeholder="For example, LUAB12CD">
+            <button id="org-join-btn" class="btn btn-soft" type="button">Join</button>
+            <a class="btn btn-ghost" href="/teams.html">Set up LoosenUp for your organisation</a>
+          </div>
+          <div id="org-joined" hidden>
+            <p><strong id="org-name"></strong></p>
+            <button id="org-share" class="btn btn-ghost" type="button" aria-pressed="false">Share an anonymous weekly pulse: off</button>
+            <p class="fine">The pulse is only weekly averages: mood, Calm gain, number of breaks and your top feelings. No names, no notes, nothing about SOS. Your organisation sees a week only when 5 or more people share.</p>
+            <button id="org-leave" class="btn btn-ghost" type="button">Leave this organisation</button>
+          </div>
+          <p id="org-status" class="fine" aria-live="polite"></p>
         </article>
         <article class="card">
           <h2 class="subtitle">SOS and support</h2>
@@ -770,9 +853,15 @@
     <article class="card plan-card">
       <p class="eyebrow">Subscription</p>
       <h3 class="plan-name">Full Bloom</h3>
-      <p class="muted">Every guided break with no Seeds needed, every technique as it opens.</p>
-      <p class="price">₹299/mo <span class="or">or</span> USD 6.99/mo</p>
-      <button class="btn btn-sun" type="button" data-sku="fullbloom">Choose Full Bloom (demo)</button>
+      <ul class="plan-perks">
+        <li>Every guided programme, all days: Better sleep in 21 days, Exam calm, Recovering from burnout</li>
+        <li>Every guided break with no Seeds needed</li>
+        <li>Every technique as it opens</li>
+      </ul>
+      <p class="price">₹149/mo <span class="or">or</span> USD 4.99/mo</p>
+      <button class="btn btn-sun" type="button" data-sku="fullbloom">Choose monthly (demo)</button>
+      <p class="price">₹799/yr <span class="or">or</span> USD 34.99/yr <em class="save">Save 55%</em></p>
+      <button class="btn btn-soft" type="button" data-sku="fullbloomYear">Choose yearly (demo)</button>
     </article>
     <div class="packs">
       <button class="pack" type="button" data-sku="seeds10"><strong>10 Seeds</strong><span>₹99 or USD 1.99</span></button>
@@ -801,6 +890,7 @@
     <a id="sos-alert" class="btn btn-sos" href="#" hidden>Message my trusted person</a>
     <button id="sos-location" class="btn btn-ghost" type="button" aria-pressed="false" hidden>Add my location to the message: off</button>
     <a class="btn btn-sun" href="tel:14416">Call Tele-MANAS 14416 (India, free, 24x7)</a>
+    <a id="sos-org" class="btn btn-soft" href="#" hidden></a>
     <a class="btn btn-soft" href="tel:112">Emergency: call 112</a>
     <a class="btn btn-soft" href="https://findahelpline.com" target="_blank" rel="noopener">Find a helpline anywhere: findahelpline.com</a>
     <button class="btn btn-soft" type="button" data-tool="safety">Open my safety plan</button>

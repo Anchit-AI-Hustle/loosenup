@@ -8,3 +8,7 @@ assets/
 scripts/
 /*.zip
 site/
+.voice/
+.agents/
+.claude/
+skills-lock.json

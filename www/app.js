@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.8.1';
+  var VERSION = '1.9.0';
   var KEY = 'loosenup.v1';
   var PUBLIC_URL = 'https://loosenup-ios.anchit-tandon.com';
   var ANDROID_URL = 'https://loosenup-android.anchit-tandon.com';
@@ -169,7 +169,8 @@
     sunbeam: ['Sunbeam', 'Caught a Sunbeam surprise'],
     sharer: ['Sunbeam sharer', 'Shared LoosenUp'],
     golden: ['Golden hour', 'Set a daily time'],
-    playful: ['Playful', 'Played a calm game']
+    playful: ['Playful', 'Played a calm game'],
+    programme: ['Finisher', 'Finished a guided programme']
   };
 
   var NOTES = [
@@ -182,7 +183,8 @@
   ];
 
   var SKUS = {
-    fullbloom: { name: 'Full Bloom, monthly', price: '₹299/mo or USD 6.99/mo' },
+    fullbloom: { name: 'Full Bloom, monthly', price: '₹149/mo or USD 4.99/mo' },
+    fullbloomYear: { name: 'Full Bloom, yearly', price: '₹799/yr or USD 34.99/yr' },
     seeds10: { name: '10 Seeds', price: '₹99 or USD 1.99', seeds: 10 },
     seeds30: { name: '30 Seeds', price: '₹249 or USD 4.99', seeds: 30 },
     seeds100: { name: '100 Seeds', price: '₹699 or USD 12.99', seeds: 100 }
@@ -236,7 +238,7 @@
       nudges: { day: null, count: 0, shown: [] }, goldenHour: null, voice: false, badges: [], purchases: [],
       games: { day: null, count: 0 }, gameBest: { pairs: null, catch: 0, bloom: 0 },
       moods: [], smallSteps: [], goodThings: [], trusted: null, sosLocation: false, jarXp: { day: null, count: 0 },
-      careTeam: null, safetyPlan: null, wellbeing: [], toolXp: { day: null, count: 0 }, reframes: 0, theme: 'auto', lang: 'en', lessonsDone: [], chime: true, bed: 'none',
+      careTeam: null, safetyPlan: null, wellbeing: [], toolXp: { day: null, count: 0 }, reframes: 0, theme: 'auto', lang: 'en', programs: {}, org: null, lessonsDone: [], chime: true, bed: 'none',
       lock: { enabled: false, salt: '', hash: '', bio: false }
     };
   }
@@ -505,17 +507,18 @@
   function demoPurchase(sku) {
     var item = SKUS[sku];
     if (!item) return;
-    if (sku === 'fullbloom') state.plan = 'fullbloom';
+    if (sku === 'fullbloom' || sku === 'fullbloomYear') state.plan = 'fullbloom';
     else state.seeds += item.seeds;
     state.purchases.push({ sku: sku, ts: now().getTime(), demo: true });
     save();
     renderSeedPill();
     if (RENDER[current]) RENDER[current]();
     closeSheets();
-    toast(sku === 'fullbloom' ? 'Welcome to Full Bloom (demo). Enjoy every break.' : '+' + item.seeds + ' Seeds added (demo).');
+    toast(sku === 'fullbloom' || sku === 'fullbloomYear' ? 'Welcome to Full Bloom (demo). Enjoy every break.' : '+' + item.seeds + ' Seeds added (demo).');
   }
   function openSupport(editing) {
     renderSos(editing);
+    renderOrg();
     openSheet('support-sheet');
     if (editing && $('trusted-name').focus) $('trusted-name').focus();
   }
@@ -526,12 +529,23 @@
     'Fairly settled', 'Fairly calm', 'Calm', 'Very calm', 'Wonderfully calm'];
   function bindSlider(id) {
     var el = $(id);
-    var sun = $(id + '-sun');
+    var sky = $(id + '-sky');
+    var last = null;
     var upd = function () {
+      var v = +el.value;
       setText(id + '-out', el.value);
-      setText(id + '-word', CALM_WORDS[+el.value] || '');
-      // The petal sun opens wider as calm rises.
-      if (sun) sun.style.transform = 'scale(' + (0.62 + 0.04 * +el.value).toFixed(2) + ') rotate(' + (+el.value * 9) + 'deg)';
+      setText(id + '-word', CALM_WORDS[v] || '');
+      // The sky clears as calm rises: rain and heavy clouds at 1, clouds parting in the middle,
+      // the petal sun up and glowing at 10. CSS reads --v (0 to 1).
+      var t = ((v - 1) / 9).toFixed(3);
+      if (sky) sky.style.setProperty('--v', t);
+      el.style.setProperty('--fill', (t * 100).toFixed(1) + '%');
+      if (last !== null && last !== v) {
+        var out = $(id + '-out');
+        if (out) { out.classList.remove('pop'); void out.offsetWidth; out.classList.add('pop'); }
+        haptic('light');
+      }
+      last = v;
     };
     el.addEventListener('input', upd);
     el.addEventListener('change', upd);
@@ -710,6 +724,7 @@
     $('orb-petals').style.transform = 'scale(0.55)';
     setText('session-kicker', t.free ? 'Always free' : 'Guided break');
     speak(INTRO[t.kind] || INTRO.breath);
+    speak(t.desc, true);
     if (state.bed && state.bed !== 'none' && !audio) { sessionBed = playSound(state.bed, 0.35); }
     if (t.kind === 'steps') { run.stepLeft = Math.floor(t.seconds / t.steps.length); showStep(0); }
     if (t.kind === 'journal') { setText('cue', ''); }
@@ -775,7 +790,7 @@
   function stopRun() {
     if (run && run.timer) clearInterval(run.timer);
     clearTimeout(orbTimer);
-    if (window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch (e) { /* no voice */ } }
+    stopVoice();
   }
 
   function endSession(complete) {
@@ -796,7 +811,7 @@
     run.paused = !run.paused;
     setText('session-pause', run.paused ? 'Resume' : 'Pause');
     $('session-pause').setAttribute('aria-pressed', String(run.paused));
-    if (run.paused && window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch (e) { /* no voice */ } }
+    if (run.paused) stopVoice();
   }
 
   var chimeCtx = null;
@@ -833,14 +848,64 @@
   }
 
   function canSpeak() { return 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function'; }
+  // Recorded voice: clips of a real human voice in www/voice/<lang>/<id>.m4a, listed in
+  // www/voice/manifest.json. Lines without a clip fall back to the device voice.
+  var voiceClips = null;
+  var voiceQueue = [];
+  var voiceAudio = null;
+  function loadVoiceClips() {
+    if (typeof fetch !== 'function') return Promise.resolve(null);
+    return fetch('voice/manifest.json').then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (m) { voiceClips = m && m.lines && m.have ? m : null; return voiceClips; })
+      .catch(function () { return null; });
+  }
+  function clipFor(text) {
+    if (!voiceClips) return null;
+    var id = voiceClips.lines[text], lang = state.lang === 'hi' ? 'hi' : 'en';
+    return id && (voiceClips.have[lang] || []).indexOf(id) !== -1 ? 'voice/' + lang + '/' + id + '.m4a' : null;
+  }
+  function deviceUtterance(text) {
+    var u = new window.SpeechSynthesisUtterance(tr(text));
+    u.rate = 0.9; u.pitch = 1.05;
+    u.lang = state.lang === 'hi' ? 'hi-IN' : 'en-IN';
+    return u;
+  }
+  function stopVoice() {
+    voiceQueue = [];
+    if (voiceAudio) { try { voiceAudio.pause(); } catch (e) { /* already stopped */ } voiceAudio = null; }
+    if (window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch (e) { /* no voice */ } }
+  }
+  function playNextVoice() {
+    if (voiceAudio || !voiceQueue.length) return;
+    var text = voiceQueue.shift(), src = clipFor(text);
+    var next = function () { voiceAudio = null; playNextVoice(); };
+    if (src && typeof window.Audio === 'function') {
+      var a = new window.Audio(src);
+      voiceAudio = a;
+      a.onended = next;
+      a.onerror = function () { voiceAudio = null; if (canSpeak()) { var u = deviceUtterance(text); u.onend = next; window.speechSynthesis.speak(u); } else next(); };
+      var p = a.play();
+      if (p && p.catch) p.catch(a.onerror);
+    } else if (canSpeak()) {
+      voiceAudio = { pause: function () {} };
+      var u = deviceUtterance(text);
+      u.onend = next;
+      window.speechSynthesis.speak(u);
+    } else next();
+  }
   function speak(text, queue) {
-    if (!state.voice || !canSpeak()) return;
+    if (!state.voice) return;
+    if (voiceClips) {
+      // Recorded clips and device voice share one queue so lines never overlap.
+      if (!queue) stopVoice();
+      voiceQueue.push(text);
+      playNextVoice();
+      return;
+    }
+    if (!canSpeak()) return;
     try {
       if (!queue) window.speechSynthesis.cancel();
-      var u = new window.SpeechSynthesisUtterance(tr(text));
-      u.rate = 0.9; u.pitch = 1.05;
-      u.lang = state.lang === 'hi' ? 'hi-IN' : 'en-IN';
-      window.speechSynthesis.speak(u);
+      window.speechSynthesis.speak(deviceUtterance(text));
     } catch (e) { /* voice not available */ }
   }
   function renderVoiceButtons() {
@@ -864,6 +929,7 @@
     var before = flow.before;
     var after = clampScore($('calm-after').value);
     var r = completeSession({ technique: flow.technique || 'quick', context: flow.context || 'Just a quick lift', contexts: flow.contexts, before: before, after: after });
+    completeProgramDay(r);
     renderResult(r);
     go('result');
     haptic('success');
@@ -888,6 +954,7 @@
     if (r.milestone) items.push(plural(r.milestone, 'Sunny day', 'Sunny days') + '! ' + (r.milestoneSeed ? '+1 Seed' : 'Milestone badge earned.'));
     if (r.sunbeam) items.push('A Sunbeam surprise! ' + (r.sunbeamSeed ? '+1 Seed' : '+5 bonus XP'));
     if (r.levelUp) items.push('You grew into a ' + r.levelUp + '!');
+    if (r.programNote) items.push(r.programNote);
     r.unlocked.forEach(function (n) { items.push(n + ' is now open for you.'); });
     r.newBadges.forEach(function (b) { if (b !== 'first' || breaksDone() === 1) items.push('Badge: ' + BADGES[b][0]); });
     var ul = $('result-rewards');
@@ -946,6 +1013,7 @@
   }
 
   function renderToday() {
+    renderProgramCard();
     renderSky();
     setText('today-title', greeting());
     setText('today-streak', state.streak.count ? plural(state.streak.count, 'Sunny day', 'Sunny days') : 'Starts today');
@@ -1302,6 +1370,7 @@
   }
 
   function renderMe() {
+    renderOrg();
     setText('me-title', state.name ? state.name + '\'s corner' : 'Your corner');
     setText('me-seeds', plural(state.seeds, 'Seed', 'Seeds'));
     setText('me-plan', state.plan === 'fullbloom' ? 'Full Bloom plan (demo): guided breaks use no Seeds.' : 'Free plan. Quick breeze is always free.');
@@ -1318,7 +1387,7 @@
     setText('open-trusted', state.trusted ? 'Change my trusted person' : 'Set up my trusted person');
   }
 
-  var RENDER = { learn: renderLearn, support: renderSupport, safety: renderSafety, reframe: startReframe, sounds: function () {}, wellbeing: renderWellbeing,
+  var RENDER = { programs: renderPrograms, program: renderProgram, learn: renderLearn, support: renderSupport, safety: renderSafety, reframe: startReframe, sounds: function () {}, wellbeing: renderWellbeing,
     today: renderToday, play: renderPlay, garden: renderGarden, week: renderWeek, me: renderMe, pick: renderPick, checkin: renderContextChips };
 
   /* ---------- Golden hour, sharing, install ---------- */
@@ -1428,6 +1497,384 @@
   };
   var FLOWERS = [['Sunflower', '#FFC857'], ['Peach rose', '#FFB088'], ['Fern bell', '#4FA67C'], ['Sky poppy', '#8CC8F0'], ['Lilac', '#C9A7F2'], ['Blush daisy', '#F28FA0']];
   var game = null;
+
+  /* ---------- Guided programmes (Full Bloom after the free days) ---------- */
+  // One day opens per calendar day. Each day is a short tip plus one exercise.
+  var PROGRAM_FREE_DAYS = 3;
+  var PROGRAMS = {
+    sleep: { id: 'sleep', name: 'Better sleep in 21 days', color: '#8CA9F0', space: 'sleep',
+      desc: 'A gentle 21 day plan for falling asleep more easily and waking up fresher.',
+      days: [
+        ['Set your anchor', 'Pick one wake time and keep it all week, even on weekends. Tonight, just notice when you feel sleepy.', 'breeze'],
+        ['Dim the last hour', 'One hour before bed, lower the lights and the screen brightness. Dim light tells your body it is time to rest.', 'release'],
+        ['Park your thoughts', 'Write tomorrow\'s top three tasks on paper before bed, so your mind can set them down.', 'letitout'],
+        ['A cool, quiet room', 'Make the room a little cooler and darker tonight. Small changes add up.', 'breeze'],
+        ['Long breaths out', 'In bed, breathe out for longer than you breathe in, for a few slow rounds.', 'sigh'],
+        ['Tea and coffee earlier', 'Try no tea or coffee after 2pm today and notice how the evening feels.', 'here'],
+        ['Look back kindly', 'Notice one night this week that went a little better. What helped?', 'kind'],
+        ['Morning light', 'Get ten minutes of daylight soon after waking. It helps set your body clock.', 'breeze'],
+        ['The bed is for sleep', 'If you have been awake in bed for a long while, get up and do something calm in dim light, then return.', 'release'],
+        ['Soften the body', 'Relax each part of the body, from shoulders to toes, as you lie down.', 'release'],
+        ['Screens down', 'Put the phone to charge out of reach of the bed tonight.', 'breeze'],
+        ['A worry window', 'Give your thoughts ten minutes on paper in the early evening, so they are not saved for bedtime.', 'letitout'],
+        ['Gentle movement', 'A short walk or stretch during the day can make sleep come more easily.', 'here'],
+        ['Halfway there', 'Two weeks in. Notice what has changed, even slightly.', 'kind'],
+        ['Same time, every day', 'Keep the wake time steady, even after a short night. Your body learns the rhythm.', 'breeze'],
+        ['Lighter dinners', 'Try finishing dinner two to three hours before bed.', 'sigh'],
+        ['A wind down ritual', 'Choose three calm steps for every night, like washing up, a soft sound and slow breathing.', 'release'],
+        ['If you wake at night', 'Keep the lights low, skip the clock, and return to slow breathing.', 'breeze'],
+        ['Naps with care', 'If you nap, keep it short and before mid afternoon.', 'here'],
+        ['Kind words at night', 'Speak to yourself gently tonight, the way you would to a tired friend.', 'kind'],
+        ['Your sleep plan', 'Pick the three habits that helped most and keep them. You did this.', 'sigh']
+      ] },
+    exam: { id: 'exam', name: 'Exam calm', color: '#FFC857', space: 'everyday',
+      desc: 'Two weeks of focus, steady breathing and kind self-talk for students.',
+      days: [
+        ['Map the next two weeks', 'Write every exam date and topic on one page, so it lives on paper, not in your head.', 'letitout'],
+        ['Study in rounds', 'Try 25 minutes of focus, then a 5 minute break away from the screen.', 'desk'],
+        ['Breathe before you start', 'Before each study round, take one steady square breath.', 'square'],
+        ['Sleep is study time', 'Your memory sorts what you learned while you sleep. Protect at least seven hours.', 'breeze'],
+        ['One topic at a time', 'When the list feels long, pick only the next small topic.', 'square'],
+        ['Move a little', 'A ten minute walk between study rounds can refresh your focus.', 'here'],
+        ['Talk to yourself kindly', 'Swap "I will never get this" for "I am still learning this."', 'kind'],
+        ['Practise like the real thing', 'Do one past paper with a timer, then rest.', 'square'],
+        ['Fuel and water', 'Keep water nearby and eat regular meals. Your brain runs on them.', 'here'],
+        ['When your mind goes blank', 'Put the pen down, take a long breath out, and read the question again slowly.', 'sigh'],
+        ['Ask for help early', 'Message a teacher or a friend about one topic you are unsure of.', 'kind'],
+        ['Phone in another room', 'Keep the phone out of the room during study rounds.', 'desk'],
+        ['The night before', 'Light revision only, pack your things, and wind down early.', 'breeze'],
+        ['Exam morning', 'Eat something, reach the hall with time to spare, and take three slow breaths before you begin.', 'sigh']
+      ] },
+    burnout: { id: 'burnout', name: 'Recovering from burnout', color: '#9ED3C4', space: 'work',
+      desc: 'Three weeks to rebuild your energy, set clear limits and rest well.',
+      days: [
+        ['Name what drains you', 'Write down the three things that take the most energy from you right now.', 'letitout'],
+        ['One real break', 'Take one break today away from all screens, even for five minutes.', 'desk'],
+        ['A clear end to the day', 'Choose a time to stop work today, and close the laptop then.', 'release'],
+        ['Sleep first', 'Protect your sleep tonight. Recovery starts there.', 'breeze'],
+        ['Say no to one thing', 'Turn down or postpone one task that can wait.', 'pause'],
+        ['Move your body', 'Ten minutes of walking or stretching today.', 'here'],
+        ['Notice the small wins', 'Write one thing you handled well this week.', 'kind'],
+        ['One task at a time', 'Work on one task for an hour with notifications off.', 'square'],
+        ['Lunch away from the desk', 'Eat one meal today without a screen.', 'desk'],
+        ['Ask for what you need', 'Tell your manager or a colleague one thing that would help.', 'pause'],
+        ['Reconnect', 'Spend time with someone who leaves you feeling lighter.', 'warmth'],
+        ['Your energy map', 'Notice the hours when you feel most awake, and plan focused work there.', 'here'],
+        ['Slow mornings', 'Start the day without email for the first 30 minutes.', 'breeze'],
+        ['Halfway check', 'Compare today with day one. What feels a little lighter?', 'kind'],
+        ['Limits in writing', 'Put your working hours on your calendar and your status.', 'pause'],
+        ['Something just for you', 'Do one thing today purely because you enjoy it.', 'here'],
+        ['Soften the body', 'Let your shoulders and jaw go soft a few times today.', 'release'],
+        ['Rest is part of the work', 'Treat rest as part of your job, not a reward for finishing it.', 'breeze'],
+        ['Talk it through', 'If heavy days keep coming, talking to a counsellor can really help. Find support lists real options.', 'kind'],
+        ['Plan next week', 'Put two short breaks a day into next week\'s calendar.', 'desk'],
+        ['Keep what works', 'Choose three habits from these weeks to keep going.', 'sigh']
+      ] }
+  };
+  var PROGRAM_ORDER = ['sleep', 'exam', 'burnout'];
+  var currentProgram = null;
+  function progState(id) { return (state.programs || {})[id] || null; }
+  // Which day (1 based) the person is on, and whether it can be done today.
+  function programStatus(id) {
+    var p = PROGRAMS[id], ps = progState(id), total = p.days.length;
+    if (!ps) return { started: false, day: 1, total: total, doneToday: false, finished: false, locked: false };
+    var done = ps.done.length;
+    var finished = done >= total;
+    var doneToday = ps.lastDay === dayKey(now());
+    var day = finished ? total : done + 1;
+    var locked = !finished && day > PROGRAM_FREE_DAYS && state.plan !== 'fullbloom';
+    return { started: true, day: day, total: total, done: done, doneToday: doneToday, finished: finished, locked: locked };
+  }
+  function activeProgram() {
+    for (var i = 0; i < PROGRAM_ORDER.length; i++) {
+      var st = programStatus(PROGRAM_ORDER[i]);
+      if (st.started && !st.finished) return PROGRAM_ORDER[i];
+    }
+    return null;
+  }
+  function renderPrograms() {
+    var box = $('program-list');
+    box.textContent = '';
+    PROGRAM_ORDER.forEach(function (id) {
+      var p = PROGRAMS[id], st = programStatus(id);
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'program-card';
+      b.setAttribute('data-program', id);
+      b.style.setProperty('--c', p.color);
+      var h = document.createElement('strong'); h.textContent = p.name;
+      var d = document.createElement('span'); d.className = 'program-desc'; d.textContent = p.desc;
+      var m = document.createElement('span'); m.className = 'program-meta';
+      m.textContent = st.finished ? 'Completed' : st.started ? 'Day ' + st.day + ' of ' + st.total : st.total + ' days · first ' + PROGRAM_FREE_DAYS + ' free';
+      var bar = document.createElement('span'); bar.className = 'program-bar';
+      var fill = document.createElement('i'); fill.style.width = Math.round(100 * (st.done || 0) / st.total) + '%';
+      bar.appendChild(fill);
+      b.appendChild(h); b.appendChild(d); b.appendChild(m); b.appendChild(bar);
+      box.appendChild(b);
+    });
+  }
+  function openProgram(id) {
+    if (!PROGRAMS[id]) return;
+    currentProgram = id;
+    go('program');
+  }
+  function renderProgram() {
+    var id = currentProgram || activeProgram() || 'sleep';
+    currentProgram = id;
+    var p = PROGRAMS[id], st = programStatus(id);
+    $('screen-program').style.setProperty('--c', p.color);
+    setText('program-name', p.name);
+    setText('program-desc', p.desc);
+    var day = p.days[st.day - 1];
+    setText('program-day-label', st.finished ? 'All ' + st.total + ' days done' : 'Day ' + st.day + ' of ' + st.total);
+    setText('program-day-title', st.finished ? 'You finished ' + p.name : day[0]);
+    setText('program-day-tip', st.finished ? 'Keep the habits that helped. You can start again any time.' : day[1]);
+    setText('program-day-tech', st.finished ? '' : 'Today\'s practice: ' + TECH[day[2]].name);
+    var btn = $('program-start');
+    btn.hidden = false;
+    if (st.finished) setText('program-start', 'Start again');
+    else if (st.doneToday) { btn.hidden = true; }
+    else if (st.locked) setText('program-start', 'Unlock with Full Bloom');
+    else setText('program-start', st.started ? 'Start today\'s practice' : 'Start day 1');
+    $('program-wait').hidden = !(st.doneToday && !st.finished);
+    setText('program-wait', 'Done for today. Day ' + st.day + ' opens tomorrow.');
+    $('program-paywall').hidden = state.plan === 'fullbloom';
+    var dots = $('program-days');
+    dots.textContent = '';
+    for (var i = 1; i <= st.total; i++) {
+      var s = document.createElement('span');
+      var done = st.started && i <= (st.done || 0);
+      var isToday = !st.finished && i === st.day;
+      var paid = i > PROGRAM_FREE_DAYS && state.plan !== 'fullbloom';
+      s.className = 'pday' + (done ? ' done' : '') + (isToday ? ' today' : '') + (paid && !done ? ' paid' : '');
+      s.textContent = String(i);
+      s.setAttribute('aria-label', 'Day ' + i + (done ? ', done' : isToday ? ', today' : paid ? ', Full Bloom' : ''));
+      dots.appendChild(s);
+    }
+  }
+  function startProgramDay() {
+    var id = currentProgram, p = PROGRAMS[id], st = programStatus(id);
+    if (st.finished) { state.programs[id] = null; delete state.programs[id]; save(); renderProgram(); return 'restart'; }
+    if (st.doneToday) return 'wait';
+    if (st.locked) { openShop('Day ' + (PROGRAM_FREE_DAYS + 1) + ' onwards of every programme is part of Full Bloom.'); return 'shop'; }
+    if (!state.programs) state.programs = {};
+    if (!state.programs[id]) state.programs[id] = { started: dayKey(now()), done: [], lastDay: null };
+    save();
+    var tech = p.days[st.day - 1][2];
+    startCheckin('guided', TECH[tech].space || null);
+    flow.technique = tech; flow.picked = true; flow.chosen = true; flow.program = { id: id, day: st.day };
+    flow.reason = 'Day ' + st.day + ' of ' + p.name + '.';
+    return 'started';
+  }
+  // Called when a break finishes. Marks the programme day done (once per calendar day).
+  function completeProgramDay(r) {
+    var pr = flow.program;
+    flow.program = null;
+    if (!pr || !state.programs || !state.programs[pr.id]) return;
+    var ps = state.programs[pr.id];
+    var dk = dayKey(now());
+    if (ps.lastDay === dk || ps.done.indexOf(pr.day) !== -1) return;
+    ps.done.push(pr.day);
+    ps.lastDay = dk;
+    state.xp += 5;
+    var total = PROGRAMS[pr.id].days.length;
+    r.programNote = ps.done.length >= total ? 'You finished ' + PROGRAMS[pr.id].name + '!' : 'Day ' + pr.day + ' of ' + total + ' done. +5 XP';
+    if (ps.done.length >= total) addBadge('programme', r.newBadges);
+    save();
+  }
+  function renderProgramCard() {
+    var id = activeProgram(), card = $('program-today');
+    if (!card) return;
+    card.hidden = !id;
+    if (!id) return;
+    var p = PROGRAMS[id], st = programStatus(id);
+    card.style.setProperty('--c', p.color);
+    card.setAttribute('data-program', id);
+    setText('program-today-name', p.name);
+    setText('program-today-day', st.doneToday ? 'Day ' + st.done + ' of ' + st.total + ' done. See you tomorrow.' : 'Day ' + st.day + ' of ' + st.total + ': ' + p.days[st.day - 1][0]);
+  }
+
+  /* ---------- Organisations: join code, anonymous weekly pulse, support line ---------- */
+  // The app only ever sends weekly averages, and only after the person turns sharing on.
+  var ORG_API = 'https://loosenup-ios.anchit-tandon.com/api/org';
+  function orgCall(body) {
+    if (typeof fetch !== 'function') return Promise.reject(new Error('offline'));
+    return fetch(ORG_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Please try again.'); return j; }); });
+  }
+  function randomId() {
+    var a = new Uint8Array(18);
+    if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(a);
+    else for (var i = 0; i < a.length; i++) a[i] = Math.floor(Math.random() * 256);
+    return Array.prototype.map.call(a, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+  }
+  // A week's averages, from what is already on this phone.
+  function weekPulse(week) {
+    var ses = state.sessions.filter(function (x) { return weekKey(new Date(x.ts)) === week; });
+    var moods = state.moods.filter(function (m) { return weekKey(new Date(m.day + 'T12:00:00')) === week; });
+    if (!ses.length && !moods.length) return null;
+    var avg = function (a) { return a.length ? Math.round(10 * a.reduce(function (x, y) { return x + y; }, 0) / a.length) / 10 : null; };
+    var count = {};
+    ses.forEach(function (x) { (x.contexts || [x.context]).forEach(function (c) { if (c) count[c] = (count[c] || 0) + 1; }); });
+    var top = Object.keys(count).sort(function (a, b) { return count[b] - count[a]; }).slice(0, 3);
+    return { week: week, mood: avg(moods.map(function (m) { return m.mood; })), calmGain: avg(ses.map(function (x) { return x.gain; })), breaks: ses.length, contexts: top };
+  }
+  // Sends last week's pulse once, if sharing is on and there is something to share.
+  function sendPulse() {
+    var o = state.org;
+    if (!o || !o.share) return Promise.resolve(false);
+    var week = weekKey(new Date(now().getTime() - 7 * 86400000));
+    if (o.sentWeek === week) return Promise.resolve(false);
+    var p = weekPulse(week);
+    if (!p) return Promise.resolve(false);
+    p.action = 'pulse'; p.code = o.code; p.member = o.member;
+    return orgCall(p).then(function () { state.org.sentWeek = week; save(); return true; }).catch(function () { return false; });
+  }
+  function joinOrg(code) {
+    code = String(code || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (code.length < 6) { setText('org-status', 'Add the join code from your organisation.'); return Promise.resolve(false); }
+    setText('org-status', 'Checking the code...');
+    return orgCall({ action: 'join', code: code }).then(function (j) {
+      state.org = { code: j.joinCode, name: j.name, kind: j.kind, supportName: j.supportName || null, supportPhone: j.supportPhone || null, share: false, member: randomId(), sentWeek: null };
+      save();
+      renderOrg();
+      setText('org-status', 'You joined ' + j.name + '.');
+      return true;
+    }).catch(function (e) { setText('org-status', e.message === 'offline' ? 'Connect to the internet to join.' : e.message); return false; });
+  }
+  function toggleOrgShare() {
+    if (!state.org) return;
+    state.org.share = !state.org.share;
+    save();
+    renderOrg();
+    if (state.org.share) sendPulse();
+  }
+  function leaveOrg() { state.org = null; save(); renderOrg(); setText('org-status', 'You left the organisation.'); }
+  function renderOrg() {
+    var o = state.org;
+    if (!$('org-card')) return;
+    $('org-join').hidden = !!o;
+    $('org-joined').hidden = !o;
+    if (o) {
+      setText('org-name', o.name);
+      setText('org-share', 'Share an anonymous weekly pulse: ' + (o.share ? 'on' : 'off'));
+      $('org-share').setAttribute('aria-pressed', String(!!o.share));
+    }
+    var sos = $('sos-org');
+    sos.hidden = !(o && o.supportPhone);
+    if (o && o.supportPhone) {
+      sos.href = 'tel:' + o.supportPhone.replace(/\s/g, '');
+      setText('sos-org', 'Call ' + (o.supportName || o.name) + ' (' + o.supportPhone + ')');
+    }
+  }
+
+  /* ---------- Real services: book online, or in person in your city ---------- */
+  // The list lives in www/partners.js (checked on official sites). Location is used only on
+  // this phone to sort nearby places; it is never sent anywhere.
+  var partnerFilter = 'all';
+  var inPerson = { city: null, here: null };
+  function partners() { return window.LoosenUpPartners || { online: [], offline: [] }; }
+  function mk(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function partnerMatches(p, f) {
+    if (f === 'free') return /^Free/.test(p.price);
+    if (f === 'therapy') return /Counselling|Psychology|helpline/i.test(p.type) && !/^AI/.test(p.type);
+    if (f === 'psychiatry') return /psychiatry/i.test(p.type);
+    if (f === 'hindi') return (p.languages || []).indexOf('Hindi') !== -1;
+    return true;
+  }
+  function renderPartners() {
+    var box = $('partner-list');
+    if (!box) return;
+    box.textContent = '';
+    var list = partners().online.filter(function (p) { return partnerMatches(p, partnerFilter); });
+    list.forEach(function (p) {
+      var c = mk('article', 'partner');
+      var head = mk('div', 'partner-head');
+      var nm = mk('strong', null, p.name); nm.setAttribute('data-no-tr', '');
+      head.appendChild(nm);
+      head.appendChild(mk('span', 'partner-type', p.type));
+      c.appendChild(head);
+      c.appendChild(mk('p', 'partner-desc', p.desc));
+      var meta = mk('p', 'partner-meta');
+      meta.appendChild(mk('span', 'partner-price', p.price));
+      if (p.modes && p.modes.length) meta.appendChild(mk('span', null, p.modes.map(function (m) { return m.charAt(0).toUpperCase() + m.slice(1); }).join(' · ')));
+      c.appendChild(meta);
+      if (p.languages && p.languages.length) c.appendChild(mk('p', 'fine', p.languages.join(', ')));
+      if (p.rating) { var r = mk('p', 'fine partner-rating', p.rating); r.setAttribute('data-no-tr', ''); c.appendChild(r); }
+      var a = mk('a', 'btn btn-soft', /^Free/.test(p.price) && /helpline/i.test(p.type) ? 'Open their site' : 'Book on their site');
+      a.href = p.url; a.target = '_blank'; a.rel = 'noopener';
+      c.appendChild(a);
+      box.appendChild(c);
+    });
+    if (!list.length) box.appendChild(mk('p', 'muted', 'Nothing matches that filter yet.'));
+    setText('partner-note', 'LoosenUp is not paid by these services. Details were checked on their official sites on ' + partners().checked + '; confirm prices before you book.');
+    var chips = document.querySelectorAll('[data-pfilter]');
+    for (var i = 0; i < chips.length; i++) chips[i].setAttribute('aria-pressed', String(chips[i].getAttribute('data-pfilter') === partnerFilter));
+  }
+  function km(a, b) {
+    var R = 6371, rad = Math.PI / 180;
+    var dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  function cities() { var s = []; partners().offline.forEach(function (o) { if (s.indexOf(o.city) === -1) s.push(o.city); }); return s; }
+  function nearestCity(here) {
+    var best = null;
+    partners().offline.forEach(function (o) { var d = km(here, o); if (!best || d < best.d) best = { city: o.city, d: d }; });
+    return best;
+  }
+  function renderInPerson() {
+    var sel = $('inperson-city');
+    if (!sel) return;
+    if (!sel.options.length) {
+      var none = mk('option', null, 'Choose a city'); none.value = ''; sel.appendChild(none);
+      cities().forEach(function (c) { var o = mk('option', null, c); o.value = c; sel.appendChild(o); });
+    }
+    sel.value = inPerson.city || '';
+    var box = $('inperson-list');
+    box.textContent = '';
+    if (!inPerson.city) return;
+    var here = inPerson.here;
+    var list = partners().offline.filter(function (o) { return o.city === inPerson.city; })
+      .map(function (o) { return { o: o, d: here ? km(here, o) : null }; })
+      .sort(function (a, b) { return a.d == null ? 0 : a.d - b.d; });
+    list.forEach(function (x) {
+      var o = x.o, c = mk('article', 'partner');
+      var head = mk('div', 'partner-head');
+      var nm = mk('strong', null, o.name); nm.setAttribute('data-no-tr', '');
+      head.appendChild(nm);
+      head.appendChild(mk('span', 'partner-type', o.type));
+      c.appendChild(head);
+      var ad = mk('p', 'partner-desc', o.address); ad.setAttribute('data-no-tr', ''); c.appendChild(ad);
+      var meta = mk('p', 'partner-meta');
+      meta.appendChild(mk('span', 'partner-price', o.cost));
+      if (x.d != null) meta.appendChild(mk('span', null, (x.d < 10 ? x.d.toFixed(1) : Math.round(x.d)) + ' km away'));
+      c.appendChild(meta);
+      var row = mk('div', 'partner-actions');
+      if (o.phone) { var call = mk('a', 'btn btn-soft', 'Call'); call.href = 'tel:' + o.phone.replace(/[^\d+]/g, ''); row.appendChild(call); }
+      var dir = mk('a', 'btn btn-soft', 'Directions');
+      dir.href = isIos() ? 'https://maps.apple.com/?daddr=' + o.lat + ',' + o.lon : 'https://www.google.com/maps/dir/?api=1&destination=' + o.lat + ',' + o.lon;
+      dir.target = '_blank'; dir.rel = 'noopener'; row.appendChild(dir);
+      var site = mk('a', 'btn btn-ghost', 'Website'); site.href = o.url; site.target = '_blank'; site.rel = 'noopener'; row.appendChild(site);
+      c.appendChild(row);
+      box.appendChild(c);
+    });
+  }
+  function setCity(city) { inPerson.city = city || null; renderInPerson(); }
+  function locateInPerson() {
+    if (!navigator.geolocation) { setText('inperson-status', 'Location is not available here. Choose a city instead.'); return; }
+    setText('inperson-status', 'Finding places near you...');
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      var here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      useLocation(here);
+    }, function () { setText('inperson-status', 'Location is off. Choose a city instead.'); }, { timeout: 10000, maximumAge: 600000 });
+  }
+  function useLocation(here) {
+    var n = nearestCity(here);
+    inPerson.here = here;
+    if (n && n.d < 120) { setText('inperson-status', 'Showing ' + n.city + ', nearest first.'); setCity(n.city); }
+    else { setText('inperson-status', 'No listed city is close by yet. The map search below finds options near you.'); setCity(null); }
+  }
 
   /* ---------- Calm: breathing, games and sounds in one screen ---------- */
   var SEGS = ['breathe', 'games', 'sounds'];
@@ -1858,6 +2305,8 @@
       links[i].setAttribute('href', isIos() ? 'https://maps.apple.com/?q=' + encodeURIComponent(q) : 'https://www.google.com/maps/search/' + encodeURIComponent(q).replace(/%20/g, '+'));
     }
     renderCare(false);
+    renderPartners();
+    renderInPerson();
   }
   function renderCare(editing) {
     var c = state.careTeam;
@@ -2518,6 +2967,10 @@
     if (lessonId) { openLesson(lessonId); return; }
     var themeChoice = el.getAttribute('data-theme-choice');
     if (themeChoice) { setTheme(themeChoice); haptic('light'); return; }
+    var pf = el.getAttribute('data-pfilter');
+    if (pf) { partnerFilter = pf; renderPartners(); return; }
+    var prog = el.getAttribute('data-program');
+    if (prog) { openProgram(prog); return; }
     var seg = el.getAttribute('data-seg');
     if (seg) { setSeg(seg); haptic('light'); return; }
     var practice = el.getAttribute('data-practice');
@@ -2575,7 +3028,12 @@
         if (flow.mode === 'quick') beginBreak('quick');
         else { flow.picked = !!(flow.fromLesson || flow.chosen); go('pick'); }
         break;
-      case 'checkin-back': go(flow.chosen ? 'play' : state.onboarded ? 'today' : 'gift'); break;
+      case 'checkin-back': go(flow.program ? 'program' : flow.chosen ? 'play' : state.onboarded ? 'today' : 'gift'); break;
+      case 'program-start': startProgramDay(); break;
+      case 'inperson-locate': locateInPerson(); break;
+      case 'org-join-btn': joinOrg($('org-code').value); break;
+      case 'org-share': toggleOrgShare(); break;
+      case 'org-leave': leaveOrg(); break;
       case 'pick-begin': beginBreak(flow.technique); break;
       case 'pick-quick': beginBreak('quick'); break;
       case 'session-finish': endSession(false); break;
@@ -2716,6 +3174,7 @@
     applyTheme();
     applyLang();
     bindCalmGestures();
+    $('inperson-city').addEventListener('change', function () { inPerson.here = null; setText('inperson-status', ''); setCity(this.value); });
     $('lock-pin').addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) hiddenAt = Date.now();
@@ -2729,6 +3188,8 @@
     if (state.goldenHour) scheduleGoldenHour();
     liveUpdate();
     document.addEventListener('visibilitychange', function () { if (!document.hidden) liveUpdate(); });
+    sendPulse();
+    loadVoiceClips();
   }
 
   /* ---------- Public API (used by the app shell and the test suite) ---------- */
@@ -2754,6 +3215,17 @@
     showLock: showLock,
     setLang: setLang,
     setSeg: setSeg,
+    joinOrg: joinOrg,
+    loadVoiceClips: loadVoiceClips,
+    clipFor: clipFor,
+    useLocation: useLocation,
+    setCity: setCity,
+    sendPulse: sendPulse,
+    weekPulse: weekPulse,
+    programs: PROGRAMS,
+    programStatus: programStatus,
+    openProgram: openProgram,
+    startProgramDay: startProgramDay,
     calmSeg: function () { return calmSeg; },
     startPractice: startPractice,
     tr: tr,
@@ -2782,6 +3254,16 @@
     flipCard: flipCard,
     spawnBeam: spawnBeam,
     finishCurrentGame: finishCurrentGame,
+    voiceLines: function () {
+      var out = [INTRO.breath, INTRO.steps, INTRO.journal, OUTRO, 'Voice guide on.', 'Breathe in', 'Breathe out'];
+      Object.keys(TECH).forEach(function (k) {
+        var t = TECH[k];
+        out.push(t.desc);
+        (t.pattern || []).forEach(function (p) { out.push(p[0]); });
+        (t.steps || []).forEach(function (st) { out.push(st); });
+      });
+      return out.filter(function (x, i) { return out.indexOf(x) === i; });
+    },
     techniques: TECH
   };
 
