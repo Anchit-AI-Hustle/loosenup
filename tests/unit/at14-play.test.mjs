@@ -20,7 +20,7 @@ test('AT14 Play tab lists three calm games', () => {
   const app = ready();
   app.click('[data-tab="play"]');
   assert.equal(app.B.currentScreen(), 'play');
-  const names = [...app.document.querySelectorAll('[data-game]')].map((b) => b.textContent);
+  const names = [...app.document.querySelectorAll('#panel-games [data-game]')].map((b) => b.textContent);
   assert.equal(names.length, 3);
   assert.match(names.join(' '), /Calm Pairs/);
   assert.match(names.join(' '), /Sunbeam Catch/);
@@ -67,6 +67,7 @@ test('AT14 games can be played as often as you like, with a kind ending every ti
   }
   assert.doesNotMatch(app.$('#game-done-text').textContent, /XP|garden/);
   app.click('#game-back');
+  app.B.go('play');
   assert.match(app.$('#play-note').textContent, /nothing to rush/);
 });
 
@@ -97,4 +98,15 @@ test('AT14 Breathing Ring: holding starts the breath guide and finishing blooms 
   assert.match(app.$('#game-done-title').textContent, /Six slow breaths/);
   assert.match(app.$('#game-done-text').textContent, /Every breath counted/);
   assert.equal(app.errors.length, 0, app.errors.join('\n'));
+});
+
+test('AT14 games are one tap from Today, and Back returns to Today', () => {
+  const app = ready();
+  app.B.go('today');
+  const tiles = [...app.document.querySelectorAll('#screen-today [data-game]')].map((b) => b.getAttribute('data-game'));
+  assert.deepEqual(tiles, ['pairs', 'catch', 'bloom']);
+  app.click('#screen-today [data-game="catch"]');
+  assert.equal(app.B.currentScreen(), 'game');
+  app.click('#game-back');
+  assert.equal(app.B.currentScreen(), 'today');
 });

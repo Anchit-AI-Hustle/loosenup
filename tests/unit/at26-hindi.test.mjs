@@ -65,7 +65,9 @@ test('AT26 the voice guide speaks Hindi with a Hindi voice', () => {
   assert.equal(spoken[0].lang, 'hi-IN');
   assert.match(spoken[0].text, /चलिए शुरू करें/);
   assert.match(spoken[1].text, /[\u0900-\u097F]/);
-  assert.equal(spoken[2].text, 'साँस लें');
+  assert.equal(spoken[2].text, 'तैयार हो जाइए');
+  for (let i = 0; i < 3; i++) app.B.sessionTick();
+  assert.equal(spoken.at(-1).text, 'साँस लें');
 });
 
 test('AT26 Hindi and Hinglish crisis phrases open SOS; everyday Hindi does not', () => {

@@ -69,6 +69,11 @@
       var $ = function (id) { return document.getElementById(id); };
       var key = (location.hash.match(/key=([^&]+)/) || [])[1];
       key = key ? decodeURIComponent(key) : '';
+      // Keep the admin key out of the address bar and browser history; remember it for this tab only.
+      try {
+        if (key) { sessionStorage.setItem('lu-admin', key); history.replaceState(null, '', location.pathname); }
+        else key = sessionStorage.getItem('lu-admin') || '';
+      } catch (e) { /* storage blocked: the key still works for this visit */ }
       function stat(v, label, wide) { var d = document.createElement('div'); d.className = 'stat' + (wide ? ' wide' : ''); var b = document.createElement('b'); b.textContent = v; var s = document.createElement('span'); s.textContent = label; d.appendChild(b); d.appendChild(s); return d; }
       function load() {
         if (!key) return;

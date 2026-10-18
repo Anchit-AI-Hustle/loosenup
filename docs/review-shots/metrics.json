@@ -1,0 +1,946 @@
+{
+ "light-01-welcome": {
+  "words": 47,
+  "height": 986,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-02-how-it-works": {
+  "words": 66,
+  "height": 844,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-03-checkin": {
+  "words": 61,
+  "height": 1211,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-04-pick": {
+  "words": 74,
+  "height": 1366,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-05-session-breathing": {
+  "words": 13,
+  "height": 869,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-06-after": {
+  "words": 24,
+  "height": 844,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-07-result": {
+  "words": 43,
+  "height": 1085,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-08-session-steps": {
+  "words": 27,
+  "height": 893,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-09-today": {
+  "words": 235,
+  "height": 2835,
+  "lowContrast": [
+   {
+    "text": "⟳",
+    "ratio": 4.44,
+    "size": 18
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "light-09b-today-mood-picked": {
+  "words": 237,
+  "height": 2835,
+  "lowContrast": [
+   {
+    "text": "⟳",
+    "ratio": 4.44,
+    "size": 18
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "light-10-calm-breathe": {
+  "words": 241,
+  "height": 1977,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-11-calm-games": {
+  "words": 48,
+  "height": 844,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-12-calm-sounds": {
+  "words": 57,
+  "height": 1094,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-13-game-pairs": {
+  "words": 26,
+  "height": 844,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-13-game-pairs-done": {
+  "words": 38,
+  "height": 964,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-14-game-catch": {
+  "words": 27,
+  "height": 895,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-14-game-catch-done": {
+  "words": 37,
+  "height": 1084,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-15-game-ring": {
+  "words": 40,
+  "height": 942,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-15-game-ring-done": {
+  "words": 57,
+  "height": 1156,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-16-progress": {
+  "words": 202,
+  "height": 1998,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-17-me": {
+  "words": 261,
+  "height": 3192,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-18-find-support": {
+  "words": 828,
+  "height": 7055,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-19-safety-plan": {
+  "words": 86,
+  "height": 1992,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-20-reframe": {
+  "words": 26,
+  "height": 844,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-21-learn": {
+  "words": 88,
+  "height": 1165,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-23-wellbeing": {
+  "words": 131,
+  "height": 1429,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-24-programmes": {
+  "words": 95,
+  "height": 946,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-22-lesson": {
+  "words": 107,
+  "height": 1037,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-25-programme-sleep": {
+  "words": 89,
+  "height": 943,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-26-sos-sheet": {
+  "words": 109,
+  "height": 2835,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-26b-sos-sheet-bottom": {
+  "words": 109,
+  "height": 2835,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-27-plus-sheet": {
+  "words": 71,
+  "height": 2835,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-28-lowest-mood-question": {
+  "words": 41,
+  "height": 2856,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-29-hindi-today": {
+  "words": 299,
+  "height": 2741,
+  "lowContrast": [
+   {
+    "text": "⟳",
+    "ratio": 4.44,
+    "size": 18
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "light-30-hindi-sos": {
+  "words": 130,
+  "height": 2741,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-31-hindi-welcome": {
+  "words": 56,
+  "height": 949,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-32-hindi-how-it-works": {
+  "words": 85,
+  "height": 844,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "light-33-small-phone-today": {
+  "words": 250,
+  "height": 3214,
+  "lowContrast": [
+   {
+    "text": "⟳",
+    "ratio": 4.44,
+    "size": 18
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "light-34-small-phone-session": {
+  "words": 13,
+  "height": 924,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "dark-01-welcome": {
+  "words": 47,
+  "height": 986,
+  "lowContrast": [
+   {
+    "text": "Let's begin",
+    "ratio": 1.28,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-02-how-it-works": {
+  "words": 66,
+  "height": 844,
+  "lowContrast": [
+   {
+    "text": "Start my first break",
+    "ratio": 1.28,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-03-checkin": {
+  "words": 61,
+  "height": 1211,
+  "lowContrast": [
+   {
+    "text": "Next",
+    "ratio": 1.28,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-04-pick": {
+  "words": 74,
+  "height": 1366,
+  "lowContrast": [
+   {
+    "text": "Begin",
+    "ratio": 1.28,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-05-session-breathing": {
+  "words": 13,
+  "height": 869,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "dark-06-after": {
+  "words": 24,
+  "height": 844,
+  "lowContrast": [
+   {
+    "text": "See my Calm gain",
+    "ratio": 1.28,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-07-result": {
+  "words": 43,
+  "height": 1085,
+  "lowContrast": [
+   {
+    "text": "Back to Today",
+    "ratio": 1.28,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-08-session-steps": {
+  "words": 27,
+  "height": 893,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "dark-09-today": {
+  "words": 235,
+  "height": 2835,
+  "lowContrast": [
+   {
+    "text": "Good morning, Asha",
+    "ratio": 1.28,
+    "size": 28.86
+   },
+   {
+    "text": "Start a calm break",
+    "ratio": 1.28,
+    "size": 18
+   },
+   {
+    "text": "Meetings, pile-ups, tough calls",
+    "ratio": 2.43,
+    "size": 14
+   },
+   {
+    "text": "When things feel tense",
+    "ratio": 2.43,
+    "size": 14
+   },
+   {
+    "text": "Gentle lifts for heavy days",
+    "ratio": 2.43,
+    "size": 14
+   },
+   {
+    "text": "Wind down, quiet a racing mind",
+    "ratio": 2.43,
+    "size": 14
+   },
+   {
+    "text": "I did it",
+    "ratio": 1.17,
+    "size": 15
+   },
+   {
+    "text": "⟳",
+    "ratio": 4.44,
+    "size": 18
+   },
+   {
+    "text": "+3 Calm gain",
+    "ratio": 3.18,
+    "size": 17
+   },
+   {
+    "text": "+3 Calm gain",
+    "ratio": 3.18,
+    "size": 17
+   },
+   {
+    "text": "+6 Calm gain",
+    "ratio": 3.18,
+    "size": 17
+   }
+  ],
+  "lowCount": 11,
+  "overflowX": false
+ },
+ "dark-09b-today-mood-picked": {
+  "words": 237,
+  "height": 2835,
+  "lowContrast": [
+   {
+    "text": "Good morning, Asha",
+    "ratio": 1.28,
+    "size": 28.86
+   },
+   {
+    "text": "Start a calm break",
+    "ratio": 1.28,
+    "size": 18
+   },
+   {
+    "text": "Meetings, pile-ups, tough calls",
+    "ratio": 2.43,
+    "size": 14
+   },
+   {
+    "text": "When things feel tense",
+    "ratio": 2.43,
+    "size": 14
+   },
+   {
+    "text": "Gentle lifts for heavy days",
+    "ratio": 2.43,
+    "size": 14
+   },
+   {
+    "text": "Wind down, quiet a racing mind",
+    "ratio": 2.43,
+    "size": 14
+   },
+   {
+    "text": "I did it",
+    "ratio": 1.17,
+    "size": 15
+   },
+   {
+    "text": "⟳",
+    "ratio": 4.44,
+    "size": 18
+   },
+   {
+    "text": "+3 Calm gain",
+    "ratio": 3.18,
+    "size": 17
+   },
+   {
+    "text": "+3 Calm gain",
+    "ratio": 3.18,
+    "size": 17
+   },
+   {
+    "text": "+6 Calm gain",
+    "ratio": 3.18,
+    "size": 17
+   }
+  ],
+  "lowCount": 11,
+  "overflowX": false
+ },
+ "dark-10-calm-breathe": {
+  "words": 241,
+  "height": 1977,
+  "lowContrast": [
+   {
+    "text": "Breathe",
+    "ratio": 1.03,
+    "size": 15
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-11-calm-games": {
+  "words": 48,
+  "height": 844,
+  "lowContrast": [
+   {
+    "text": "Games",
+    "ratio": 1.03,
+    "size": 15
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-12-calm-sounds": {
+  "words": 57,
+  "height": 1094,
+  "lowContrast": [
+   {
+    "text": "Sounds",
+    "ratio": 1.03,
+    "size": 15
+   },
+   {
+    "text": "Rain",
+    "ratio": 1.28,
+    "size": 20
+   },
+   {
+    "text": "Soft and steady",
+    "ratio": 2.43,
+    "size": 13
+   },
+   {
+    "text": "Ocean",
+    "ratio": 1.28,
+    "size": 20
+   },
+   {
+    "text": "Slow waves",
+    "ratio": 2.43,
+    "size": 13
+   },
+   {
+    "text": "Deep hush",
+    "ratio": 1.28,
+    "size": 20
+   },
+   {
+    "text": "Warm brown noise",
+    "ratio": 2.43,
+    "size": 13
+   },
+   {
+    "text": "Breeze",
+    "ratio": 1.28,
+    "size": 20
+   },
+   {
+    "text": "Gentle airflow",
+    "ratio": 2.43,
+    "size": 13
+   }
+  ],
+  "lowCount": 9,
+  "overflowX": false
+ },
+ "dark-13-game-pairs": {
+  "words": 26,
+  "height": 844,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "dark-13-game-pairs-done": {
+  "words": 38,
+  "height": 964,
+  "lowContrast": [
+   {
+    "text": "Play again",
+    "ratio": 1.17,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-14-game-catch": {
+  "words": 27,
+  "height": 895,
+  "lowContrast": [
+   {
+    "text": "In your jar: 0   0:42",
+    "ratio": 1.35,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-14-game-catch-done": {
+  "words": 37,
+  "height": 1084,
+  "lowContrast": [
+   {
+    "text": "In your jar: 0   0:42",
+    "ratio": 1.35,
+    "size": 17
+   },
+   {
+    "text": "Play again",
+    "ratio": 1.17,
+    "size": 17
+   }
+  ],
+  "lowCount": 2,
+  "overflowX": false
+ },
+ "dark-15-game-ring": {
+  "words": 40,
+  "height": 942,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "dark-15-game-ring-done": {
+  "words": 57,
+  "height": 1156,
+  "lowContrast": [
+   {
+    "text": "Play again",
+    "ratio": 1.17,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-16-progress": {
+  "words": 202,
+  "height": 1998,
+  "lowContrast": [
+   {
+    "text": "7 days in a row",
+    "ratio": 1.89,
+    "size": 17
+   },
+   {
+    "text": "Not yet: a full week of practice",
+    "ratio": 1.89,
+    "size": 13
+   },
+   {
+    "text": "21 days in a row",
+    "ratio": 1.89,
+    "size": 17
+   },
+   {
+    "text": "Not yet: three weeks: a real habit",
+    "ratio": 1.89,
+    "size": 13
+   },
+   {
+    "text": "30 days in a row",
+    "ratio": 1.89,
+    "size": 17
+   },
+   {
+    "text": "Not yet: a whole month of practice",
+    "ratio": 1.89,
+    "size": 13
+   },
+   {
+    "text": "Ten breaks",
+    "ratio": 1.89,
+    "size": 17
+   },
+   {
+    "text": "Not yet: ten calm breaks taken",
+    "ratio": 1.89,
+    "size": 13
+   },
+   {
+    "text": "Explorer",
+    "ratio": 1.89,
+    "size": 17
+   },
+   {
+    "text": "Not yet: tried every exercise",
+    "ratio": 1.89,
+    "size": 13
+   },
+   {
+    "text": "Shared LoosenUp",
+    "ratio": 1.89,
+    "size": 17
+   },
+   {
+    "text": "Not yet: shared loosenup with someone",
+    "ratio": 1.89,
+    "size": 13
+   }
+  ],
+  "lowCount": 16,
+  "overflowX": false
+ },
+ "dark-17-me": {
+  "words": 261,
+  "height": 3192,
+  "lowContrast": [
+   {
+    "text": "Share LoosenUp",
+    "ratio": 1.17,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-18-find-support": {
+  "words": 828,
+  "height": 7055,
+  "lowContrast": [
+   {
+    "text": "Call 14416",
+    "ratio": 1.17,
+    "size": 15
+   },
+   {
+    "text": "Free helpline",
+    "ratio": 3.13,
+    "size": 12
+   },
+   {
+    "text": "Free helpline",
+    "ratio": 3.13,
+    "size": 12
+   },
+   {
+    "text": "Free helpline",
+    "ratio": 3.13,
+    "size": 12
+   },
+   {
+    "text": "Free helpline",
+    "ratio": 3.13,
+    "size": 12
+   },
+   {
+    "text": "Psychology and psychiatry",
+    "ratio": 3.13,
+    "size": 12
+   },
+   {
+    "text": "Psychology",
+    "ratio": 3.13,
+    "size": 12
+   },
+   {
+    "text": "Psychology and psychiatry",
+    "ratio": 3.13,
+    "size": 12
+   },
+   {
+    "text": "Counselling and psychiatry",
+    "ratio": 3.13,
+    "size": 12
+   },
+   {
+    "text": "Psychology and psychiatry",
+    "ratio": 3.13,
+    "size": 12
+   },
+   {
+    "text": "Psychiatry",
+    "ratio": 3.13,
+    "size": 12
+   },
+   {
+    "text": "AI self help plus human coaches",
+    "ratio": 3.13,
+    "size": 12
+   }
+  ],
+  "lowCount": 12,
+  "overflowX": false
+ },
+ "dark-19-safety-plan": {
+  "words": 86,
+  "height": 1992,
+  "lowContrast": [
+   {
+    "text": "Save my safety plan",
+    "ratio": 1.17,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-20-reframe": {
+  "words": 26,
+  "height": 844,
+  "lowContrast": [
+   {
+    "text": "Next",
+    "ratio": 1.17,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-21-learn": {
+  "words": 88,
+  "height": 1165,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "dark-23-wellbeing": {
+  "words": 131,
+  "height": 1429,
+  "lowContrast": [
+   {
+    "text": "See my result",
+    "ratio": 1.28,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-24-programmes": {
+  "words": 95,
+  "height": 946,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ },
+ "dark-22-lesson": {
+  "words": 107,
+  "height": 1037,
+  "lowContrast": [
+   {
+    "text": "Try Sigh of relief",
+    "ratio": 1.28,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-25-programme-sleep": {
+  "words": 89,
+  "height": 943,
+  "lowContrast": [
+   {
+    "text": "Start day 1",
+    "ratio": 1.17,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-26-sos-sheet": {
+  "words": 109,
+  "height": 2835,
+  "lowContrast": [
+   {
+    "text": "Call Tele-MANAS 14416 (India, free, 24x7)",
+    "ratio": 1.28,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-26b-sos-sheet-bottom": {
+  "words": 109,
+  "height": 2835,
+  "lowContrast": [
+   {
+    "text": "Call Tele-MANAS 14416 (India, free, 24x7)",
+    "ratio": 1.28,
+    "size": 17
+   }
+  ],
+  "lowCount": 1,
+  "overflowX": false
+ },
+ "dark-27-plus-sheet": {
+  "words": 71,
+  "height": 2835,
+  "lowContrast": [
+   {
+    "text": "Choose monthly (demo)",
+    "ratio": 1.17,
+    "size": 17
+   },
+   {
+    "text": "Save 55%",
+    "ratio": 3.18,
+    "size": 12
+   }
+  ],
+  "lowCount": 2,
+  "overflowX": false
+ },
+ "dark-28-lowest-mood-question": {
+  "words": 41,
+  "height": 2856,
+  "lowContrast": [],
+  "lowCount": 0,
+  "overflowX": false
+ }
+}

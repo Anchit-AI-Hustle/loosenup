@@ -4,7 +4,8 @@
 // Privacy rules enforced here, not just in the app:
 // - A pulse holds only weekly averages and up to three feeling labels from a fixed list. No names,
 //   no text, no device ids. The member id is a random string the app makes, stored only as a hash.
-// - The dashboard shows a week only when at least MIN_GROUP people shared that week.
+// - The dashboard shows a week only when at least MIN_GROUP people, on MIN_GROUP different networks,
+//   shared that week, so an admin cannot unlock a small group by posting made-up pulses.
 // - Nothing about SOS or crisis support is ever sent.
 import { sql, ensureSchema, sha256, token, joinCode } from './_db.js';
 
@@ -50,7 +51,7 @@ async function join(body) {
   return { name: o.name, kind: o.kind, joinCode: o.join_code, supportName: o.support_name, supportPhone: o.support_phone };
 }
 
-async function pulse(body) {
+async function pulse(body, ip) {
   const o = await orgByCode(body.code);
   const member = clean(body.member, 64);
   if (member.length < 16) throw problem(400, 'Missing member id.');
@@ -60,11 +61,11 @@ async function pulse(body) {
   const calmGain = body.calmGain == null ? null : num(body.calmGain, -9, 9);
   const breaks = Math.round(num(body.breaks, 0, 500) || 0);
   const contexts = (Array.isArray(body.contexts) ? body.contexts : []).filter((c) => CONTEXTS.includes(c)).slice(0, 3);
-  await sql(`INSERT INTO lu_pulses (org_id, week, member_hash, mood, calm_gain, breaks, contexts)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+  await sql(`INSERT INTO lu_pulses (org_id, week, member_hash, mood, calm_gain, breaks, contexts, ip_hash)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     ON CONFLICT (org_id, week, member_hash) DO UPDATE SET mood = EXCLUDED.mood, calm_gain = EXCLUDED.calm_gain,
-      breaks = EXCLUDED.breaks, contexts = EXCLUDED.contexts, created_at = now()`,
-  [o.id, week, sha256(o.id + ':' + member), mood, calmGain, breaks, contexts]);
+      breaks = EXCLUDED.breaks, contexts = EXCLUDED.contexts, ip_hash = EXCLUDED.ip_hash, created_at = now()`,
+  [o.id, week, sha256(o.id + ':' + member), mood, calmGain, breaks, contexts, sha256('lu-ip:' + o.id + ':' + ip)]);
   return { ok: true };
 }
 
@@ -78,13 +79,13 @@ async function orgByAdmin(key) {
 
 async function dashboard(key) {
   const o = await orgByAdmin(key);
-  const weeks = await sql(`SELECT week, count(*)::int AS members, round(avg(mood)::numeric, 2)::float AS mood,
+  const weeks = await sql(`SELECT week, count(*)::int AS members, count(DISTINCT ip_hash)::int AS networks, round(avg(mood)::numeric, 2)::float AS mood,
       round(avg(calm_gain)::numeric, 2)::float AS calm_gain, sum(breaks)::int AS breaks
     FROM lu_pulses WHERE org_id = $1 GROUP BY week ORDER BY week DESC LIMIT 12`, [o.id]);
   const ctx = await sql(`SELECT week, c AS context, count(*)::int AS n FROM lu_pulses, unnest(contexts) AS c
     WHERE org_id = $1 GROUP BY week, c`, [o.id]);
   const shown = weeks.map((w) => {
-    const enough = w.members >= MIN_GROUP;
+    const enough = w.members >= MIN_GROUP && (w.networks == null || w.networks >= MIN_GROUP);
     const top = ctx.filter((c) => c.week === w.week).sort((a, b) => b.n - a.n).slice(0, 3).map((c) => c.context);
     return enough
       ? { week: w.week, members: w.members, mood: w.mood, calmGain: w.calm_gain, breaks: w.breaks, topFeelings: top }
@@ -118,7 +119,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET' && action === 'dashboard') out = await dashboard(adminKey);
     else if (req.method === 'POST' && action === 'create') out = await create(body, ip);
     else if (req.method === 'POST' && action === 'join') out = await join(body);
-    else if (req.method === 'POST' && action === 'pulse') out = await pulse(body);
+    else if (req.method === 'POST' && action === 'pulse') out = await pulse(body, ip);
     else if (req.method === 'POST' && action === 'delete') out = await remove(adminKey);
     else throw problem(400, 'Unknown action.');
     return res.status(200).json(out);

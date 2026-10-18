@@ -70,7 +70,7 @@ async function walkScreens(page, width, label) {
   for (const g of ['pairs', 'catch', 'bloom']) {
     await page.click('[data-tab="play"]');
     await page.click('[data-seg="games"]');
-    await page.click(`[data-game="${g}"]`);
+    await page.click(`#panel-games [data-game="${g}"]`);
     if (g === 'pairs') { await page.click('[data-card="0"]'); await page.click('[data-card="1"]'); }
     if (g === 'bloom') { await page.locator('#bloom-hold').dispatchEvent('pointerdown'); await page.waitForTimeout(1500); }
     await check('game-' + g);
@@ -160,7 +160,7 @@ test('AT13 every visible button and tab is at least 48px tall and wide', async (
   await page.click('#after-next'); await page.waitForTimeout(400); await measure('result');
   await page.click('#result-done');
   for (const tab of ['today', 'play', 'progress', 'me']) { await page.click(`[data-tab="${tab}"]`); await measure(tab); }
-  for (const g of ['pairs', 'catch', 'bloom']) { await page.click('[data-tab="play"]'); await page.click('[data-seg="games"]'); await page.click(`[data-game="${g}"]`); await measure('game-' + g); await page.click('#game-back'); }
+  for (const g of ['pairs', 'catch', 'bloom']) { await page.click('[data-tab="play"]'); await page.click('[data-seg="games"]'); await page.click(`#panel-games [data-game="${g}"]`); await measure('game-' + g); await page.click('#game-back'); }
   await page.click('[data-tab="today"]'); await page.click('[data-mood="3"]'); await measure('today-mood');
   await page.click('[data-tab="today"]');
   for (const seg of ['breathe', 'games', 'sounds']) { await page.click('[data-tab="play"]'); await page.click(`[data-seg="${seg}"]`); await measure('calm-' + seg); }

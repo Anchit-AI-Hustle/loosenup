@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.0.2';
+  var VERSION = '2.1.0';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -236,7 +236,7 @@
       nudges: { day: null, count: 0, shown: [] }, goldenHour: null, voice: false, badges: [], purchases: [],
       games: { day: null, count: 0 }, gameBest: { pairs: null, catch: 0, bloom: 0 },
       moods: [], smallSteps: [], goodThings: [], trusted: null, sosLocation: false, jarXp: { day: null, count: 0 },
-      careTeam: null, safetyPlan: null, wellbeing: [], toolXp: { day: null, count: 0 }, reframes: 0, theme: 'auto', lang: 'en', programs: {}, org: null, lessonsDone: [], chime: true, bed: 'none',
+      careTeam: null, safetyPlan: null, wellbeing: [], toolXp: { day: null, count: 0 }, reframes: 0, theme: 'auto', lang: 'en', programs: {}, org: null, emotions: [], safetyAskedDay: null, lessonsDone: [], chime: true, bed: 'none',
       lock: { enabled: false, salt: '', hash: '', bio: false }
     };
   }
@@ -641,14 +641,78 @@
   var run = null;
   var orbTimer = null;
 
+  /* ---------- Follow-along guides ---------- */
+  // How-to tips shown while the exercise gets going.
+  var HOW = {
+    sigh: ['Breathe in through your nose, then sip in a little more air.', 'Let it all out slowly through your mouth.', 'Let your shoulders drop on every breath out.'],
+    breeze: ['Sit comfortably and let your jaw relax.', 'Breathe in through your nose as the circle grows.', 'Breathe out gently as it shrinks.'],
+    square: ['Breathe in as the circle grows.', 'Hold gently when it pauses. Never strain.', 'Breathe out, then rest before the next round.'],
+    cooldown: ['Breathe in through your nose for four.', 'Breathe out slowly, as if through a straw, for seven.', 'Feel your body settle a little more each round.'],
+    quick: ['Breathe in for four as the circle grows.', 'Breathe out for six as it shrinks.', 'That is all. Just follow the circle.'],
+    here: ['Go slowly. There are no right answers.', 'Tap a dot each time you notice something.', 'If your mind wanders, come back to the next sense.'],
+    release: ['Tense each area firmly, but never to the point of pain.', 'Hold while the circle squeezes, then let go as it opens.', 'Notice the warm, loose feeling after each release.'],
+    kind: ['Find a quiet moment, even a short one.', 'Say each line slowly, out loud or in your head.', 'Let your hand rest where it feels comforting.'],
+    desk: ['Stay seated, feet flat on the floor.', 'Move gently. Stop if anything feels sore.', 'Follow the timer for each move.'],
+    pause: ['Use this before you reply to a message or a person.', 'Take your time on each question.', 'You can always come back to the conversation later.'],
+    warmth: ['Close your eyes if that feels okay.', 'Picture each person clearly before you wish them well.', 'Say each wish slowly, in your head.']
+  };
+  // Step exercises: an icon, seconds for each step, tap-to-count dots, or a two-part cue (like tense, then let go).
+  var STEP_GUIDE = {
+    here: [{ icon: '👀', secs: 24, count: 5 }, { icon: '✋', secs: 24, count: 4 }, { icon: '👂', secs: 24, count: 3 }, { icon: '👃', secs: 24, count: 2 }, { icon: '👅', secs: 24, count: 1 }],
+    release: [{ icon: '🤷', secs: 24, sub: [['Tense', 5], ['Let go', 7]] }, { icon: '✊', secs: 24, sub: [['Squeeze', 5], ['Open wide', 7]] },
+      { icon: '😖', secs: 24, sub: [['Scrunch', 5], ['Let go', 7]] }, { icon: '🦶', secs: 24, sub: [['Press down', 5], ['Rest', 7]] }, { icon: '🌬️', secs: 24, sub: [['Breathe in', 4], ['Long breath out', 8]] }],
+    kind: [{ icon: '🤲', secs: 24 }, { icon: '💬', secs: 24 }, { icon: '🤝', secs: 24 }, { icon: '💗', secs: 24 }, { icon: '🫶', secs: 24 }],
+    desk: [{ icon: '🔄', secs: 24, count: 5 }, { icon: '↔️', secs: 24, sub: [['Left side', 6], ['Right side', 6]] }, { icon: '🙏', secs: 24, sub: [['Press', 5], ['Let go', 7]] },
+      { icon: '🔭', secs: 24 }, { icon: '🌬️', secs: 24, sub: [['Breathe in', 4], ['Long breath out', 8]] }],
+    pause: [{ icon: '🌬️', secs: 24, sub: [['Breathe in', 4], ['Breathe out', 6]] }, { icon: '🏷️', secs: 24 }, { icon: '❓', secs: 24 }, { icon: '🤝', secs: 24 }, { icon: '💬', secs: 24 }],
+    warmth: [{ icon: '😊', secs: 24 }, { icon: '🕊️', secs: 24 }, { icon: '🧑', secs: 24 }, { icon: '🌤️', secs: 24 }, { icon: '💛', secs: 24 }]
+  };
+  var SHORT_PHASE = { 'Breathe in': 'In', 'A little more': 'Top up', 'Long breath out': 'Out', 'Breathe out': 'Out', 'Hold gently': 'Hold', 'Rest': 'Rest' };
+  var RING = 289.03; // circumference of r = 46
+  function ringTo(el, seconds) {
+    if (!el) return;
+    el.style.transition = 'none';
+    el.style.strokeDashoffset = String(RING);
+    void el.getBoundingClientRect();
+    if (prefersReducedMotion()) { el.style.strokeDashoffset = '0'; return; }
+    el.style.transition = 'stroke-dashoffset ' + seconds + 's linear';
+    el.style.strokeDashoffset = '0';
+  }
+  function renderHow(id) {
+    var ul = $('how-list');
+    ul.textContent = '';
+    (HOW[id] || []).forEach(function (h) { var li = document.createElement('li'); li.textContent = h; ul.appendChild(li); });
+    ul.hidden = !(HOW[id] || []).length;
+  }
+  function renderPatternStrip(t) {
+    var box = $('pattern-strip');
+    box.textContent = '';
+    box.hidden = t.kind !== 'breath';
+    if (t.kind !== 'breath') return;
+    t.pattern.forEach(function (ph, i) {
+      var c = document.createElement('span');
+      c.className = 'pchip';
+      c.setAttribute('data-phase', String(i));
+      c.textContent = (SHORT_PHASE[ph[0]] || ph[0]) + ' ' + ph[1] + 's';
+      box.appendChild(c);
+    });
+  }
+  function markPhase(i) {
+    var chips = document.querySelectorAll('#pattern-strip .pchip');
+    for (var k = 0; k < chips.length; k++) chips[k].classList.toggle('on', k === i);
+  }
+
   function startSession(id) {
     stopRun();
     var t = TECH[id];
     flow.technique = id;
-    run = { id: id, left: t.seconds, paused: false, phase: -1, phaseLeft: 0, step: 0, stepLeft: 0, crisisShown: false };
+    var cycle = t.pattern ? t.pattern.reduce(function (a, p) { return a + p[1]; }, 0) : 0;
+    run = { id: id, left: t.seconds, paused: false, phase: -1, phaseLeft: 0, step: 0, stepLeft: 0, crisisShown: false,
+      ready: t.kind === 'journal' ? 0 : 3, round: 0, rounds: cycle ? Math.max(1, Math.round(t.seconds / cycle)) : 0, sub: 0, subLeft: 0, dots: 0 };
     var scr = $('screen-session');
     scr.classList.toggle('steps', t.kind === 'steps');
     scr.classList.toggle('journal', t.kind === 'journal');
+    scr.classList.toggle('breath', t.kind === 'breath');
     setText('session-title', t.name);
     $('step-box').hidden = t.kind !== 'steps';
     $('journal-box').hidden = t.kind !== 'journal';
@@ -657,6 +721,9 @@
     $('session-pause').setAttribute('aria-pressed', 'false');
     renderVoiceButtons();
     setText('session-finish', 'Finish early');
+    renderHow(id);
+    renderPatternStrip(t);
+    setText('round-count', '');
     go('session');
     var orb = $('orb');
     orb.style.transitionDuration = '0s';
@@ -667,19 +734,37 @@
     speak(INTRO[t.kind] || INTRO.breath);
     speak(t.desc, true);
     if (state.bed && state.bed !== 'none' && !audio) { sessionBed = playSound(state.bed, 0.35); }
-    if (t.kind === 'steps') { run.stepLeft = Math.floor(t.seconds / t.steps.length); showStep(0); }
-    if (t.kind === 'journal') { setText('cue', ''); }
-    if (t.kind === 'breath') nextPhase();
+    if (t.kind === 'journal') { setText('cue', ''); setText('orb-count', ''); }
+    else {
+      // A short get-ready countdown so people can settle and read how it works.
+      setText('cue', 'Get ready');
+      setText('orb-count', String(run.ready));
+      speak('Get ready', true);
+      ringTo($('phase-ring'), run.ready);
+      if (t.kind === 'steps') { renderStepProgress(t); showStep(0, true); }
+    }
     updateTime();
     run.timer = setInterval(tick, 1000);
+  }
+
+  function beginGuide() {
+    var t = TECH[run.id];
+    if (t.kind === 'breath') nextPhase();
+    if (t.kind === 'steps') showStep(0);
   }
 
   function nextPhase() {
     var t = TECH[run.id];
     run.phase = (run.phase + 1) % t.pattern.length;
+    if (run.phase === 0) run.round++;
     var ph = t.pattern[run.phase];
     run.phaseLeft = ph[1];
     setText('cue', ph[0]);
+    setText('orb-count', String(ph[1]));
+    setText('round-count', 'Round ' + Math.min(run.round, run.rounds) + ' of ' + run.rounds);
+    markPhase(run.phase);
+    $('screen-session').setAttribute('data-phase', ph[2] >= 1 ? (run.phase > 0 && t.pattern[run.phase - 1][2] >= 1 ? 'hold' : 'in') : 'out');
+    ringTo($('phase-ring'), ph[1]);
     speak(ph[0], true);
     chime();
     var orb = $('orb');
@@ -690,34 +775,95 @@
     clearTimeout(orbTimer);
     orbTimer = setTimeout(function () {
       orb.style.transform = 'scale(' + ph[2] + ')';
-      // Petals open wide and turn a little on the in-breath, fold in on the out-breath.
       pet.style.transform = 'scale(' + (ph[2] >= 1 ? 1.02 : 0.55) + ') rotate(' + (ph[2] >= 1 ? 18 : 0) + 'deg)';
     }, 30);
   }
 
-  function showStep(i) {
+  function renderStepProgress(t) {
+    var box = $('step-progress');
+    box.textContent = '';
+    t.steps.forEach(function () { box.appendChild(document.createElement('i')); });
+  }
+  function stepGuide(i) { return (STEP_GUIDE[run.id] || [])[i] || { icon: '', secs: Math.floor(TECH[run.id].seconds / TECH[run.id].steps.length) }; }
+  function showStep(i, preview) {
     var t = TECH[run.id];
+    var g = stepGuide(i);
     run.step = i;
     setText('step-count', 'Step ' + (i + 1) + ' of ' + t.steps.length);
     setText('step-text', t.steps[i]);
+    setText('step-icon', g.icon || '');
+    var bars = document.querySelectorAll('#step-progress i');
+    for (var b = 0; b < bars.length; b++) bars[b].className = b < i ? 'done' : b === i ? 'on' : '';
+    $('step-next').hidden = i >= t.steps.length - 1;
+    // Tap-to-count dots, for steps like "name 5 things you can see".
+    var dots = $('step-dots');
+    dots.textContent = '';
+    dots.hidden = !g.count;
+    run.dots = 0;
+    for (var d = 0; d < (g.count || 0); d++) {
+      var bt = document.createElement('button');
+      bt.type = 'button'; bt.className = 'sdot'; bt.setAttribute('data-dot', String(d));
+      bt.setAttribute('aria-label', 'Noticed ' + (d + 1) + ' of ' + g.count);
+      bt.setAttribute('aria-pressed', 'false');
+      dots.appendChild(bt);
+    }
+    $('step-sub').hidden = !g.sub;
+    if (preview) { setText('step-left', String(run.ready)); return; }
+    run.stepLeft = g.secs;
+    setText('step-left', String(run.stepLeft));
+    ringTo($('step-ring'), g.secs);
+    run.sub = 0;
+    if (g.sub) startSub(g);
     speak(t.steps[i], true);
     if (i > 0) chime();
-    $('step-next').hidden = i >= t.steps.length - 1;
     var orb = $('orb');
-    if (!prefersReducedMotion()) {
+    if (!prefersReducedMotion() && !g.sub) {
       orb.style.transitionDuration = '1.2s'; orb.style.transform = 'scale(' + (0.7 + 0.06 * i) + ')';
       $('orb-petals').style.transitionDuration = '1.2s'; $('orb-petals').style.transform = 'scale(' + (0.6 + 0.09 * i) + ') rotate(' + (i * 14) + 'deg)';
     }
   }
+  // Two-part cues inside a step, such as "Tense" then "Let go", repeated with the circle squeezing and opening.
+  function startSub(g) {
+    var part = g.sub[run.sub % g.sub.length];
+    run.subLeft = part[1];
+    setText('step-sub', part[0] + ' · ' + part[1]);
+    var squeeze = run.sub % g.sub.length === 0;
+    var orb = $('orb');
+    if (!prefersReducedMotion()) { orb.style.transitionDuration = part[1] + 's'; orb.style.transform = 'scale(' + (squeeze ? 0.66 : 1) + ')'; }
+    if (run.sub > 0) chime();
+  }
+  function tapDot(i) {
+    var g = stepGuide(run.step);
+    if (!g.count) return;
+    var dots = document.querySelectorAll('#step-dots .sdot');
+    if (i !== run.dots) return;
+    dots[i].setAttribute('aria-pressed', 'true');
+    run.dots++;
+    haptic('light');
+    if (run.dots >= g.count && run.step < TECH[run.id].steps.length - 1) setTimeout(function () { if (run) showStep(run.step + 1); }, 700);
+  }
 
   function tick() {
     if (!run || run.paused) return;
-    run.left--;
     var t = TECH[run.id];
-    if (t.kind === 'breath') { run.phaseLeft--; if (run.phaseLeft <= 0) nextPhase(); }
+    if (run.ready > 0) {
+      run.ready--;
+      setText('orb-count', run.ready ? String(run.ready) : '');
+      if (t.kind === 'steps') setText('step-left', run.ready ? String(run.ready) : '');
+      if (!run.ready) beginGuide();
+      return;
+    }
+    run.left--;
+    if (t.kind === 'breath') {
+      run.phaseLeft--;
+      if (run.phaseLeft <= 0) nextPhase(); else setText('orb-count', String(run.phaseLeft));
+    }
     if (t.kind === 'steps') {
+      var g = stepGuide(run.step);
       run.stepLeft--;
-      if (run.stepLeft <= 0 && run.step < t.steps.length - 1) { run.stepLeft = Math.floor(t.seconds / t.steps.length); showStep(run.step + 1); }
+      setText('step-left', String(Math.max(0, run.stepLeft)));
+      if (g.sub) { run.subLeft--; if (run.subLeft <= 0) { run.sub++; startSub(g); } else setText('step-sub', g.sub[run.sub % g.sub.length][0] + ' · ' + run.subLeft); }
+      if (run.stepLeft <= 0 && run.step < t.steps.length - 1) showStep(run.step + 1);
     }
     updateTime();
     if (run.left <= 0) endSession(true);
@@ -974,6 +1120,7 @@
     });
     renderGoldenBanner();
     renderMood();
+    renderEmotions();
     renderSupportCard();
     renderSteps();
     renderJar();
@@ -995,7 +1142,8 @@
     renderMood();
     renderSupportCard();
     renderSeedPill();
-    if (n === 1) openSheet('safety-sheet');
+    // Ask the gentle safety question at most once a day, so the lowest face never feels like a trap.
+    if (n === 1 && state.safetyAskedDay !== dk) { state.safetyAskedDay = dk; save(); openSheet('safety-sheet'); }
   }
   function renderMood() {
     var m = todayMood();
@@ -1164,6 +1312,7 @@
     setText('prog-wb', wb ? wb.score + ' / 100' : 'Not yet');
     setText('prog-wb-note', wb ? wellbeingNote(wb.score).split('. ')[0] + '.' : 'Take the two-week check below.');
     renderWeek();
+    renderEmotionStats();
     renderMilestones();
   }
 
@@ -1744,6 +1893,111 @@
     else { setText('inperson-status', 'No listed city is close by yet. The map search below finds options near you.'); setCity(null); }
   }
 
+
+  /* ---------- Emotion meter: what else is there, and how strongly ---------- */
+  // Each tap cycles the intensity: a little (1), quite (2), very (3), then off.
+  var EMOTIONS = [
+    ['angry', 'Angry', '😠', 'cooldown', 'Long breaths out help anger cool.'],
+    ['worried', 'Worried', '😟', 'square', 'A steady square breath settles a worried mind.'],
+    ['sad', 'Sad', '😢', 'kind', 'Kind words help on a sad day.'],
+    ['tired', 'Tired', '🥱', 'sigh', 'Two quick sighs can lift low energy.'],
+    ['lonely', 'Lonely', '🥺', 'warmth', 'Warm wishes help you feel closer to others.'],
+    ['overwhelmed', 'Overwhelmed', '😵‍💫', 'here', 'Here and now brings you back to one thing at a time.'],
+    ['frustrated', 'Frustrated', '😤', 'pause', 'Pause before replying helps frustration pass.'],
+    ['restless', 'Restless', '😬', 'release', 'Soft release lets tense muscles go.'],
+    ['calm', 'Calm', '😌', null], ['happy', 'Happy', '😄', null], ['grateful', 'Grateful', '🙏', null],
+    ['hopeful', 'Hopeful', '🌤️', null], ['loved', 'Loved', '🥰', null], ['energetic', 'Energetic', '⚡', null]
+  ];
+  var EMO_LEVEL = [null, 'a little', 'quite', 'very'];
+  function todayEmotions() {
+    var dk = dayKey(now());
+    if (!state.emotions) state.emotions = [];
+    for (var i = 0; i < state.emotions.length; i++) if (state.emotions[i].day === dk) return state.emotions[i];
+    var e = { day: dk, e: {} };
+    state.emotions.push(e);
+    if (state.emotions.length > 400) state.emotions = state.emotions.slice(-400);
+    return e;
+  }
+  function setEmotion(key) {
+    var t = todayEmotions();
+    var lv = ((t.e[key] || 0) + 1) % 4;
+    if (lv) t.e[key] = lv; else delete t.e[key];
+    save();
+    renderEmotions();
+    haptic('light');
+    return lv;
+  }
+  function renderEmotions() {
+    var box = $('emotions');
+    if (!box) return;
+    var t = todayEmotions();
+    box.textContent = '';
+    EMOTIONS.forEach(function (em) {
+      var lv = t.e[em[0]] || 0;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'emo' + (em[3] ? ' hard' : ' good');
+      b.setAttribute('data-emotion', em[0]);
+      b.setAttribute('data-level', String(lv));
+      b.setAttribute('aria-pressed', String(!!lv));
+      b.setAttribute('aria-label', em[1] + (lv ? ', ' + EMO_LEVEL[lv] : ''));
+      var f = document.createElement('span'); f.className = 'emo-face'; f.setAttribute('aria-hidden', 'true'); f.textContent = em[2];
+      var n = document.createElement('span'); n.className = 'emo-name'; n.textContent = em[1];
+      var d = document.createElement('span'); d.className = 'emo-dots'; d.setAttribute('aria-hidden', 'true');
+      for (var k = 1; k <= 3; k++) { var i = document.createElement('i'); if (k <= lv) i.className = 'on'; d.appendChild(i); }
+      b.appendChild(f); b.appendChild(n); b.appendChild(d);
+      box.appendChild(b);
+    });
+    // Suggest one exercise for the strongest difficult emotion.
+    var best = null;
+    EMOTIONS.forEach(function (em) { var lv = t.e[em[0]] || 0; if (em[3] && lv && (!best || lv > best.lv)) best = { em: em, lv: lv }; });
+    $('emo-suggest').hidden = !best;
+    if (best) {
+      setText('emo-suggest-text', best.em[4]);
+      setText('emo-suggest-btn', 'Try ' + TECH[best.em[3]].name);
+      $('emo-suggest-btn').setAttribute('data-practice', best.em[3]);
+    }
+  }
+  // Last 7 days: how often and how strongly each emotion showed up, with the week before for a trend.
+  function emotionStats() {
+    var end = dayNum(dayKey(now()));
+    var out = {};
+    (state.emotions || []).forEach(function (row) {
+      var age = end - dayNum(row.day);
+      Object.keys(row.e).forEach(function (k) {
+        var o = out[k] || (out[k] = { days: 0, sum: 0, prevDays: 0, prevSum: 0 });
+        if (age >= 0 && age < 7) { o.days++; o.sum += row.e[k]; }
+        else if (age >= 7 && age < 14) { o.prevDays++; o.prevSum += row.e[k]; }
+      });
+    });
+    return EMOTIONS.filter(function (em) { return out[em[0]] && out[em[0]].days; }).map(function (em) {
+      var o = out[em[0]];
+      var score = o.sum, prev = o.prevSum;
+      return { key: em[0], name: em[1], face: em[2], hard: !!em[3], days: o.days, avg: Math.round(10 * o.sum / o.days) / 10,
+        score: score, trend: !o.prevDays ? 'new' : score < prev ? 'down' : score > prev ? 'up' : 'same' };
+    }).sort(function (a, b) { return b.score - a.score; });
+  }
+  function renderEmotionStats() {
+    var box = $('emo-stats');
+    if (!box) return;
+    box.textContent = '';
+    var st = emotionStats();
+    $('emo-empty').hidden = !!st.length;
+    var max = Math.max.apply(null, [3].concat(st.map(function (x) { return x.score; })));
+    st.forEach(function (x) {
+      var row = document.createElement('div');
+      row.className = 'emo-row ' + (x.hard ? 'hard' : 'good');
+      var l = document.createElement('span'); l.className = 'emo-row-name'; l.textContent = x.face + ' ' + x.name;
+      var bar = document.createElement('span'); bar.className = 'emo-bar';
+      var fill = document.createElement('i'); fill.style.width = Math.round(100 * x.score / max) + '%'; bar.appendChild(fill);
+      var meta = document.createElement('span'); meta.className = 'emo-row-meta';
+      var arrow = x.trend === 'down' ? (x.hard ? ' · easing' : ' · less') : x.trend === 'up' ? (x.hard ? ' · rising' : ' · more') : '';
+      meta.textContent = plural(x.days, 'day', 'days') + arrow;
+      row.appendChild(l); row.appendChild(bar); row.appendChild(meta);
+      box.appendChild(row);
+    });
+  }
+
   /* ---------- Calm: breathing, games and sounds in one screen ---------- */
   var SEGS = ['breathe', 'games', 'sounds'];
   var calmSeg = 'breathe';
@@ -2173,7 +2427,7 @@
   }
 
   // Find support
-  var DEFAULT_PROS = 'Tele-MANAS 14416 (24x7, free)\nVandrevala Foundation +91 9999 666 555 (24x7, call or WhatsApp)\niCall 022-25521111 (Mon to Sat, 8am to 9pm)\nEmergency 112';
+  var DEFAULT_PROS = 'Tele-MANAS 14416 (24x7, free)\nVandrevala Foundation +91 9999 666 555 (24x7, call or WhatsApp)\niCall 9152987821 (Mon to Sat, 8am to 9pm)\nEmergency 112';
   function renderSupport() {
     var links = document.querySelectorAll('[data-near]');
     for (var i = 0; i < links.length; i++) {
@@ -2847,6 +3101,10 @@
     if (pf) { partnerFilter = pf; renderPartners(); return; }
     var prog = el.getAttribute('data-program');
     if (prog) { openProgram(prog); return; }
+    var emotion = el.getAttribute('data-emotion');
+    if (emotion) { setEmotion(emotion); return; }
+    var dot = el.getAttribute('data-dot');
+    if (dot !== null) { tapDot(+dot); return; }
     var seg = el.getAttribute('data-seg');
     if (seg) { setSeg(seg); haptic('light'); return; }
     var practice = el.getAttribute('data-practice');
@@ -2915,10 +3173,10 @@
       case 'session-finish': endSession(false); break;
       case 'session-pause': togglePause(); break;
       case 'session-voice': case 'voice-toggle': toggleVoice(); break;
-      case 'step-next': if (run && TECH[run.id].steps && run.step < TECH[run.id].steps.length - 1) { run.stepLeft = Math.floor(TECH[run.id].seconds / TECH[run.id].steps.length); showStep(run.step + 1); } break;
+      case 'step-next': if (run && TECH[run.id].steps && run.step < TECH[run.id].steps.length - 1) { run.ready = 0; showStep(run.step + 1); } break;
       case 'after-next': finishAfter(); break;
       case 'result-done': go('today'); break;
-      case 'game-back': go('play'); break;
+      case 'game-back': go(lastTab || 'play'); break;
       case 'game-again': if (game) openGame(game.id); break;
       case 'start-break': startCheckin('guided'); break;
       case 'quick-breeze': startCheckin('quick'); break;
@@ -3083,6 +3341,10 @@
     showLock: showLock,
     setLang: setLang,
     setSeg: setSeg,
+    setEmotion: setEmotion,
+    emotionStats: emotionStats,
+    sessionTick: function () { tick(); },
+    run: function () { return run ? JSON.parse(JSON.stringify({ id: run.id, ready: run.ready, phase: run.phase, phaseLeft: run.phaseLeft, round: run.round, rounds: run.rounds, step: run.step, stepLeft: run.stepLeft, dots: run.dots, left: run.left })) : null; },
     joinOrg: joinOrg,
     loadVoiceClips: loadVoiceClips,
     clipFor: clipFor,
@@ -3123,7 +3385,7 @@
     spawnBeam: spawnBeam,
     finishCurrentGame: finishCurrentGame,
     voiceLines: function () {
-      var out = [INTRO.breath, INTRO.steps, INTRO.journal, OUTRO, 'Voice guide on.', 'Breathe in', 'Breathe out'];
+      var out = [INTRO.breath, INTRO.steps, INTRO.journal, OUTRO, 'Voice guide on.', 'Get ready', 'Breathe in', 'Breathe out'];
       Object.keys(TECH).forEach(function (k) {
         var t = TECH[k];
         out.push(t.desc);

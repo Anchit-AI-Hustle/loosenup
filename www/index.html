@@ -183,17 +183,30 @@
       <section id="screen-session" class="screen session" data-screen="session" hidden aria-labelledby="session-title">
         <p class="eyebrow center" id="session-kicker">Guided break</p>
         <h1 id="session-title" class="title center"></h1>
-        <div class="orb-wrap" id="orb-wrap" aria-hidden="true">
-          <div class="orb-halo"></div>
-          <svg id="orb-petals" class="orb-petals" viewBox="-100 -100 200 200"></svg>
-          <div id="orb" class="orb"></div>
+        <div id="pattern-strip" class="pattern-strip" aria-label="Breathing rhythm"></div>
+        <div class="orb-wrap" id="orb-wrap">
+          <div class="orb-halo" aria-hidden="true"></div>
+          <svg id="orb-petals" class="orb-petals" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
+          <div id="orb" class="orb" aria-hidden="true"></div>
+          <svg class="phase-ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="pr-track" cx="50" cy="50" r="46"/><circle id="phase-ring" class="pr-fill" cx="50" cy="50" r="46"/></svg>
+          <span id="orb-count" class="orb-count" aria-hidden="true"></span>
         </div>
         <p id="cue" class="cue" aria-live="polite"></p>
+        <p id="round-count" class="round-count"></p>
         <div id="step-box" class="card step-box" hidden>
+          <div class="step-progress" id="step-progress" aria-hidden="true"></div>
+          <div class="step-visual">
+            <span id="step-icon" class="step-icon" aria-hidden="true"></span>
+            <svg class="step-ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="pr-track" cx="50" cy="50" r="46"/><circle id="step-ring" class="pr-fill" cx="50" cy="50" r="46"/></svg>
+            <span id="step-left" class="step-left" aria-hidden="true"></span>
+          </div>
           <p id="step-count" class="eyebrow"></p>
           <p id="step-text" class="step-text" aria-live="polite"></p>
+          <p id="step-sub" class="step-sub" aria-live="polite" hidden></p>
+          <div id="step-dots" class="step-dots" hidden></div>
           <button id="step-next" class="btn btn-soft" type="button">Next step</button>
         </div>
+        <ul id="how-list" class="how-list" aria-label="How to do it"></ul>
         <div id="journal-box" class="card journal-box" hidden>
           <label class="field-label" for="letitout-text">Type whatever is on your mind. It is never saved, and it clears when you finish.</label>
           <textarea id="letitout-text" class="journal" rows="6" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Let it out here..."></textarea>
@@ -279,6 +292,14 @@
           </div>
         </div>
 
+        <section class="block" aria-labelledby="games-title">
+          <div class="block-head"><h2 class="subtitle" id="games-title">Play a calm game</h2><span class="tag">1 tap</span></div>
+          <div class="game-row">
+            <button class="game-tile gt-pairs" type="button" data-game="pairs"><span class="gt-ic" aria-hidden="true">🃏</span><strong>Calm Pairs</strong><span>Match the pairs</span></button>
+            <button class="game-tile gt-catch" type="button" data-game="catch"><span class="gt-ic" aria-hidden="true">☀️</span><strong>Sunbeam Catch</strong><span>Tap the light</span></button>
+            <button class="game-tile gt-ring" type="button" data-game="bloom"><span class="gt-ic" aria-hidden="true">🫧</span><strong>Breathing Ring</strong><span>Hold to breathe</span></button>
+          </div>
+        </section>
         <article id="support-card" class="card support-card" hidden>
           <p class="eyebrow">We are here with you</p>
           <h2 class="subtitle">It has been a heavy few days. You do not have to carry it alone.</h2>
@@ -306,6 +327,12 @@
             <span class="mood-knob"></span>
           </div>
           <div class="mood-scale-ends" aria-hidden="true"><span>Crying</span><span>Happy</span></div>
+          <div class="emo-head"><h3 class="emo-title">What else are you feeling?</h3><span class="fine">Tap again for more</span></div>
+          <div id="emotions" class="emotions" role="group" aria-label="Emotions"></div>
+          <div id="emo-suggest" class="emo-suggest" hidden>
+            <p id="emo-suggest-text"></p>
+            <button id="emo-suggest-btn" class="btn btn-sun btn-small" type="button"></button>
+          </div>
           <p id="mood-done" class="fine" aria-live="polite"></p>
           <p id="jar-memory" class="jar-memory" hidden></p>
         </article>
@@ -354,7 +381,7 @@
 
         <article id="check-due" class="card check-due" hidden>
           <p class="tag">Two-week wellbeing check</p>
-          <p class="muted">Five quick questions that show how your days have really been going.</p>
+          <p class="muted">Five quick questions, once every two weeks.</p>
           <button class="btn btn-soft btn-small" type="button" data-tool="wellbeing">Take the check</button>
         </article>
 
@@ -381,7 +408,6 @@
           <div class="ps-item"><span class="stat-k">This week</span><span id="today-week" class="stat-v"></span></div>
           <div class="ps-item"><span class="stat-k">Avg Calm gain</span><span id="today-avg" class="stat-v"></span></div>
         </article>
-        <p id="today-rain" class="fine center"></p>
 
         <h2 class="subtitle">Recent breaks</h2>
         <ul id="today-recent" class="recent"></ul>
@@ -406,7 +432,7 @@
           </div>
           <div class="help-line">
             <div><strong>iCall (TISS)</strong><p class="fine">Mon to Sat, 8am to 9pm, free counselling by phone and email.</p></div>
-            <div class="row"><a class="btn btn-soft btn-small" href="tel:02225521111">Call</a><a class="btn btn-soft btn-small" href="mailto:icall@tiss.edu">Email</a></div>
+            <div class="row"><a class="btn btn-soft btn-small" href="tel:9152987821">Call</a><a class="btn btn-soft btn-small" href="mailto:icall@tiss.edu">Email</a></div>
           </div>
           <div class="help-line">
             <div><strong>Emergency</strong><p class="fine">If you might act on thoughts of ending your life.</p></div>
@@ -666,7 +692,7 @@
           <p id="game-done-text" class="muted"></p>
           <button id="game-again" class="btn btn-sun" type="button">Play again</button>
         </div>
-        <button id="game-back" class="btn btn-ghost" type="button">Back to Play</button>
+        <button id="game-back" class="btn btn-ghost" type="button">Back</button>
       </section>
 
       <!-- Progress -->
@@ -679,6 +705,11 @@
           <div class="stat"><span class="stat-k">Average Calm gain</span><span id="prog-avg" class="stat-v"></span></div>
           <div class="stat"><span class="stat-k">Wellbeing</span><span id="prog-wb" class="stat-v"></span><span id="prog-wb-note" class="fine"></span></div>
         </div>
+        <article class="card">
+          <h2 class="subtitle">Your emotions this week</h2>
+          <div id="emo-stats" class="emo-stats"></div>
+          <p id="emo-empty" class="fine">Tap how you feel on Today, and your emotions will show here day by day.</p>
+        </article>
         <h2 class="subtitle">The last 7 days</h2>
         <div class="card"><svg id="week-chart" viewBox="0 0 340 190" role="img" aria-label="Calm gain for the last 7 days"></svg></div>
         <div class="stat-grid">

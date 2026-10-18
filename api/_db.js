@@ -39,6 +39,8 @@ export function ensureSchema() {
       contexts text[] NOT NULL DEFAULT '{}',
       created_at timestamptz NOT NULL DEFAULT now(),
       PRIMARY KEY (org_id, week, member_hash))`);
+    // A week only counts people on different networks, so one person cannot fake a group.
+    await sql('ALTER TABLE lu_pulses ADD COLUMN IF NOT EXISTS ip_hash text');
   })().catch((e) => { ready = null; throw e; });
   return ready;
 }

@@ -26,7 +26,7 @@ test('AT22 Find support lists verified helplines with working links', () => {
   const app = ready();
   app.B.go('support');
   const html = app.$('#screen-support').innerHTML;
-  for (const href of ['tel:14416', 'tel:+919999666555', 'https://wa.me/919999666555', 'tel:02225521111', 'mailto:icall@tiss.edu', 'tel:112']) {
+  for (const href of ['tel:14416', 'tel:+919999666555', 'https://wa.me/919999666555', 'tel:9152987821', 'mailto:icall@tiss.edu', 'tel:112']) {
     assert.ok(html.includes(`href="${href}"`), href);
   }
   assert.match(app.$('#screen-support').textContent, /Psychiatrist[\s\S]*Clinical psychologist[\s\S]*Counsellor/);

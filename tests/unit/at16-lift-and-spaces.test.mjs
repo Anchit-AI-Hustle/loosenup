@@ -78,6 +78,8 @@ test('AT17 Work space: contexts and breaks for the workday', () => {
   assert.ok(picks.includes('desk') && picks.includes('square'), 'work breaks offered');
   app.click('#pick-begin');
   assert.equal(app.B.currentScreen(), 'session');
+  assert.match(app.$('#cue').textContent, /Get ready/);
+  for (let i = 0; i < 3; i++) app.B.sessionTick();
   assert.match(app.$('#cue').textContent, /Breathe in/);
 });
 

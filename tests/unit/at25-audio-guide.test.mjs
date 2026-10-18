@@ -33,7 +33,9 @@ test('AT25 voice narration: intro, then each cue, then a kind close', () => {
   app.click('#pick-begin');
   assert.match(spoken[0].text, /Let us begin/);
   assert.match(spoken[1].text, /easy breaths in through the nose|Soft, even breathing|Slow, even breathing|Sixty seconds/, 'then the exercise in a sentence');
-  assert.equal(spoken[2].text, 'Breathe in');
+  assert.equal(spoken[2].text, 'Get ready', 'a short get-ready countdown first');
+  for (let i = 0; i < 3; i++) app.B.sessionTick();
+  assert.equal(spoken.at(-1).text, 'Breathe in');
   assert.equal(spoken[0].lang, 'en-IN');
   assert.ok(app.B.chimesPlayed() > before, 'a chime marks the breath change');
   app.click('#session-finish');

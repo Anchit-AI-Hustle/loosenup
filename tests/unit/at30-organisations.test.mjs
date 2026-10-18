@@ -93,7 +93,7 @@ async function apiWith(rowsFor) {
 test('AT30 API: the dashboard hides any week with fewer than 5 people', async () => {
   const { call, queries, mod } = await apiWith((q) => {
     if (q.includes('FROM lu_orgs WHERE admin_hash')) return [{ id: 1, name: 'Riverside College', kind: 'college', join_code: 'LUAB23CD' }];
-    if (q.includes('GROUP BY week ORDER BY')) return [{ week: '2026-W42', members: 7, mood: 3.4, calm_gain: 2.1, breaks: 30 }, { week: '2026-W41', members: 3, mood: 1.5, calm_gain: 0, breaks: 4 }];
+    if (q.includes('GROUP BY week ORDER BY')) return [{ week: '2026-W42', members: 7, networks: 6, mood: 3.4, calm_gain: 2.1, breaks: 30 }, { week: '2026-W41', members: 3, networks: 3, mood: 1.5, calm_gain: 0, breaks: 4 }, { week: '2026-W40', members: 6, networks: 1, mood: 2, calm_gain: 1, breaks: 9 }];
     if (q.includes('unnest(contexts)')) return [{ week: '2026-W42', context: 'Busy mind', n: 5 }, { week: '2026-W41', context: 'Feeling low', n: 2 }];
     return [];
   });
@@ -103,6 +103,7 @@ test('AT30 API: the dashboard hides any week with fewer than 5 people', async ()
   assert.deepEqual(r.json.weeks[0].topFeelings, ['Busy mind']);
   assert.equal(r.json.weeks[0].members, 7);
   assert.deepEqual(r.json.weeks[1], { week: '2026-W41', members: null, hidden: true }, 'a small week reveals nothing');
+  assert.deepEqual(r.json.weeks[2], { week: '2026-W40', members: null, hidden: true }, 'six pulses from one network stay private');
   assert.match(queries.at(-1).url, /^https:\/\/api\.ap-southeast-1\.aws\.neon\.tech\/sql$/);
   assert.ok(queries.every((q) => !q.params.includes('k'.repeat(32))), 'the admin key is stored and compared only as a hash');
 });
@@ -116,6 +117,7 @@ test('AT30 API: pulses keep only allowed fields and feelings; members are stored
   assert.equal(ins.params[3], 5, 'mood is clamped to 1 to 5');
   assert.deepEqual(ins.params[6], ['Busy mind', 'Feeling low', 'Low energy'], 'only listed feelings, at most 3');
   assert.notEqual(ins.params[2], member, 'member id is hashed');
+  assert.equal(ins.params[7].length, 64, 'network stored only as a hash');
   assert.ok(!JSON.stringify(ins.params).includes('secret'));
   const bad = await call('POST', { body: { action: 'pulse', code: 'LUAB23CD', member, week: 'last week' } });
   assert.equal(bad.status, 400);

@@ -55,7 +55,7 @@ test('AT27 live: the iPhone install manifest and app file are served over HTTPS'
   assert.match(page, /itms-services:\/\/\?action=download-manifest/);
 });
 
-test('AT30 live: organisations work end to end on Neon, and small groups stay private', { skip }, async () => {
+test('AT30 live: organisations work end to end on Neon, and small or single-network groups stay private', { skip }, async () => {
   const api = IOS + '/api/org';
   const post = async (body, headers = {}) => { const r = await fetch(api, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body) }); return { status: r.status, json: await r.json() }; };
   const made = await post({ action: 'create', name: 'LoosenUp live test', kind: 'other' });
@@ -68,10 +68,8 @@ test('AT30 live: organisations work end to end on Neon, and small groups stay pr
     for (let i = 0; i < 4; i++) assert.equal((await post({ action: 'pulse', code: joinCode, member: 'live-member-' + i + '-xxxxxxxxxxxx', week: '2026-W01', mood: 3, calmGain: 2, breaks: 2, contexts: ['Busy mind'] })).status, 200);
     assert.equal((await dash()).weeks[0].hidden, true, '4 people: still private');
     await post({ action: 'pulse', code: joinCode, member: 'live-member-4-xxxxxxxxxxxx', week: '2026-W01', mood: 5, calmGain: 4, breaks: 3, contexts: ['Feeling low'] });
-    const w = (await dash()).weeks[0];
-    assert.equal(w.members, 5);
-    assert.equal(w.breaks, 11);
-    assert.deepEqual(w.topFeelings[0], 'Busy mind');
+    // Five pulses, but all from this one network: still private, so nobody can fake a group.
+    assert.equal((await dash()).weeks[0].hidden, true, 'one network cannot unlock the five-person view');
   } finally {
     assert.equal((await post({ action: 'delete' }, { 'X-Admin-Key': adminKey })).status, 200, 'test organisation removed');
   }
