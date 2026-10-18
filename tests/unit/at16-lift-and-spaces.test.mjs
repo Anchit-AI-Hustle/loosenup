@@ -9,43 +9,36 @@ const ready = (now = day(1)) => {
   return app;
 };
 
-test('AT16 mood check-in saves one mood per day and gives a little XP once', () => {
+test('AT16 mood check-in saves one mood per day', () => {
   const app = ready();
-  const xp = app.B.state().xp;
   assert.equal(app.visible('#mood-card'), true);
   app.click('[data-mood="4"]');
   app.click('[data-mood="5"]');
   const s = app.B.state();
   assert.deepEqual(JSON.parse(JSON.stringify(s.moods)), [{ day: '2026-10-05', mood: 5 }]);
-  assert.equal(s.xp, xp + 2);
-  assert.match(app.$('#mood-done').textContent, /Bright/);
+  assert.match(app.$("#mood-done").textContent, /Happy today/);
 });
 
-test('AT16 mood trend appears on the Sunny week with a kind insight', () => {
+test('AT16 mood trend appears on Progress with a kind insight', () => {
   const app = ready(day(5));
   app.B.setState({ moods: [
     { day: '2026-10-05', mood: 2 }, { day: '2026-10-06', mood: 2 }, { day: '2026-10-07', mood: 3 },
     { day: '2026-10-08', mood: 4 }, { day: '2026-10-09', mood: 4 },
   ] });
-  app.click('[data-tab="week"]');
+  app.click('[data-tab="progress"]');
   assert.equal(app.document.querySelectorAll('#week-chart .mood-dot').length, 5);
   assert.match(app.$('#insight-mood').textContent, /lighter/);
 });
 
-test('AT16 Small steps: completing one grows a sprout and gives XP, capped at 3 a day', () => {
+test('AT16 Small steps: each completed step is counted, with a fresh idea each time', () => {
   const app = ready();
-  const xp = app.B.state().xp;
   assert.ok(app.$('#step-idea').textContent.length > 5);
   const first = app.$('#step-idea').textContent;
   app.click('#step-another');
   assert.notEqual(app.$('#step-idea').textContent, first, 'another idea');
   for (let i = 0; i < 4; i++) app.click('#step-done');
-  const s = app.B.state();
-  assert.equal(s.smallSteps.length, 4);
-  assert.equal(s.xp, xp + 9, '3 XP for each of the first 3 steps');
-  assert.equal(s.seeds, 5, 'steps never change Seeds');
-  app.click('[data-tab="garden"]');
-  assert.equal(app.document.querySelectorAll('#garden-svg .sprout').length, 4);
+  assert.equal(app.B.state().smallSteps.length, 4);
+  assert.match(app.$('#steps-note').textContent, /4 small steps today/);
 });
 
 test('AT16 Good things jar saves only when asked and resurfaces on heavy days', () => {

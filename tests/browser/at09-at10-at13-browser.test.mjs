@@ -63,7 +63,7 @@ async function walkScreens(page, width, label) {
   await page.waitForTimeout(1600);
   await check('result');
   await page.click('#result-done');
-  for (const tab of ['today', 'play', 'garden', 'week', 'me']) {
+  for (const tab of ['today', 'play', 'progress', 'me']) {
     await page.click(`[data-tab="${tab}"]`);
     await check(tab);
   }
@@ -159,7 +159,7 @@ test('AT13 every visible button and tab is at least 48px tall and wide', async (
   await page.click('#session-finish'); await measure('after');
   await page.click('#after-next'); await page.waitForTimeout(400); await measure('result');
   await page.click('#result-done');
-  for (const tab of ['today', 'play', 'garden', 'week', 'me']) { await page.click(`[data-tab="${tab}"]`); await measure(tab); }
+  for (const tab of ['today', 'play', 'progress', 'me']) { await page.click(`[data-tab="${tab}"]`); await measure(tab); }
   for (const g of ['pairs', 'catch', 'bloom']) { await page.click('[data-tab="play"]'); await page.click('[data-seg="games"]'); await page.click(`[data-game="${g}"]`); await measure('game-' + g); await page.click('#game-back'); }
   await page.click('[data-tab="today"]'); await page.click('[data-mood="3"]'); await measure('today-mood');
   await page.click('[data-tab="today"]');
@@ -259,4 +259,50 @@ test('AT26 Hindi in a real browser: Welcome to Today in Hindi, no errors, no hor
   await page.screenshot({ path: path.join(SHOTS, 'hindi-today-360.png'), fullPage: true });
   assert.deepEqual(errors, []);
   await ctx.close();
+});
+
+test('AT32 every screen fits small phones (320, 360, 390 px): no sideways scroll, nothing cut, nothing under the tab bar', async () => {
+  const problems = [];
+  for (const width of [320, 360, 390]) {
+    const { ctx, page } = await newPage(width, { isMobile: true, hasTouch: true });
+    await page.goto(server.url + '/');
+    const check = async (name) => {
+      await page.waitForTimeout(500);
+      const r = await page.evaluate(() => {
+        const W = document.documentElement.clientWidth;
+        const out = [];
+        if (document.documentElement.scrollWidth > W + 1) out.push('page scrolls sideways');
+        for (const el of document.querySelectorAll('.app *')) {
+          if (el.closest('[hidden], svg, .sky-card, .game-stage, .bleed, .mood-sky, .sr-only')) continue;
+          const cs = getComputedStyle(el);
+          if (cs.display === 'none' || cs.visibility === 'hidden' || cs.position === 'fixed') continue;
+          const rc = el.getBoundingClientRect();
+          if (!rc.width || !rc.height) continue;
+          const pov = el.parentElement && getComputedStyle(el.parentElement).overflowX;
+          if ((rc.right > W + 1 || rc.left < -1) && !['auto', 'scroll', 'hidden'].includes(pov)) out.push('off screen: ' + (el.id || el.className || el.tagName));
+        }
+        const tab = document.getElementById('tabbar');
+        if (tab && !tab.hidden) {
+          window.scrollTo(0, document.scrollingElement.scrollHeight);
+          const scr = [...document.querySelectorAll('.screen')].find((s) => !s.hidden);
+          const last = scr && [...scr.querySelectorAll('*')].filter((e) => e.getBoundingClientRect().height > 0 && !e.closest('[hidden]')).pop();
+          if (last && last.getBoundingClientRect().bottom > tab.getBoundingClientRect().top + 2) out.push('last item under the tab bar');
+          window.scrollTo(0, 0);
+        }
+        return [...new Set(out)];
+      });
+      r.forEach((x) => problems.push(`${width} ${name}: ${x}`));
+    };
+    await check('welcome');
+    await page.fill('#name-input', 'Anchit Tandon'); await page.click('#welcome-go'); await check('how-it-works');
+    await page.click('#gift-go'); await check('checkin');
+    await page.click('[data-context="Busy mind"]'); await page.click('#checkin-next'); await check('pick');
+    await page.click('#pick-begin'); await check('session'); await page.click('#session-finish'); await check('after');
+    await page.click('#after-next'); await check('result'); await page.click('#result-done');
+    for (const t of ['today', 'play', 'progress', 'me']) { await page.click(`[data-tab="${t}"]`); await check('tab-' + t); }
+    for (const sg of ['games', 'sounds']) { await page.click('[data-tab="play"]'); await page.click(`[data-seg="${sg}"]`); await check('calm-' + sg); }
+    for (const tool of ['support', 'safety', 'reframe', 'learn', 'wellbeing', 'programs']) { await page.evaluate((t) => window.LoosenUp.go(t), tool); await check('tool-' + tool); }
+    await ctx.close();
+  }
+  assert.deepEqual(problems, []);
 });

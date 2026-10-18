@@ -5,7 +5,7 @@ import { makeApp, onboard, day } from './app.mjs';
 export const KEEP_EN = [
   'LoosenUp', 'Full Bloom', 'Calm gain', 'Sunny days', 'Sunny day', 'Sunny week', 'Rain day', 'Golden hour', 'Sunbeams', 'Sunbeam',
   'Seedling', 'Sprout', 'Meadow', 'Bloom', 'Bud', 'Seeds', 'Seed', 'XP', 'SOS', 'PIN', 'Tele-MANAS', 'WhatsApp', 'Face ID',
-  'Breath Bloom', 'Petal Pairs', 'Sunbeam Catch', 'Sigh of relief', 'Slow breeze', 'Here and now', 'Soft release', 'Let it out',
+  'Breath Bloom', 'Petal Pairs', 'Sunbeam Catch', 'Calm Pairs', 'Breathing Ring', 'LoosenUp Plus', 'Sigh of relief', 'Slow breeze', 'Here and now', 'Soft release', 'Let it out',
   'Kind words', 'Desk reset', 'Steady square', 'Pause before replying', 'Cool down', 'Warm wishes', 'Quick breeze',
   'findahelpline.com', 'Vandrevala Foundation', 'iCall (TISS)', 'iCall', 'Stanley-Brown', 'WHO-5', 'RCI', 'NMC', 'MBBS', 'MD', 'CBT', 'OPD',
   'USD', 'Android', 'iPhone', 'Safari', 'Chrome', 'Share', 'Add to Home Screen', 'Install app', 'loosenup-ios.anchit-tandon.com',
@@ -44,7 +44,7 @@ export async function walkAll({ lang = 'hi' } = {}) {
   for (const sp of ['everyday', 'work', 'relationships', 'lowdays', 'sleep']) { app.click(`[data-space-tab="${sp}"]`); await grab(); }
   app.click('[data-context="Busy mind"]'); app.click('[data-context="Tight shoulders"]'); app.click('#checkin-next'); await grab();
   app.click('#pick-begin'); await grab(); app.click('#session-finish'); await grab(); app.click('#after-next'); await grab();
-  for (const s of ['today', 'play', 'garden', 'week', 'me', 'support', 'safety', 'reframe', 'sounds', 'wellbeing', 'learn']) { B.go(s); await grab(); }
+  for (const s of ['today', 'play', 'progress', 'me', 'support', 'safety', 'reframe', 'sounds', 'wellbeing', 'learn']) { B.go(s); await grab(); }
   for (const sg of ['breathe', 'games', 'sounds']) { B.go('play'); app.click(`[data-seg="${sg}"]`); await grab(); }
   for (const id of Object.keys(B.programs)) { B.openProgram(id); await grab(); }
   B.go('programs'); await grab();

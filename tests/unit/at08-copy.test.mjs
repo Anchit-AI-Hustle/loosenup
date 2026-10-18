@@ -53,7 +53,7 @@ test('AT8 rendered UI text on every screen has no banned words', () => {
   app.setValue('#calm-after', 3);
   app.click('#after-next'); grab();
   app.click('#result-done');
-  for (const t of ['today', 'play', 'garden', 'week', 'me']) { app.click(`[data-tab="${t}"]`); grab(); }
+  for (const t of ['today', 'play', 'progress', 'me']) { app.click(`[data-tab="${t}"]`); grab(); }
   for (const g of ['pairs', 'catch', 'bloom']) { app.B.openGame(g); app.B.finishCurrentGame(); grab(); }
   app.B.go('today');
   app.B.openShop(); grab();
@@ -75,14 +75,16 @@ test('AT8 no em or en dashes in any repo file', () => {
   assert.deepEqual(hits, []);
 });
 
-test('AT8 locked vocabulary and footer note are present', () => {
+test('AT8 plain wellbeing vocabulary: core terms present, no garden or currency theme in the app', () => {
   const html = readFileSync(path.join(ROOT, 'www/index.html'), 'utf8');
   const js = readFileSync(path.join(ROOT, 'www/app.js'), 'utf8');
   const all = html + js;
-  for (const w of ['LoosenUp', 'Seeds', 'Full Bloom', 'Calm gain', 'Sunny days', 'Rain day', 'Golden hour', 'Sunbeam',
-    'Seedling', 'Sprout', 'Bud', 'Bloom', 'Meadow', 'Sunny week', 'Sigh of relief', 'Slow breeze', 'Here and now',
-    'Soft release', 'Let it out', 'Quick breeze']) {
-    assert.ok(all.includes(w), `vocabulary: ${w}`);
+  for (const w of ['LoosenUp', 'LoosenUp Plus', 'Calm gain', 'day streak', 'rest day', 'Daily reminder', 'Sigh of relief', 'Slow breeze',
+    'Here and now', 'Soft release', 'Let it out', 'Quick breeze', 'Progress']) {
+    assert.ok(all.toLowerCase().includes(w.toLowerCase()), `vocabulary: ${w}`);
+  }
+  for (const w of ['Seedling', 'Sprout', 'Meadow', 'Full Bloom', 'Sunny days', 'Rain day', 'Golden hour', 'Seed shop', 'your garden']) {
+    assert.ok(!html.includes(w), `retired in the markup: ${w}`);
   }
   assert.ok(html.includes('A wellbeing companion, not medical care.'));
 });

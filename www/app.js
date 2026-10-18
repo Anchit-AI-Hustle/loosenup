@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.9.0';
+  var VERSION = '2.0.0';
   var KEY = 'loosenup.v1';
   var PUBLIC_URL = 'https://loosenup-ios.anchit-tandon.com';
   var ANDROID_URL = 'https://loosenup-android.anchit-tandon.com';
@@ -38,13 +38,13 @@
         'Listen for 3 sounds, near or far.', 'Find 2 things you can smell, or 2 favourite scents.', 'Notice 1 taste, or take a sip of water.']
     },
     release: {
-      id: 'release', name: 'Soft release', seconds: 120, unlockAt: 3, color: '#C9A7F2', kind: 'steps',
+      id: 'release', name: 'Soft release', seconds: 120, unlockAt: 0, color: '#C9A7F2', kind: 'steps',
       desc: 'Tense each area for a breath, then let it go soft, from shoulders to toes.',
       steps: ['Lift your shoulders up to your ears. Hold. Let them drop.', 'Make two fists. Squeeze. Open your hands wide and soft.',
         'Scrunch your face. Then let your jaw hang loose.', 'Press your feet into the floor. Then let them rest.', 'Take one long breath and feel your whole body settle.']
     },
     letitout: {
-      id: 'letitout', name: 'Let it out', seconds: 120, unlockAt: 5, color: '#FFC857', kind: 'journal',
+      id: 'letitout', name: 'Let it out', seconds: 120, unlockAt: 0, color: '#FFC857', kind: 'journal',
       desc: 'Two minutes to type whatever is on your mind. Nothing is saved.'
     },
     kind: {
@@ -139,13 +139,13 @@
       ['breeze', 'Slow breathing helps a racing mind ease toward sleep.']]
   };
 
-  var MOODS = [null, 'Very heavy', 'Heavy', 'Okay', 'Light', 'Bright'];
+  var MOODS = [null, 'Crying', 'Sad', 'Okay', 'Decent', 'Happy'];
   var MOOD_NOTES = [null,
-    'Thank you for being honest. Kind words or a Small step are here for you, and so is SOS.',
-    'Heavy days happen. Kind words or a Small step can help a little.',
+    'Thank you for being honest. It is okay to cry. Kind words or a Small step are here for you, and so is SOS.',
+    'Sad days happen. Kind words or a Small step can help a little.',
     'Okay is okay. A Small step could add a little lift.',
-    'Light today. A calm break can keep the good going.',
-    'Bright today. Lovely! Maybe share a Sunbeam and pass it on.'];
+    'A decent day. A calm break can keep the good going.',
+    'Happy today. Lovely! Maybe share LoosenUp with someone who could use it.'];
   var STEPS = ['Step outside or by a window for two minutes of daylight.', 'Drink a full glass of water, slowly.',
     'Stretch your arms up high, then let them float down.', 'Send a short hello to someone you trust.',
     'Tidy one small thing near you.', 'Play one song you love and let yourself enjoy it.',
@@ -155,20 +155,19 @@
     'Change into something comfortable.', 'Give yourself a small smile in the mirror.'];
   var LIFT_XP_PER_DAY = 3;
 
-  var LEVELS = [['Seedling', 0], ['Sprout', 50], ['Bud', 150], ['Bloom', 300], ['Full Bloom', 500], ['Meadow', 800]];
 
+  // Milestones, in plain words. Ids stay stable so saved progress keeps working.
   var BADGES = {
-    first: ['First light', 'Your first break'],
-    streak3: ['3 Sunny days', 'Three days in a row'],
-    streak7: ['Sunny week', 'Seven days in a row'],
-    streak21: ['21 Sunny days', 'A habit in full bloom'],
-    streak30: ['30 Sunny days', 'A whole month of light'],
-    ten: ['Ten breaks', 'Ten calm moments'],
+    first: ['First break', 'Your first calm break'],
+    streak3: ['3 days in a row', 'Three days of practice in a row'],
+    streak7: ['7 days in a row', 'A full week of practice'],
+    streak21: ['21 days in a row', 'Three weeks: a real habit'],
+    streak30: ['30 days in a row', 'A whole month of practice'],
+    ten: ['Ten breaks', 'Ten calm breaks taken'],
     bigLift: ['Big lift', 'A Calm gain of +5 or more'],
-    explorer: ['Explorer', 'Tried every technique'],
-    sunbeam: ['Sunbeam', 'Caught a Sunbeam surprise'],
-    sharer: ['Sunbeam sharer', 'Shared LoosenUp'],
-    golden: ['Golden hour', 'Set a daily time'],
+    explorer: ['Explorer', 'Tried every exercise'],
+    sharer: ['Shared LoosenUp', 'Shared LoosenUp with someone'],
+    golden: ['Daily reminder', 'Set a daily reminder'],
     playful: ['Playful', 'Played a calm game'],
     programme: ['Finisher', 'Finished a guided programme']
   };
@@ -177,17 +176,14 @@
     'Two minutes for you is never small.',
     'Your calm is a skill, and you just practised it.',
     'However today goes, you made a little room for yourself.',
-    'Small breaks, bright days.',
+    'Small breaks add up to steadier days.',
     'You gave your mind a soft place to land.',
     'Every break plants something good.'
   ];
 
   var SKUS = {
-    fullbloom: { name: 'Full Bloom, monthly', price: '₹149/mo or USD 4.99/mo' },
-    fullbloomYear: { name: 'Full Bloom, yearly', price: '₹799/yr or USD 34.99/yr' },
-    seeds10: { name: '10 Seeds', price: '₹99 or USD 1.99', seeds: 10 },
-    seeds30: { name: '30 Seeds', price: '₹249 or USD 4.99', seeds: 30 },
-    seeds100: { name: '100 Seeds', price: '₹699 or USD 12.99', seeds: 100 }
+    fullbloom: { name: 'LoosenUp Plus, monthly', price: '₹149/mo or USD 4.99/mo' },
+    fullbloomYear: { name: 'LoosenUp Plus, yearly', price: '₹799/yr or USD 34.99/yr' }
   };
 
   var CRISIS = [
@@ -261,16 +257,6 @@
 
   /* ---------- Engine ---------- */
 
-  function level(xp) {
-    xp = xp == null ? state.xp : xp;
-    var i = 0;
-    while (i + 1 < LEVELS.length && xp >= LEVELS[i + 1][1]) i++;
-    var lo = LEVELS[i][1];
-    var next = LEVELS[i + 1];
-    var pct = next ? Math.max(0, Math.min(100, Math.round((xp - lo) / (next[1] - lo) * 100))) : 100;
-    return { index: i, name: LEVELS[i][0], percent: pct, next: next ? next[0] : null, toNext: next ? next[1] - xp : 0 };
-  }
-
   function breaksDone() { return state.sessions.length; }
   function isUnlocked(id) { return breaksDone() >= (TECH[id] ? TECH[id].unlockAt : 0); }
 
@@ -319,15 +305,6 @@
       reason: best.reason + ' Picked for ' + joinNames(list) + (covers.length < list.length ? ', and it suits ' + joinNames(covers) + ' best.' : '.') };
   }
 
-  function grantRewardSeed() {
-    var wk = weekKey(now());
-    if (state.rewardSeeds.week !== wk) state.rewardSeeds = { week: wk, count: 0 };
-    if (state.rewardSeeds.count >= WEEKLY_FREE_SEEDS) return false;
-    state.rewardSeeds.count++;
-    state.seeds++;
-    return true;
-  }
-
   function addBadge(id, list) {
     if (state.badges.indexOf(id) === -1) { state.badges.push(id); if (list) list.push(id); }
   }
@@ -337,19 +314,14 @@
     var dk = dayKey(d);
     var before = clampScore(input.before), after = clampScore(input.after);
     var gain = after - before;
-    var positive = Math.max(0, gain);
-    var prevLevel = level().index;
-    var prevBreaks = breaksDone();
-    var r = { gain: gain, shownGain: positive, xpGained: 10 + 2 * positive, rainDayUsed: false, freshRun: false,
-      milestone: null, milestoneSeed: false, showedUpSeed: false, sunbeam: false, sunbeamSeed: false,
-      levelUp: null, newBadges: [], unlocked: [] };
+    var r = { gain: gain, shownGain: Math.max(0, gain), before: before, after: after, rainDayUsed: false, freshRun: false,
+      milestone: null, newBadges: [], unlocked: [] };
 
-    state.xp += r.xpGained;
     var ctxList = (input.contexts && input.contexts.length ? input.contexts : [input.context || 'Just a quick lift']).slice(0, 8);
     state.sessions.push({ ts: d.getTime(), day: dk, technique: input.technique, context: ctxList[0], contexts: ctxList,
       before: before, after: after, gain: gain });
 
-    // Sunny days: once per calendar day, a Rain day bridges one quiet day per week.
+    // Day streak: once per calendar day; one rest day a week keeps it going.
     var st = state.streak;
     if (st.lastDay !== dk) {
       var gap = st.lastDay ? daysBetween(st.lastDay, dk) : null;
@@ -361,20 +333,6 @@
       if (MILESTONES.indexOf(st.count) !== -1 && state.milestones.indexOf(st.count) === -1) {
         state.milestones.push(st.count);
         r.milestone = st.count;
-        r.milestoneSeed = grantRewardSeed();
-      }
-    }
-
-    if (gain <= 0) r.showedUpSeed = grantRewardSeed();
-
-    // Sunbeam surprise: one roll per day, 25 percent chance.
-    if (state.sunbeamDay !== dk) {
-      state.sunbeamDay = dk;
-      if (rng() < 0.25) {
-        r.sunbeam = true;
-        r.sunbeamSeed = grantRewardSeed();
-        if (!r.sunbeamSeed) { state.xp += 5; r.xpGained += 5; }
-        addBadge('sunbeam', r.newBadges);
       }
     }
 
@@ -386,15 +344,8 @@
     if (breaksDone() >= 10) addBadge('ten', r.newBadges);
     if (gain >= 5) addBadge('bigLift', r.newBadges);
     var tried = {};
-    state.sessions.forEach(function (s) { tried[s.technique] = true; });
+    state.sessions.forEach(function (x) { tried[x.technique] = true; });
     if (CHOOSABLE.every(function (id) { return tried[id]; })) addBadge('explorer', r.newBadges);
-
-    var lv = level();
-    if (lv.index > prevLevel) r.levelUp = lv.name;
-    CHOOSABLE.forEach(function (id) {
-      var at = TECH[id].unlockAt;
-      if (at > 0 && prevBreaks < at && breaksDone() >= at) r.unlocked.push(TECH[id].name);
-    });
 
     save();
     return r;
@@ -402,7 +353,8 @@
 
   function clampScore(v) { v = Math.round(Number(v)); return isNaN(v) ? 5 : Math.max(1, Math.min(10, v)); }
 
-  function canStart(id) { return !!TECH[id].free || state.plan === 'fullbloom' || state.seeds > 0; }
+  // Every calm break is free, always.
+  function canStart(id) { return !!TECH[id]; }
 
   function nudgeAllowed(type) {
     var dk = dayKey(now());
@@ -444,7 +396,7 @@
   /* ---------- Navigation ---------- */
 
   var current = null;
-  var TABS = ['today', 'play', 'garden', 'week', 'me'];
+  var TABS = ['today', 'play', 'progress', 'me'];
   var flow = { mode: 'guided', before: 5, context: null, technique: null };
 
   var lastTab = 'today';
@@ -459,17 +411,13 @@
     $('tabbar').hidden = !isTab;
     var tabs = document.querySelectorAll('[data-tab]');
     for (var j = 0; j < tabs.length; j++) tabs[j].setAttribute('aria-selected', String(tabs[j].getAttribute('data-tab') === name));
-    $('seed-pill').hidden = !state.onboarded;
     renderSeedPill();
     if (RENDER[name]) RENDER[name]();
     if (isHindi()) translateDom(document.body);
     if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
   }
 
-  function renderSeedPill() {
-    setText('seed-pill-count', state.plan === 'fullbloom' ? String(state.seeds) : String(state.seeds));
-    $('seed-pill').setAttribute('aria-label', state.seeds + ' Seeds' + (state.plan === 'fullbloom' ? ', Full Bloom plan' : '') + '. Open the Seed shop');
-  }
+  function renderSeedPill() { /* Seeds were retired in 2.0; kept as a no-op for older call sites. */ }
 
   /* ---------- Sheets ---------- */
 
@@ -495,7 +443,6 @@
   function openShop(note) {
     setText('shop-note', note || '');
     $('shop-note').hidden = !note;
-    setText('shop-seeds', String(state.seeds));
     openSheet('shop-sheet');
   }
   function openCheckout(sku) {
@@ -507,14 +454,13 @@
   function demoPurchase(sku) {
     var item = SKUS[sku];
     if (!item) return;
-    if (sku === 'fullbloom' || sku === 'fullbloomYear') state.plan = 'fullbloom';
-    else state.seeds += item.seeds;
+    state.plan = 'fullbloom';
     state.purchases.push({ sku: sku, ts: now().getTime(), demo: true });
     save();
     renderSeedPill();
     if (RENDER[current]) RENDER[current]();
     closeSheets();
-    toast(sku === 'fullbloom' || sku === 'fullbloomYear' ? 'Welcome to Full Bloom (demo). Enjoy every break.' : '+' + item.seeds + ' Seeds added (demo).');
+    toast('Welcome to LoosenUp Plus (demo). Every programme is open.');
   }
   function openSupport(editing) {
     renderSos(editing);
@@ -676,20 +622,13 @@
       }
       box.appendChild(b);
     });
-    var label;
-    if (state.plan === 'fullbloom') label = 'Begin (Full Bloom)';
-    else if (state.seeds > 0) label = 'Begin (uses 1 of ' + plural(state.seeds, 'Seed', 'Seeds') + ')';
-    else label = 'Begin (add Seeds)';
+    var label = 'Begin';
     setText('pick-begin', label);
     renderGuide();
   }
 
   function beginBreak(id) {
-    if (!canStart(id)) {
-      openShop('All your Seeds are planted. Add a few more, or take a free Quick breeze.');
-      return 'shop';
-    }
-    if (!TECH[id].free && state.plan !== 'fullbloom') state.seeds--;
+    if (!canStart(id)) return 'unknown';
     save();
     startSession(id);
     return 'started';
@@ -935,31 +874,34 @@
     haptic('success');
   }
 
+  function weekStats() {
+    var wk = weekKey(now());
+    var ses = state.sessions.filter(function (x) { return weekKey(new Date(x.ts)) === wk; });
+    var avg = ses.length ? Math.round(10 * ses.reduce(function (a, x) { return a + Math.max(0, x.gain); }, 0) / ses.length) / 10 : 0;
+    return { n: ses.length, avg: avg };
+  }
   function renderResult(r) {
     var name = state.name || 'friend';
     setText('result-headline', r.gain > 0 ? 'Lovely, ' + name + '!' : 'You showed up, ' + name + '.');
     var g = $('result-gain');
     g.textContent = signed(r.shownGain);
     g.setAttribute('aria-label', signed(r.shownGain) + ' Calm gain');
-    setText('result-garden', '+1 flower');
-    setText('result-seeds', state.plan === 'fullbloom' ? plural(state.seeds, 'Seed', 'Seeds') + ' (Full Bloom)' : plural(state.seeds, 'Seed', 'Seeds') + ' left');
-    setText('result-streak', plural(state.streak.count, 'Sunny day', 'Sunny days'));
-    var lv = level();
-    setText('result-level', lv.name + ' ' + lv.percent + '%');
+    setText('result-change', 'From ' + r.before + ' to ' + r.after + ' out of 10');
+    var ws = weekStats();
+    setText('result-streak', plural(state.streak.count, 'day in a row', 'days in a row'));
+    setText('result-week', plural(ws.n, 'break this week', 'breaks this week'));
+    setText('result-avg', signed(ws.avg) + ' average Calm gain');
     var items = [];
-    items.push('+' + r.xpGained + ' XP');
-    if (r.gain <= 0) items.push(r.showedUpSeed ? 'You showed up: +1 Seed' : 'You showed up, and that counts.');
-    if (r.rainDayUsed) items.push('A Rain day kept your Sunny days going.');
-    if (r.freshRun) items.push('A fresh run of Sunny days starts today.');
-    if (r.milestone) items.push(plural(r.milestone, 'Sunny day', 'Sunny days') + '! ' + (r.milestoneSeed ? '+1 Seed' : 'Milestone badge earned.'));
-    if (r.sunbeam) items.push('A Sunbeam surprise! ' + (r.sunbeamSeed ? '+1 Seed' : '+5 bonus XP'));
-    if (r.levelUp) items.push('You grew into a ' + r.levelUp + '!');
+    if (r.gain <= 0) items.push('You showed up, and that counts.');
+    if (r.rainDayUsed) items.push('A rest day kept your streak going.');
+    if (r.freshRun) items.push('A fresh streak starts today.');
+    if (r.milestone) items.push(plural(r.milestone, 'day in a row', 'days in a row') + '! Milestone reached.');
     if (r.programNote) items.push(r.programNote);
-    r.unlocked.forEach(function (n) { items.push(n + ' is now open for you.'); });
-    r.newBadges.forEach(function (b) { if (b !== 'first' || breaksDone() === 1) items.push('Badge: ' + BADGES[b][0]); });
+    r.newBadges.forEach(function (b) { if (b !== 'first' || breaksDone() === 1) items.push('Milestone: ' + BADGES[b][0]); });
     var ul = $('result-rewards');
     ul.textContent = '';
     items.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    ul.hidden = !items.length;
     var note = r.gain <= 0 ? 'You made time for yourself today, and that is what matters most.' : NOTES[(breaksDone() - 1) % NOTES.length];
     setText('result-note', note);
     // Restart the sunrise animation.
@@ -983,13 +925,6 @@
       if (cls) { pth.setAttribute('class', cls); pth.style.setProperty('--i', String(i)); }
     }
   }
-  function miniFlower(parent, x, y, r, color) {
-    for (var k = 0; k < 5; k++) {
-      var a = k * 72 * Math.PI / 180;
-      svg('circle', { cx: (x + Math.cos(a) * r * 0.8).toFixed(1), cy: (y + Math.sin(a) * r * 0.8).toFixed(1), r: (r * 0.62).toFixed(1), fill: color }, parent);
-    }
-    svg('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: (r * 0.45).toFixed(1), fill: '#FFC857' }, parent);
-  }
   function renderSky() {
     var d = now();
     var b = bucketOf(d.getTime());
@@ -998,39 +933,31 @@
     // The sun travels an arc from 6:00 to 20:00.
     var hrs = d.getHours() + d.getMinutes() / 60;
     var t = Math.max(0, Math.min(1, (hrs - 6) / 14));
-    card.style.setProperty('--sx', (16 + t * 68).toFixed(1) + '%');
-    card.style.setProperty('--sy', (62 - Math.sin(t * Math.PI) * 44).toFixed(1) + '%');
+    // The sun stays in the right-hand part of the sky so it never sits behind the greeting.
+    card.style.setProperty('--sx', (70 + t * 18).toFixed(1) + '%');
+    card.style.setProperty('--sy', (34 - Math.sin(t * Math.PI) * 16).toFixed(1) + '%');
     setText('today-date', d.toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' }));
     setText('today-sky-streak', state.sessions.length
-      ? plural(state.streak.count, 'Sunny day', 'Sunny days') + ' · ' + plural(state.sessions.length, 'flower', 'flowers')
-      : 'Your first flower is one break away');
-    var fl = $('today-flowers');
-    while (fl.firstChild) fl.removeChild(fl.firstChild);
-    state.sessions.slice(-16).forEach(function (s, i) {
-      var r = seeded(i + 7);
-      miniFlower(fl, 14 + r() * 332, 54 + r() * 20, 4.2, (TECH[s.technique] || TECH.breeze).color);
-    });
+      ? plural(state.streak.count, 'day in a row', 'days in a row') + ' · ' + plural(state.sessions.length, 'break', 'breaks')
+      : 'Your first break is two minutes away');
   }
 
   function renderToday() {
     renderProgramCard();
     renderSky();
     setText('today-title', greeting());
-    setText('today-streak', state.streak.count ? plural(state.streak.count, 'Sunny day', 'Sunny days') : 'Starts today');
-    setText('today-seeds', state.plan === 'fullbloom' ? 'Full Bloom' : String(state.seeds));
-    var lv = level();
-    setText('today-level-name', lv.name);
-    $('today-level-fill').style.width = lv.percent + '%';
-    $('today-level-bar').setAttribute('aria-valuenow', String(lv.percent));
-    setText('today-level-pct', lv.next ? lv.percent + '% of the way to ' + lv.next : 'Your meadow is in full glow');
+    var ws = weekStats();
+    setText('today-streak', state.streak.count ? String(state.streak.count) : '0');
+    setText('today-week', String(ws.n));
+    setText('today-avg', signed(ws.avg));
     var wk = weekKey(now());
-    setText('today-rain', state.rainDayWeek === wk ? 'This week\'s Rain day is already watering your streak.' : 'One Rain day is ready this week if you take a day off.');
+    setText('today-rain', state.rainDayWeek === wk ? 'This week\'s rest day is already used.' : 'One rest day a week keeps your streak going.');
     var ul = $('today-recent');
     ul.textContent = '';
     var recent = state.sessions.slice(-3).reverse();
     if (!recent.length) {
       var li0 = document.createElement('li');
-      li0.textContent = 'Your first break will bloom here.';
+      li0.textContent = 'Your breaks will appear here.';
       ul.appendChild(li0);
     }
     recent.forEach(function (s) {
@@ -1060,7 +987,7 @@
     var dk = dayKey(now());
     var found = false;
     state.moods.forEach(function (m) { if (m.day === dk) { m.mood = n; found = true; } });
-    if (!found) { state.moods.push({ day: dk, mood: n }); state.xp += 2; }
+    if (!found) state.moods.push({ day: dk, mood: n });
     if (state.moods.length > 400) state.moods = state.moods.slice(-400);
     save();
     renderMood();
@@ -1072,6 +999,10 @@
     var m = todayMood();
     var btns = document.querySelectorAll('[data-mood]');
     for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', String(+btns[i].getAttribute('data-mood') === m));
+    var scale = document.querySelector('.mood-scale');
+    if (scale) { scale.setAttribute('data-level', String(m || 0)); scale.style.setProperty('--lv', String(m ? (m - 1) / 4 : 0)); }
+    var moods = document.querySelector('.moods');
+    if (moods) moods.classList.toggle('has-pick', !!m);
     setText('mood-done', m ? MOOD_NOTES[m] : 'One tap is enough. Every answer is welcome here.');
     var mem = $('jar-memory');
     if (m && m <= 2 && state.goodThings.length) {
@@ -1096,7 +1027,7 @@
     setText('step-idea', currentStep());
     var dk = dayKey(now());
     var today = state.smallSteps.filter(function (x) { return x.day === dk; }).length;
-    setText('steps-note', today ? plural(today, 'small step', 'small steps') + ' today. Each one plants a sprout.' : 'Tiny actions count. Each one plants a sprout in your garden.');
+    setText('steps-note', today ? plural(today, 'small step', 'small steps') + ' today. Each one counts.' : 'Tiny actions count, and each one lifts your day a little.');
   }
   function doStep() {
     var dk = dayKey(now());
@@ -1109,7 +1040,7 @@
     renderSteps();
     renderSeedPill();
     haptic('success');
-    toast(xp ? 'Lovely. A sprout joins your garden. +3 XP' : 'Lovely. A sprout joins your garden.');
+    toast('Lovely. That small step counts.');
   }
   function renderJar() {
     var n = state.goodThings.length;
@@ -1139,7 +1070,7 @@
     closeSheets();
     renderJar();
     renderSeedPill();
-    toast(xp ? 'Saved in your jar. +2 XP' : 'Saved in your jar.');
+    toast('Saved in your jar.');
   }
 
   /* ---------- SOS ---------- */
@@ -1195,7 +1126,7 @@
     $('golden-banner').hidden = !show;
   }
 
-  // Garden: one flower per break, decorations per level. It only ever grows.
+  // Small seeded random numbers for stable layouts.
   function seeded(i) {
     var t = (i + 1) * 0x6D2B79F5;
     return function () {
@@ -1205,79 +1136,7 @@
       return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
     };
   }
-  function renderGarden() {
-    var g = $('garden-svg');
-    while (g.firstChild) g.removeChild(g.firstChild);
-    var lv = level();
-    var defs = svg('defs', {}, g);
-    var lg = svg('linearGradient', { id: 'gsky', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
-    svg('stop', { offset: 0, 'stop-color': '#CFE8FF' }, lg);
-    svg('stop', { offset: 1, 'stop-color': '#FFF6E3' }, lg);
-    svg('rect', { x: 0, y: 0, width: 360, height: 260, fill: 'url(#gsky)' }, g);
-    var sunR = 20 + lv.index * 4;
-    svg('circle', { cx: 300, cy: 52, r: sunR + 12, fill: '#FFC857', opacity: 0.25 }, g);
-    svg('circle', { cx: 300, cy: 52, r: sunR, fill: '#FFC857' }, g);
-    if (lv.index >= 4) {
-      ['#FFB088', '#FFC857', '#4FA67C', '#8CC8F0'].forEach(function (c, i) {
-        svg('path', { d: 'M20 170 A160 130 0 0 1 340 170', fill: 'none', stroke: c, 'stroke-width': 7, opacity: 0.55, transform: 'translate(0 ' + (i * 8) + ')' }, g);
-      });
-    }
-    svg('path', { d: 'M0 150 Q90 120 180 146 T360 136 V260 H0Z', fill: '#7AC498' }, g);
-    if (lv.index >= 5) svg('path', { d: 'M0 170 Q120 140 240 164 T360 150 V260 H0Z', fill: '#66B88A' }, g);
-    svg('path', { d: 'M0 178 Q120 160 220 176 T360 172 V260 H0Z', fill: '#4FA67C' }, g);
-    if (lv.index >= 2) {
-      svg('rect', { x: 48, y: 112, width: 8, height: 54, rx: 3, fill: '#8B6B4A' }, g);
-      svg('circle', { cx: 52, cy: 104, r: 26, fill: '#2E7D5B' }, g);
-      svg('circle', { cx: 38, cy: 116, r: 16, fill: '#4FA67C' }, g);
-      svg('circle', { cx: 66, cy: 114, r: 18, fill: '#3F9A6E' }, g);
-    }
-    if (lv.index >= 3) svg('ellipse', { cx: 250, cy: 214, rx: 46, ry: 11, fill: '#8CC8F0', opacity: 0.85 }, g);
-    if (lv.index >= 1) {
-      [[150, 96], [214, 120]].forEach(function (p, i) {
-        var b = svg('g', { transform: 'translate(' + p[0] + ' ' + p[1] + ')' }, g);
-        svg('ellipse', { cx: -5, cy: 0, rx: 6, ry: 4, fill: i ? '#FFB088' : '#C9A7F2', transform: 'rotate(-30)' }, b);
-        svg('ellipse', { cx: 5, cy: 0, rx: 6, ry: 4, fill: i ? '#FFB088' : '#C9A7F2', transform: 'rotate(30)' }, b);
-      });
-    }
-    var n = state.sessions.length;
-    var shown = Math.min(n, 90);
-    for (var i = 0; i < shown; i++) {
-      var s = state.sessions[i];
-      var r = seeded(i);
-      // The first flowers bloom near the middle, later ones spread across the meadow.
-      var spread = Math.min(1, 0.25 + i / 24);
-      var x = 180 + (r() * 2 - 1) * 160 * spread;
-      var y = 200 + r() * 48;
-      var size = 9 + r() * 4 - Math.min(4, i / 20);
-      var color = (TECH[s.technique] || TECH.breeze).color;
-      var f = svg('g', { 'class': 'flower' + (i === n - 1 ? ' new' : '') }, g);
-      svg('path', { d: 'M' + x.toFixed(1) + ' ' + y.toFixed(1) + ' q ' + (r() * 8 - 4).toFixed(1) + ' -12 0 -' + (18 + size).toFixed(1), stroke: '#2E7D5B', 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round' }, f);
-      svg('ellipse', { cx: (x + 5).toFixed(1), cy: (y - 8).toFixed(1), rx: 5, ry: 2.5, fill: '#2E7D5B', transform: 'rotate(-30 ' + (x + 5).toFixed(1) + ' ' + (y - 8).toFixed(1) + ')' }, f);
-      var cy = y - 18 - size;
-      for (var k = 0; k < 5; k++) {
-        var a = k * 72 * Math.PI / 180;
-        svg('circle', { cx: (x + Math.cos(a) * size * 0.8).toFixed(1), cy: (cy + Math.sin(a) * size * 0.8).toFixed(1), r: (size * 0.62).toFixed(1), fill: color }, f);
-      }
-      svg('circle', { cx: x.toFixed(1), cy: cy.toFixed(1), r: (size * 0.45).toFixed(1), fill: '#FFC857' }, f);
-    }
-    state.smallSteps.slice(-60).forEach(function (st, j) {
-      var rr = seeded(j + 101);
-      var sx0 = 14 + rr() * 332, sy0 = 238 + rr() * 16;
-      var sp = svg('g', { 'class': 'sprout' }, g);
-      svg('path', { d: 'M' + sx0.toFixed(1) + ' ' + sy0.toFixed(1) + ' v -10', stroke: '#2E7D5B', 'stroke-width': 2, 'stroke-linecap': 'round' }, sp);
-      svg('ellipse', { cx: (sx0 - 4).toFixed(1), cy: (sy0 - 11).toFixed(1), rx: 4.5, ry: 2.4, fill: '#7AC498', transform: 'rotate(-25 ' + (sx0 - 4).toFixed(1) + ' ' + (sy0 - 11).toFixed(1) + ')' }, sp);
-      svg('ellipse', { cx: (sx0 + 4).toFixed(1), cy: (sy0 - 12).toFixed(1), rx: 4.5, ry: 2.4, fill: '#4FA67C', transform: 'rotate(25 ' + (sx0 + 4).toFixed(1) + ' ' + (sy0 - 12).toFixed(1) + ')' }, sp);
-    });
-    if (!n) {
-      var tx = svg('text', { x: 180, y: 222, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 800, fill: '#FFFFFF' }, g);
-      tx.textContent = 'Your first flower is one break away';
-    }
-    g.setAttribute('aria-label', 'Your garden with ' + plural(n, 'flower', 'flowers') + ', level ' + lv.name);
-    setText('garden-caption', n ? plural(n, 'flower', 'flowers') + '. Your garden grows with every break and stays in bloom.' : 'Every break plants a flower here.');
-    setText('garden-level', lv.name);
-    setText('garden-level-pct', lv.percent + '%');
-    $('garden-level-fill').style.width = lv.percent + '%';
-    setText('garden-next', lv.next ? lv.toNext + ' XP to ' + lv.next + '. Each break gives 10 XP, plus 2 for every point of Calm gain.' : 'You have reached Meadow. Everything keeps growing.');
+  function renderMilestones() {
     var ul = $('badges');
     ul.textContent = '';
     Object.keys(BADGES).forEach(function (id) {
@@ -1287,10 +1146,23 @@
       var st = document.createElement('strong');
       st.textContent = BADGES[id][0];
       var sp = document.createElement('span');
-      sp.textContent = has ? BADGES[id][1] : 'Still growing: ' + BADGES[id][1].toLowerCase();
+      sp.textContent = has ? BADGES[id][1] : 'Not yet: ' + BADGES[id][1].toLowerCase();
       li.appendChild(st); li.appendChild(sp);
       ul.appendChild(li);
     });
+  }
+  function renderProgress() {
+    var all = state.sessions;
+    setText('prog-streak', String(state.streak.count || 0));
+    setText('prog-best', 'Best: ' + plural(state.streak.best || 0, 'day', 'days'));
+    setText('prog-total', String(all.length));
+    var avg = all.length ? Math.round(10 * all.reduce(function (a, x) { return a + Math.max(0, x.gain); }, 0) / all.length) / 10 : 0;
+    setText('prog-avg', signed(avg));
+    var wb = state.wellbeing && state.wellbeing.length ? state.wellbeing[state.wellbeing.length - 1] : null;
+    setText('prog-wb', wb ? wb.score + ' / 100' : 'Not yet');
+    setText('prog-wb-note', wb ? wellbeingNote(wb.score).split('. ')[0] + '.' : 'Take the two-week check below.');
+    renderWeek();
+    renderMilestones();
   }
 
   function renderWeek() {
@@ -1372,12 +1244,11 @@
   function renderMe() {
     renderOrg();
     setText('me-title', state.name ? state.name + '\'s corner' : 'Your corner');
-    setText('me-seeds', plural(state.seeds, 'Seed', 'Seeds'));
-    setText('me-plan', state.plan === 'fullbloom' ? 'Full Bloom plan (demo): guided breaks use no Seeds.' : 'Free plan. Quick breeze is always free.');
+    setText('me-plan', state.plan === 'fullbloom' ? 'LoosenUp Plus (demo): every programme, every day.' : 'Free: every calm break, tool and SOS, always.');
     if (state.goldenHour) $('golden-time').value = state.goldenHour;
     $('golden-clear').hidden = !state.goldenHour;
     setText('golden-help', state.goldenHour
-      ? 'Golden hour is set for ' + state.goldenHour + '. ' + (isNative() ? 'One gentle reminder arrives each day.' : 'A gentle note appears in the app from that time.')
+      ? 'Daily reminder set for ' + state.goldenHour + '. ' + (isNative() ? 'One gentle reminder arrives each day.' : 'A gentle note appears in the app from that time.')
       : (isNative() ? 'Pick a daily time for one gentle reminder.' : 'Pick a daily time and a gentle note will appear in the app. The phone apps can send one daily reminder.'));
     renderVoiceButtons();
     renderInstall();
@@ -1388,7 +1259,7 @@
   }
 
   var RENDER = { programs: renderPrograms, program: renderProgram, learn: renderLearn, support: renderSupport, safety: renderSafety, reframe: startReframe, sounds: function () {}, wellbeing: renderWellbeing,
-    today: renderToday, play: renderPlay, garden: renderGarden, week: renderWeek, me: renderMe, pick: renderPick, checkin: renderContextChips };
+    today: renderToday, play: renderPlay, progress: renderProgress, me: renderMe, pick: renderPick, checkin: renderContextChips };
 
   /* ---------- Golden hour, sharing, install ---------- */
 
@@ -1404,7 +1275,7 @@
         if (p && p.display && p.display !== 'granted') { toast('Reminders are off in your settings. The in-app note still works.'); return false; }
         var hm = state.goldenHour.split(':');
         return LN.schedule({ notifications: [{
-          id: 1, title: 'Golden hour', body: tr('Two calm minutes are here for you whenever you like.'),
+          id: 1, title: 'LoosenUp', body: tr('Two calm minutes are here for you whenever you like.'),
           schedule: { on: { hour: +hm[0], minute: +hm[1] }, allowWhileIdle: true }
         }] }).then(function () { return true; });
       });
@@ -1418,30 +1289,25 @@
     save();
     scheduleGoldenHour();
     renderMe();
-    toast('Golden hour set for ' + v + '.');
+    toast('Daily reminder set for ' + v + '.');
   }
   function clearGoldenHour() {
     state.goldenHour = null;
     save();
     scheduleGoldenHour();
     renderMe();
-    toast('Golden hour is off. You can set it again any time.');
+    toast('Daily reminder is off. You can set it again any time.');
   }
 
   function shareUrl() { return /^https?:$/.test(location.protocol) && !isNative() && location.hostname !== 'localhost' ? location.origin : PUBLIC_URL; }
   function shareSunbeam() {
     var url = shareUrl();
-    var text = 'Two calm minutes that brighten my day. Grow a garden with me on LoosenUp. Android: ' + ANDROID_URL + '  iPhone: ' + IOS_URL;
+    var text = 'Two calm minutes that help me feel lighter. Try LoosenUp. Android: ' + ANDROID_URL + '  iPhone: ' + IOS_URL;
     var rewardShare = function () {
-      var dk = dayKey(now());
       addBadge('sharer');
-      if (state.referralDay === dk) { save(); toast('Thanks for sharing a Sunbeam!'); return; }
-      state.referralDay = dk;
-      var got = grantRewardSeed();
+      state.referralDay = dayKey(now());
       save();
-      renderSeedPill();
-      if (RENDER[current]) RENDER[current]();
-      toast(got ? 'Thanks for sharing a Sunbeam! +1 Seed' : 'Thanks for sharing a Sunbeam! Your free Seeds for this week are all gathered.');
+      toast('Thank you for sharing LoosenUp.');
     };
     var copy = function () {
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1488,17 +1354,17 @@
     if (document.readyState === 'complete') reg(); else window.addEventListener('load', reg);
   }
 
-  /* ---------- Play: calm mini-games (every round ends kindly, never cost Seeds) ---------- */
+  /* ---------- Play: calm mini-games (every round ends kindly) ---------- */
 
   var GAMES = {
-    pairs: { name: 'Petal Pairs', help: 'Turn two cards at a time. Matching flowers stay open. Take all the time you like.' },
+    pairs: { name: 'Calm Pairs', help: 'Turn two cards at a time. Matching pairs stay open. Take all the time you like.' },
     catch: { name: 'Sunbeam Catch', help: 'Tap the sunbeams and petals as they drift by. Every catch fills your jar.' },
-    bloom: { name: 'Breath Bloom', help: 'Press and hold while the ring grows to breathe in. Let go as it shrinks to breathe out. Six breaths, six flowers.' }
+    bloom: { name: 'Breathing Ring', help: 'Press and hold while the ring grows to breathe in. Let go as it shrinks to breathe out. Six slow breaths.' }
   };
-  var FLOWERS = [['Sunflower', '#FFC857'], ['Peach rose', '#FFB088'], ['Fern bell', '#4FA67C'], ['Sky poppy', '#8CC8F0'], ['Lilac', '#C9A7F2'], ['Blush daisy', '#F28FA0']];
+  var FLOWERS = [['Bright sun', '#FFC857'], ['Moon', '#B9A3F0'], ['Cloud', '#8CC8F0'], ['Wave', '#4FA9C8'], ['Star', '#FFB088'], ['Heart', '#F28FA0']];
   var game = null;
 
-  /* ---------- Guided programmes (Full Bloom after the free days) ---------- */
+  /* ---------- Guided programmes (LoosenUp Plus after the free days) ---------- */
   // One day opens per calendar day. Each day is a short tip plus one exercise.
   var PROGRAM_FREE_DAYS = 3;
   var PROGRAMS = {
@@ -1634,7 +1500,7 @@
     btn.hidden = false;
     if (st.finished) setText('program-start', 'Start again');
     else if (st.doneToday) { btn.hidden = true; }
-    else if (st.locked) setText('program-start', 'Unlock with Full Bloom');
+    else if (st.locked) setText('program-start', 'Unlock with LoosenUp Plus');
     else setText('program-start', st.started ? 'Start today\'s practice' : 'Start day 1');
     $('program-wait').hidden = !(st.doneToday && !st.finished);
     setText('program-wait', 'Done for today. Day ' + st.day + ' opens tomorrow.');
@@ -1648,7 +1514,7 @@
       var paid = i > PROGRAM_FREE_DAYS && state.plan !== 'fullbloom';
       s.className = 'pday' + (done ? ' done' : '') + (isToday ? ' today' : '') + (paid && !done ? ' paid' : '');
       s.textContent = String(i);
-      s.setAttribute('aria-label', 'Day ' + i + (done ? ', done' : isToday ? ', today' : paid ? ', Full Bloom' : ''));
+      s.setAttribute('aria-label', 'Day ' + i + (done ? ', done' : isToday ? ', today' : paid ? ', LoosenUp Plus' : ''));
       dots.appendChild(s);
     }
   }
@@ -1656,7 +1522,7 @@
     var id = currentProgram, p = PROGRAMS[id], st = programStatus(id);
     if (st.finished) { state.programs[id] = null; delete state.programs[id]; save(); renderProgram(); return 'restart'; }
     if (st.doneToday) return 'wait';
-    if (st.locked) { openShop('Day ' + (PROGRAM_FREE_DAYS + 1) + ' onwards of every programme is part of Full Bloom.'); return 'shop'; }
+    if (st.locked) { openShop('Day ' + (PROGRAM_FREE_DAYS + 1) + ' onwards of every programme is part of LoosenUp Plus.'); return 'shop'; }
     if (!state.programs) state.programs = {};
     if (!state.programs[id]) state.programs[id] = { started: dayKey(now()), done: [], lastDay: null };
     save();
@@ -1678,7 +1544,7 @@
     ps.lastDay = dk;
     state.xp += 5;
     var total = PROGRAMS[pr.id].days.length;
-    r.programNote = ps.done.length >= total ? 'You finished ' + PROGRAMS[pr.id].name + '!' : 'Day ' + pr.day + ' of ' + total + ' done. +5 XP';
+    r.programNote = ps.done.length >= total ? 'You finished ' + PROGRAMS[pr.id].name + '!' : 'Day ' + pr.day + ' of ' + total + ' done.';
     if (ps.done.length >= total) addBadge('programme', r.newBadges);
     save();
   }
@@ -1958,9 +1824,7 @@
     setSeg(calmSeg);
     var dk = dayKey(now());
     var played = state.games.day === dk ? state.games.count : 0;
-    setText('play-note', played >= DAILY_GAME_REWARDS
-      ? 'You have gathered today\'s game XP. Play on just for the joy of it.'
-      : 'Game XP today: ' + played + ' of ' + DAILY_GAME_REWARDS + '.');
+    setText('play-note', played ? 'Play as long as you like. There is nothing to rush.' : 'Short, gentle games for a busy mind.');
   }
 
   function shuffle(a) {
@@ -2002,18 +1866,28 @@
     save();
     renderSeedPill();
     setText('game-done-title', title);
-    setText('game-done-text', text + (rewarded ? ' +' + GAME_XP + ' XP for your garden.' : ' Today\'s game XP is all gathered, so this round was just for fun.'));
+    setText('game-done-text', text);
     $('game-done').hidden = false;
     var again = $('game-again');
     if (again && again.focus) again.focus();
   }
 
-  // Petal Pairs: a gentle memory match.
-  function flowerSvg(color) {
+  // Calm Pairs: a gentle memory match.
+  // Calm Pairs card faces: simple calm symbols (sun, moon, cloud, wave, star, heart).
+  var SYMBOL_PATHS = [
+    'M20 11a9 9 0 1 1 0 18 9 9 0 0 1 0-18zM20 3v4M20 33v4M3 20h4M33 20h4M8 8l3 3M29 29l3 3M8 32l3-3M29 11l3-3',
+    'M25 7a13 13 0 1 0 8 23 11 11 0 0 1-8-23z',
+    'M12 29a7 7 0 0 1 0-14 9 9 0 0 1 17-2 7 7 0 0 1 0 16z',
+    'M4 17c4-4 8-4 12 0s8 4 12 0 8-4 8-4M4 26c4-4 8-4 12 0s8 4 12 0 8-4 8-4',
+    'M20 4l4.7 10 10.8 1.2-8 7.3 2.3 10.6L20 27.6l-9.8 5.5 2.3-10.6-8-7.3 10.8-1.2z',
+    'M20 34S6 25 6 15a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z'
+  ];
+  function flowerSvg(color, kind) {
     var s0 = document.createElementNS(SVGNS, 'svg');
     s0.setAttribute('viewBox', '0 0 40 40');
     s0.setAttribute('aria-hidden', 'true');
-    miniFlower(s0, 20, 20, 12, color);
+    var stroke = kind === 0 || kind === 3;
+    svg('path', { d: SYMBOL_PATHS[kind || 0], fill: stroke ? (kind === 0 ? color : 'none') : color, stroke: color, 'stroke-width': stroke ? 3 : 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, s0);
     return s0;
   }
   function startPairs(stage) {
@@ -2029,7 +1903,7 @@
       b.className = 'pcard';
       b.setAttribute('data-card', String(i));
       b.setAttribute('aria-label', 'Card ' + (i + 1) + ', face down');
-      b.appendChild(flowerSvg(FLOWERS[c.kind][1]));
+      b.appendChild(flowerSvg(FLOWERS[c.kind][1], c.kind));
       grid.appendChild(b);
     });
     stage.appendChild(grid);
@@ -2057,7 +1931,7 @@
         if (game.deck.every(function (x) { return x.done; })) {
           var moves = game.moves;
           var prev = state.gameBest.pairs;
-          finishGame('All pairs bloomed', 'You matched 6 pairs in ' + plural(moves, 'move', 'moves') + (prev && moves < prev ? ', your best yet!' : '.'),
+          finishGame('All pairs matched', 'You matched 6 pairs in ' + plural(moves, 'move', 'moves') + (prev && moves < prev ? ', your best yet!' : '.'),
             function () { if (!prev || moves < prev) state.gameBest.pairs = moves; });
         }
       } else {
@@ -2166,7 +2040,7 @@
       function () { if (n > prev) state.gameBest.catch = n; });
   }
 
-  // Breath Bloom: hold to breathe in with the ring, let go to breathe out.
+  // Breathing Ring: hold to breathe in with the ring, let go to breathe out.
   var BLOOM_IN = 4, BLOOM_OUT = 4, BLOOM_ROUNDS = 6;
   function startBloom(stage) {
     var wrap = document.createElement('div');
@@ -2215,7 +2089,7 @@
     hold.addEventListener('keydown', function (e) { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); setHold(true); } });
     hold.addEventListener('keyup', function (e) { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setHold(false); } });
     hold.addEventListener('contextmenu', function (e) { e.preventDefault(); });
-    setText('game-score', '0 of ' + BLOOM_ROUNDS + ' blooms');
+    setText('game-score', '0 of ' + BLOOM_ROUNDS + ' breaths');
   }
   function setHold(on) {
     if (!game || game.id !== 'bloom' || game.done) return;
@@ -2260,13 +2134,13 @@
     f.setAttribute('viewBox', '0 0 40 40');
     miniFlower(f, 20, 20, 12, FLOWERS[(game.round - 1) % FLOWERS.length][1]);
     row.appendChild(f);
-    setText('game-score', game.round + ' of ' + BLOOM_ROUNDS + ' blooms');
+    setText('game-score', game.round + ' of ' + BLOOM_ROUNDS + ' breaths');
     if (game.round >= BLOOM_ROUNDS) endBloom();
   }
   function endBloom() {
     var pct = game.samples ? Math.round(game.inSync / game.samples * 100) : 0;
     var prev = state.gameBest.bloom || 0;
-    finishGame('Six breaths, six blooms', 'You moved with the ring ' + pct + '% of the time. Every breath counted.',
+    finishGame('Six slow breaths', 'You moved with the ring ' + pct + '% of the time. Every breath counted.',
       function () { if (pct > prev) state.gameBest.bloom = pct; });
   }
   function finishCurrentGame() {
@@ -2274,7 +2148,7 @@
     if (game.id === 'pairs') {
       game.deck.forEach(function (c, i) { c.done = true; c.open = false; paintCard(i); });
       updatePairsScore();
-      finishGame('All pairs bloomed', 'You matched 6 pairs in ' + plural(game.moves, 'move', 'moves') + '.');
+      finishGame('All pairs matched', 'You matched 6 pairs in ' + plural(game.moves, 'move', 'moves') + '.');
     } else if (game.id === 'catch') endCatch();
     else endBloom();
   }
@@ -2400,8 +2274,8 @@
       state.reframes = (state.reframes || 0) + 1;
       var got = toolXp(3);
       save();
-      setText('rf-result', a < b ? 'From ' + b + ' to ' + a + '. That is a real shift, and you made it.' + (got ? ' +3 XP' : '')
-        : 'Some thoughts take a few tries. You did the work, and that counts.' + (got ? ' +3 XP' : ''));
+      setText('rf-result', a < b ? 'From ' + b + ' to ' + a + '. That is a real shift, and you made it.'
+        : 'Some thoughts take a few tries. You did the work, and that counts.');
       $('rf-result').hidden = false; $('rf-keep').hidden = false; $('rf-next').hidden = true;
       var panes = document.querySelectorAll('[data-rf]');
       for (var i = 0; i < panes.length; i++) panes[i].hidden = true;
@@ -3046,12 +2920,8 @@
       case 'game-again': if (game) openGame(game.id); break;
       case 'start-break': startCheckin('guided'); break;
       case 'quick-breeze': startCheckin('quick'); break;
-      case 'seed-pill': case 'open-shop': openShop(); break;
+      case 'open-shop': openShop(); break;
       case 'shop-close': case 'checkout-cancel': case 'support-close': case 'reset-cancel': closeSheets(); document.body.classList.remove('lock-sos'); break;
-      case 'shop-quick':
-        closeSheets(true);
-        if (current === 'pick') beginBreak('quick'); else startCheckin('quick');
-        break;
       case 'checkout-confirm': demoPurchase(pendingSku); break;
       case 'open-support': case 'sos-btn': case 'support-card-sos': openSupport(); break;
       case 'open-trusted': openSupport(true); break;
@@ -3136,13 +3006,10 @@
     if (!state.onboarded) {
       state.onboarded = true;
       state.createdAt = now().getTime();
-      state.seeds += 5;
-      state.xp += 25;
     }
     save();
     var slots = document.querySelectorAll('.name-slot');
     for (var i = 0; i < slots.length; i++) slots[i].textContent = state.name;
-    $('gift-level-fill').style.width = level().percent + '%';
     go('gift');
   }
 
@@ -3202,7 +3069,6 @@
     setRng: function (fn) { rng = fn || Math.random; },
     currentScreen: function () { return current; },
     go: go,
-    level: function () { return level(); },
     recommend: recommend,
     recommendFor: recommendFor,
     newerVersion: newerVersion,

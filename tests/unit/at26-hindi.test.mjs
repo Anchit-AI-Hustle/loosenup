@@ -15,10 +15,10 @@ test('AT26 in Hindi, every screen, tool, lesson, game and sheet shows Hindi (bra
   assert.equal(app.document.documentElement.getAttribute('lang'), 'hi');
 });
 
-test('AT26 Hindi keeps the locked brand words: Calm gain, Seeds, Sunny days, LoosenUp', async () => {
+test('AT26 Hindi keeps the brand words: Calm gain, LoosenUp, technique names', async () => {
   const { seen } = await walkAll({ lang: 'hi' });
   const all = [...seen.keys()].join('\n');
-  for (const w of ['Calm gain', 'Seeds', 'Sunny days', 'LoosenUp', 'Full Bloom', 'Sigh of relief', 'Tele-MANAS']) assert.ok(all.includes(w), w);
+  for (const w of ['Calm gain', 'LoosenUp', 'LoosenUp Plus', 'Sigh of relief', 'Tele-MANAS']) assert.ok(all.includes(w), w);
   assert.match(all, /[ऀ-ॿ]/, 'Devanagari text is shown');
 });
 

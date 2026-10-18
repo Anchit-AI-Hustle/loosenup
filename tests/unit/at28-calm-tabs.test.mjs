@@ -27,16 +27,14 @@ test('AT28 Calm holds breathing exercises, games and sounds as tabs in one scree
   assert.equal(app.visible('#panel-sounds'), true, 'the last tab is remembered');
 });
 
-test('AT28 every exercise has a card; locked ones say when they open', () => {
+test('AT28 every exercise has a card, all open from day one', () => {
   const app = ready();
   app.B.go('play');
   const ids = [...app.document.querySelectorAll('#panel-breathe [data-practice]')].map((b) => b.getAttribute('data-practice'));
   assert.deepEqual(ids.sort(), ['breeze', 'cooldown', 'desk', 'here', 'kind', 'letitout', 'pause', 'quick', 'release', 'sigh', 'square', 'warmth']);
   const breath = [...app.document.querySelectorAll('#practice-breath [data-practice]')].map((b) => b.getAttribute('data-practice'));
   assert.deepEqual(breath, ['quick', 'sigh', 'breeze', 'square', 'cooldown']);
-  const release = app.$('[data-practice="release"]');
-  assert.equal(release.disabled, true);
-  assert.match(release.textContent, /Opens in 3 more breaks/);
+  assert.equal(app.document.querySelectorAll('#panel-breathe [data-practice][disabled]').length, 0, 'nothing locked');
   assert.match(app.$('[data-practice="quick"]').textContent, /Always free/);
   assert.match(app.$('[data-practice="square"]').textContent, /2 min · Work/);
 });

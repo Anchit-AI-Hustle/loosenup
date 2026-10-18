@@ -22,15 +22,13 @@ test('AT14 Play tab lists three calm games', () => {
   assert.equal(app.B.currentScreen(), 'play');
   const names = [...app.document.querySelectorAll('[data-game]')].map((b) => b.textContent);
   assert.equal(names.length, 3);
-  assert.match(names.join(' '), /Petal Pairs/);
+  assert.match(names.join(' '), /Calm Pairs/);
   assert.match(names.join(' '), /Sunbeam Catch/);
-  assert.match(names.join(' '), /Breath Bloom/);
+  assert.match(names.join(' '), /Breathing Ring/);
 });
 
-test('AT14 Petal Pairs: 12 cards, matching all pairs finishes kindly and grants game XP', () => {
+test('AT14 Calm Pairs: 12 cards, matching all pairs finishes kindly and grants game XP', () => {
   const app = ready();
-  const xp = app.B.state().xp;
-  const seeds = app.B.state().seeds;
   app.click('[data-tab="play"]');
   app.click('[data-game="pairs"]');
   assert.equal(app.B.currentScreen(), 'game');
@@ -38,11 +36,9 @@ test('AT14 Petal Pairs: 12 cards, matching all pairs finishes kindly and grants 
   assert.equal(app.visible('#tabbar'), false);
   solvePairs(app);
   assert.equal(app.visible('#game-done'), true);
-  assert.match(app.$('#game-done-title').textContent, /All pairs bloomed/);
+  assert.match(app.$('#game-done-title').textContent, /All pairs matched/);
   assert.match(app.$('#game-done-text').textContent, /6 pairs in 6 moves/);
   const s = app.B.state();
-  assert.equal(s.xp, xp + 5);
-  assert.equal(s.seeds, seeds, 'games never change Seeds');
   assert.ok(s.badges.includes('playful'));
   assert.equal(s.gameBest.pairs, 6);
 });
@@ -62,17 +58,16 @@ test('AT14 a mismatched pair turns back over without any penalty', async () => {
   assert.equal(app.$('#game-score').textContent, '0 of 6 pairs');
 });
 
-test('AT14 game XP is capped at 3 rewarded games a day', () => {
+test('AT14 games can be played as often as you like, with a kind ending every time', () => {
   const app = ready();
-  const xp = app.B.state().xp;
   for (let i = 0; i < 4; i++) {
     app.B.openGame('pairs');
     solvePairs(app);
+    assert.equal(app.visible('#game-done'), true);
   }
-  assert.equal(app.B.state().xp, xp + 15);
-  assert.match(app.$('#game-done-text').textContent, /just for fun/);
+  assert.doesNotMatch(app.$('#game-done-text').textContent, /XP|garden/);
   app.click('#game-back');
-  assert.match(app.$('#play-note').textContent, /gathered today/);
+  assert.match(app.$('#play-note').textContent, /nothing to rush/);
 });
 
 test('AT14 Sunbeam Catch: tapping a sunbeam fills the jar', () => {
@@ -89,7 +84,7 @@ test('AT14 Sunbeam Catch: tapping a sunbeam fills the jar', () => {
   assert.equal(app.B.game(), null, 'timers stop when leaving');
 });
 
-test('AT14 Breath Bloom: holding starts the breath guide and finishing blooms kindly', () => {
+test('AT14 Breathing Ring: holding starts the breath guide and finishing blooms kindly', () => {
   const app = ready();
   app.B.openGame('bloom');
   const hold = app.$('#bloom-hold');
@@ -99,7 +94,7 @@ test('AT14 Breath Bloom: holding starts the breath guide and finishing blooms ki
   hold.dispatchEvent(new app.window.KeyboardEvent('keyup', { key: ' ', bubbles: true }));
   assert.equal(hold.getAttribute('aria-pressed'), 'false');
   app.B.finishCurrentGame();
-  assert.match(app.$('#game-done-title').textContent, /Six breaths, six blooms/);
+  assert.match(app.$('#game-done-title').textContent, /Six slow breaths/);
   assert.match(app.$('#game-done-text').textContent, /Every breath counted/);
   assert.equal(app.errors.length, 0, app.errors.join('\n'));
 });

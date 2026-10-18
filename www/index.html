@@ -70,9 +70,6 @@
     <header class="topbar">
       <div class="brand"><svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#lift-logo" width="40" height="40"/></svg><span class="wordmark">LoosenUp</span></div>
       <div class="top-actions">
-        <button id="seed-pill" class="seed-pill" type="button" hidden aria-label="Seeds and plan">
-          <span class="seed-dot" aria-hidden="true"></span><span id="seed-pill-count">0</span><span class="seed-word">Seeds</span>
-        </button>
         <button id="sos-btn" class="sos-btn" type="button" aria-label="SOS: get support now">SOS</button>
       </div>
     </header>
@@ -98,7 +95,7 @@
           <button class="chip" type="button" data-lang-choice="hi" aria-pressed="false" lang="hi">हिन्दी</button>
         </div>
         <h1 id="welcome-title" class="display">Welcome. Take a breath.</h1>
-        <p class="lead">Two calm minutes to loosen up and feel lighter. Ease a tense workday, soften a heavy mood, and watch your Calm gain grow into a garden.</p>
+        <p class="lead">Two calm minutes to loosen up and feel lighter. Ease a tense workday, soften a heavy mood, and see your Calm gain grow over the weeks.</p>
         <form id="welcome-form" class="stack" novalidate>
           <label class="field-label" for="name-input">What should we call you?</label>
           <input id="name-input" class="text-input" type="text" autocomplete="given-name" maxlength="24" placeholder="Your first name" required>
@@ -110,26 +107,14 @@
 
       <!-- Gift -->
       <section id="screen-gift" class="screen" data-screen="gift" hidden aria-labelledby="gift-title">
-        <div class="gift" aria-hidden="true">
-          <svg viewBox="0 0 200 170" class="gift-svg">
-            <g class="gift-glow"><circle cx="100" cy="92" r="72" fill="#FFF0C7"/></g>
-            <g class="gift-seeds"><circle cx="66" cy="42" r="8" fill="#4FA67C"/><circle cx="134" cy="36" r="7" fill="#2E7D5B"/><circle cx="100" cy="20" r="9" fill="#4FA67C"/></g>
-            <g class="gift-lid"><rect x="42" y="52" width="116" height="26" rx="9" fill="#FFB088"/><rect x="92" y="52" width="16" height="26" fill="#FFC857"/>
-              <path d="M100 52c-14-26-40-20-30-4 6 8 30 4 30 4zm0 0c14-26 40-20 30-4-6 8-30 4-30 4z" fill="#F2A72B"/></g>
-            <rect x="50" y="78" width="100" height="72" rx="12" fill="#FFB088"/><rect x="92" y="78" width="16" height="72" fill="#FFC857"/>
-          </svg>
-        </div>
-        <p class="eyebrow center">A welcome gift</p>
-        <h1 id="gift-title" class="display center">For you, <span class="name-slot"></span></h1>
-        <div class="gift-grid">
-          <div class="gift-chip"><strong>+5 Seeds</strong><span>for guided breaks</span></div>
-          <div class="gift-chip"><strong>+25 XP</strong><span>a head start</span></div>
-        </div>
-        <div class="card level-card">
-          <div class="level-row"><span class="level-name">Seedling</span><span class="level-pct">50%</span></div>
-          <div class="bar" role="progressbar" aria-label="Seedling progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><span id="gift-level-fill" class="bar-fill" style="width:50%"></span></div>
-          <p class="fine">You are already halfway to Sprout.</p>
-        </div>
+        <p class="eyebrow center">How LoosenUp helps</p>
+        <h1 id="gift-title" class="display center">Hi <span class="name-slot"></span>, here is how it works</h1>
+        <ol class="how-steps">
+          <li><strong>Notice how you feel</strong><span>Rate your calm from 1 to 10. It takes a second.</span></li>
+          <li><strong>Take two calm minutes</strong><span>A guided exercise picked for what you are carrying.</span></li>
+          <li><strong>See your Calm gain</strong><span>Rate again, and watch what really helps you over the weeks.</span></li>
+        </ol>
+        <p class="fine center">Every break, tool and SOS is free, always. Nothing leaves your phone.</p>
         <button id="gift-go" class="btn btn-sun" type="button">Start my first break</button>
       </section>
 
@@ -256,18 +241,17 @@
               <g id="rs-petals"></g>
               <circle cx="180" cy="132" r="46" fill="url(#g-sun)"/>
             </g></g>
-            <path d="M0 164Q90 140 180 160T360 154V210H0Z" fill="#7AC498"/>
-            <path d="M0 184Q120 166 240 182T360 178V210H0Z" fill="#4FA67C"/>
-            <path d="M0 200Q170 190 360 200V210H0Z" fill="#2E7D5B"/>
+            <path d="M0 170Q90 150 180 166T360 160V210H0Z" fill="#FFFFFF" opacity=".55"/>
+            <path d="M0 188Q120 172 240 186T360 182V210H0Z" fill="#FFFFFF" opacity=".75"/>
           </svg>
         </div>
         <p id="result-headline" class="result-headline"></p>
         <p class="gain"><span id="result-gain" class="gain-num">+0</span><span class="gain-label">Calm gain</span></p>
+        <p id="result-change" class="muted center"></p>
         <div class="stat-grid">
-          <div class="stat"><span class="stat-k">Garden</span><span id="result-garden" class="stat-v">+1 flower</span></div>
-          <div class="stat"><span class="stat-k">Seeds</span><span id="result-seeds" class="stat-v"></span></div>
-          <div class="stat"><span class="stat-k">Sunny days</span><span id="result-streak" class="stat-v"></span></div>
-          <div class="stat"><span class="stat-k">Level</span><span id="result-level" class="stat-v"></span></div>
+          <div class="stat"><span class="stat-k">Streak</span><span id="result-streak" class="stat-v"></span></div>
+          <div class="stat"><span class="stat-k">This week</span><span id="result-week" class="stat-v"></span></div>
+          <div class="stat wide"><span class="stat-k">Your average</span><span id="result-avg" class="stat-v"></span></div>
         </div>
         <ul id="result-rewards" class="rewards"></ul>
         <p id="result-note" class="kind-note"></p>
@@ -281,9 +265,8 @@
           <svg id="today-sun" class="sky-sun" viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg>
           <div class="sky-moon" aria-hidden="true"></div>
           <svg class="sky-hills" viewBox="0 0 360 80" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0 40Q90 14 180 36T360 28V80H0Z" fill="#7AC498"/>
-            <path d="M0 58Q120 38 240 54T360 50V80H0Z" fill="#4FA67C"/>
-            <g id="today-flowers"></g>
+            <path d="M0 40Q90 18 180 36T360 30V80H0Z" fill="#FFFFFF" opacity=".55"/>
+            <path d="M0 58Q120 40 240 54T360 50V80H0Z" fill="#FFFFFF" opacity=".8"/>
           </svg>
           <div class="sky-copy">
             <p class="eyebrow" id="today-date"></p>
@@ -305,18 +288,24 @@
         </article>
         <div id="golden-banner" class="banner" hidden>
           <span class="banner-sun" aria-hidden="true"></span>
-          <p><strong>Golden hour is here.</strong> Two calm minutes, whenever you like.</p>
+          <p><strong>Your daily reminder.</strong> Two calm minutes, whenever you like.</p>
         </div>
 
         <article id="mood-card" class="card mood-card">
-          <div class="block-head"><h2 class="subtitle">How are you feeling?</h2><span class="tag">Daily check-in</span></div>
+          <div class="block-head"><h2 class="subtitle">How is your mood today?</h2><span class="tag">Daily check-in</span></div>
           <div class="moods" role="group" aria-label="Mood today">
-            <button type="button" class="mood" data-mood="1" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(12 12) scale(.4)"/></svg><span>Very heavy</span></button>
-            <button type="button" class="mood" data-mood="2" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(9 9) scale(.55)"/></svg><span>Heavy</span></button>
-            <button type="button" class="mood" data-mood="3" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(6 6) scale(.7)"/></svg><span>Okay</span></button>
-            <button type="button" class="mood" data-mood="4" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40" transform="translate(3 3) scale(.85)"/></svg><span>Light</span></button>
-            <button type="button" class="mood" data-mood="5" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#petal-sun" width="40" height="40"/></svg><span>Bright</span></button>
+            <button type="button" class="mood" data-mood="1" aria-pressed="false" style="--mc: #9DB4D6"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" class="face"/><path d="M12 16q3 2.5 6 0M22 16q3 2.5 6 0" class="fx"/><path d="M14 29q6-6 12 0" class="fx"/><path d="M12.5 19.5q-1.6 3 0 4.2 1.6-1.2 0-4.2z" class="tear"/><path d="M27.5 19.5q-1.6 3 0 4.2 1.6-1.2 0-4.2z" class="tear"/></svg><span>Crying</span></button>
+            <button type="button" class="mood" data-mood="2" aria-pressed="false" style="--mc: #B8C7DA"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" class="face"/><circle cx="15" cy="17" r="1.8" class="fe"/><circle cx="25" cy="17" r="1.8" class="fe"/><path d="M14.5 28q5.5-4.5 11 0" class="fx"/><path d="M12 13.5l4.5-1.5M28 13.5l-4.5-1.5" class="fx thin"/></svg><span>Sad</span></button>
+            <button type="button" class="mood" data-mood="3" aria-pressed="false" style="--mc: #F2DC9B"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" class="face"/><circle cx="15" cy="17" r="1.8" class="fe"/><circle cx="25" cy="17" r="1.8" class="fe"/><path d="M15 26.5h10" class="fx"/></svg><span>Okay</span></button>
+            <button type="button" class="mood" data-mood="4" aria-pressed="false" style="--mc: #FFD27A"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" class="face"/><circle cx="15" cy="17" r="1.8" class="fe"/><circle cx="25" cy="17" r="1.8" class="fe"/><path d="M14.5 24.5q5.5 4.5 11 0" class="fx"/></svg><span>Decent</span></button>
+            <button type="button" class="mood" data-mood="5" aria-pressed="false" style="--mc: #FFB547"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" class="face"/><path d="M12.5 17.5q2.5-3 5 0M22.5 17.5q2.5-3 5 0" class="fx"/><path d="M13 23.5q7 8 14 0z" class="fm"/><circle cx="11.5" cy="22.5" r="2.2" class="cheek"/><circle cx="28.5" cy="22.5" r="2.2" class="cheek"/></svg><span>Happy</span></button>
           </div>
+          <div class="mood-scale" aria-hidden="true" data-level="0">
+            <span class="mood-track"><i class="mood-fill"></i></span>
+            <span class="mood-ticks"><b></b><b></b><b></b><b></b><b></b></span>
+            <span class="mood-knob"></span>
+          </div>
+          <div class="mood-scale-ends" aria-hidden="true"><span>Crying</span><span>Happy</span></div>
           <p id="mood-done" class="fine" aria-live="polite"></p>
           <p id="jar-memory" class="jar-memory" hidden></p>
         </article>
@@ -388,11 +377,9 @@
         </section>
 
         <article class="card progress-strip" aria-label="Your progress">
-          <div class="ps-item"><span class="stat-k">Sunny days</span><span id="today-streak" class="stat-v"></span></div>
-          <div class="ps-item"><span class="stat-k">Seeds</span><span id="today-seeds" class="stat-v"></span></div>
-          <div class="ps-item ps-level"><span class="stat-k" id="today-level-name"></span>
-            <div class="bar" role="progressbar" aria-label="Level progress" aria-valuemin="0" aria-valuemax="100" id="today-level-bar"><span id="today-level-fill" class="bar-fill"></span></div>
-            <span id="today-level-pct" class="fine"></span></div>
+          <div class="ps-item"><span class="stat-k">Day streak</span><span id="today-streak" class="stat-v"></span></div>
+          <div class="ps-item"><span class="stat-k">This week</span><span id="today-week" class="stat-v"></span></div>
+          <div class="ps-item"><span class="stat-k">Avg Calm gain</span><span id="today-avg" class="stat-v"></span></div>
         </article>
         <p id="today-rain" class="fine center"></p>
 
@@ -565,7 +552,7 @@
         <button class="btn btn-ghost back-btn" type="button" data-back>Back</button>
         <p class="eyebrow">A little each day</p>
         <h1 id="programs-title" class="title">Programmes</h1>
-        <p class="muted">Short daily plans with one tip and one exercise a day. The first 3 days of each are free; Full Bloom opens the rest.</p>
+        <p class="muted">Short daily plans with one tip and one exercise a day. The first 3 days of each are free; LoosenUp Plus opens the rest.</p>
         <div id="program-list" class="program-list"></div>
       </section>
 
@@ -583,7 +570,7 @@
           <p id="program-wait" class="kind-note" hidden></p>
         </article>
         <div id="program-days" class="program-days" aria-label="Your days"></div>
-        <p id="program-paywall" class="fine">Days 1 to 3 are free. Day 4 onwards is part of Full Bloom.</p>
+        <p id="program-paywall" class="fine">Days 1 to 3 are free. Day 4 onwards is part of LoosenUp Plus.</p>
       </section>
 
       <!-- Learn -->
@@ -629,11 +616,11 @@
         </div>
 
         <div id="panel-games" class="seg-panel" role="tabpanel" aria-labelledby="seg-games" hidden>
-          <p class="muted">Gentle games with nothing to rush. Each one adds a little XP, up to 3 games a day.</p>
+          <p class="muted">Gentle games with nothing to rush.</p>
           <div class="games">
             <button id="game-pairs-open" class="game-card" type="button" data-game="pairs">
               <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><rect x="4" y="8" width="20" height="28" rx="6" fill="#FFB088"/><rect x="30" y="18" width="20" height="28" rx="6" fill="#fff" stroke="#4FA67C" stroke-width="2"/><circle cx="40" cy="32" r="5" fill="#FFC857"/></svg></span>
-              <span><strong>Petal Pairs</strong><span>Turn the cards and match the flowers.</span></span>
+              <span><strong>Calm Pairs</strong><span>Turn the cards and find the pairs.</span></span>
             </button>
             <button id="game-catch-open" class="game-card" type="button" data-game="catch">
               <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><circle cx="18" cy="16" r="8" fill="#FFC857"/><circle cx="36" cy="30" r="6" fill="#FFB088"/><path d="M14 40h26l-3 10H17z" fill="#4FA67C"/></svg></span>
@@ -641,7 +628,7 @@
             </button>
             <button id="game-bloom-open" class="game-card" type="button" data-game="bloom">
               <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><use href="#petal-sun" x="7" y="7" width="40" height="40"/></svg></span>
-              <span><strong>Breath Bloom</strong><span>Hold to breathe in, let go to breathe out.</span></span>
+              <span><strong>Breathing Ring</strong><span>Hold to breathe in, let go to breathe out.</span></span>
             </button>
           </div>
           <p id="play-note" class="fine center"></p>
@@ -682,36 +669,31 @@
         <button id="game-back" class="btn btn-ghost" type="button">Back to Play</button>
       </section>
 
-      <!-- Garden -->
-      <section id="screen-garden" class="screen" data-screen="garden" hidden aria-labelledby="garden-title">
-        <p class="eyebrow">Grows with every break</p>
-        <h1 id="garden-title" class="title">Your garden</h1>
-        <div class="card garden-card"><svg id="garden-svg" viewBox="0 0 360 260" role="img" aria-label="Your garden"></svg></div>
-        <p id="garden-caption" class="muted center"></p>
-        <div class="card level-card">
-          <div class="level-row"><span id="garden-level" class="level-name"></span><span id="garden-level-pct" class="level-pct"></span></div>
-          <div class="bar"><span id="garden-level-fill" class="bar-fill"></span></div>
-          <p id="garden-next" class="fine"></p>
+      <!-- Progress -->
+      <section id="screen-progress" class="screen" data-screen="progress" hidden aria-labelledby="progress-title">
+        <p class="eyebrow">How you are really doing</p>
+        <h1 id="progress-title" class="title">Your progress</h1>
+        <div class="stat-grid">
+          <div class="stat"><span class="stat-k">Day streak</span><span id="prog-streak" class="stat-v"></span><span id="prog-best" class="fine"></span></div>
+          <div class="stat"><span class="stat-k">Calm breaks</span><span id="prog-total" class="stat-v"></span></div>
+          <div class="stat"><span class="stat-k">Average Calm gain</span><span id="prog-avg" class="stat-v"></span></div>
+          <div class="stat"><span class="stat-k">Wellbeing</span><span id="prog-wb" class="stat-v"></span><span id="prog-wb-note" class="fine"></span></div>
         </div>
-        <h2 class="subtitle">Badges</h2>
-        <ul id="badges" class="badges"></ul>
-      </section>
-
-      <!-- Week -->
-      <section id="screen-week" class="screen" data-screen="week" hidden aria-labelledby="week-title">
-        <p class="eyebrow">The last 7 days</p>
-        <h1 id="week-title" class="title">Your Sunny week</h1>
+        <h2 class="subtitle">The last 7 days</h2>
         <div class="card"><svg id="week-chart" viewBox="0 0 340 190" role="img" aria-label="Calm gain for the last 7 days"></svg></div>
         <div class="stat-grid">
           <div class="stat"><span class="stat-k">Breaks</span><span id="week-count" class="stat-v"></span></div>
           <div class="stat"><span class="stat-k">Avg Calm gain</span><span id="week-avg" class="stat-v"></span></div>
         </div>
         <article class="card insight">
-          <h2 class="subtitle">What lifts you most</h2>
+          <h2 class="subtitle">What helps you most</h2>
           <p id="insight-tech"></p>
           <p id="insight-time"></p>
           <p id="insight-mood"></p>
         </article>
+        <button class="btn btn-soft" type="button" data-tool="wellbeing">Take the wellbeing check</button>
+        <h2 class="subtitle">Milestones</h2>
+        <ul id="badges" class="badges"></ul>
       </section>
 
       <!-- Me -->
@@ -719,19 +701,19 @@
         <p class="eyebrow">Settings and plan</p>
         <h1 id="me-title" class="title"></h1>
         <article class="card">
-          <h2 class="subtitle">Seeds and plan</h2>
-          <p><strong id="me-seeds"></strong> <span id="me-plan" class="muted"></span></p>
-          <button id="open-shop" class="btn btn-soft" type="button">Visit the Seed shop</button>
+          <h2 class="subtitle">Your plan</h2>
+          <p id="me-plan" class="muted"></p>
+          <button id="open-shop" class="btn btn-soft" type="button">See LoosenUp Plus</button>
         </article>
         <article class="card">
-          <h2 class="subtitle">Golden hour</h2>
+          <h2 class="subtitle">Daily reminder</h2>
           <p class="muted" id="golden-help">Pick a daily time for a gentle reminder.</p>
           <div class="row">
-            <label class="sr-only" for="golden-time">Golden hour time</label>
+            <label class="sr-only" for="golden-time">Reminder time</label>
             <input id="golden-time" class="text-input time" type="time" value="19:00">
             <button id="golden-save" class="btn btn-soft" type="button">Save</button>
           </div>
-          <button id="golden-clear" class="btn btn-ghost" type="button" hidden>Turn off Golden hour</button>
+          <button id="golden-clear" class="btn btn-ghost" type="button" hidden>Turn off the reminder</button>
         </article>
         <article class="card" id="lock-card">
           <h2 class="subtitle">App lock</h2>
@@ -775,9 +757,9 @@
           <button id="voice-toggle" class="btn btn-soft" type="button" aria-pressed="false">Voice is off</button>
         </article>
         <article class="card sunbeam-card">
-          <h2 class="subtitle">Share a Sunbeam</h2>
-          <p class="muted">Invite a friend to LoosenUp. Sharing earns you a Seed (up to 2 free Seeds a week).</p>
-          <button id="sunbeam-share" class="btn btn-sun" type="button">Share a Sunbeam</button>
+          <h2 class="subtitle">Share LoosenUp</h2>
+          <p class="muted">Know someone who could use two calm minutes? Send them LoosenUp.</p>
+          <button id="sunbeam-share" class="btn btn-sun" type="button">Share LoosenUp</button>
         </article>
         <article class="card" id="install-card">
           <h2 class="subtitle">Install LoosenUp</h2>
@@ -833,10 +815,8 @@
         <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>Today</button>
       <button type="button" role="tab" data-tab="play" aria-selected="false">
         <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6.5" opacity=".55"/><circle cx="12" cy="12" r="10" opacity=".3"/></svg>Calm</button>
-      <button type="button" role="tab" data-tab="garden" aria-selected="false">
-        <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="2.2"/><path d="M12 5.8c0-2.5 3.2-3 3.2-.4M12 5.8c0-2.5-3.2-3-3.2-.4M14.2 8c2.5 0 3 3.2.4 3.2M9.8 8c-2.5 0-3 3.2-.4 3.2M12 10.2V21M12 17c-2.5 0-4.5-1.5-5-4 2.5 0 4.5 1.5 5 4zM12 15.5c2-.2 3.8-1.5 4.2-3.6-2 .2-3.8 1.5-4.2 3.6z"/></svg>Garden</button>
-      <button type="button" role="tab" data-tab="week" aria-selected="false">
-        <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16M7 20v-6M12 20V8M17 20v-9"/><circle cx="12" cy="4.5" r="1.5"/></svg>Week</button>
+      <button type="button" role="tab" data-tab="progress" aria-selected="false">
+        <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16M7 20v-6M12 20V8M17 20v-9"/><path d="M5 11l5-4 4 3 5-5"/></svg>Progress</button>
       <button type="button" role="tab" data-tab="me" aria-selected="false">
         <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.2-3.8 4-5.5 7.5-5.5s6.3 1.7 7.5 5.5"/></svg>Me</button>
     </div>
@@ -846,30 +826,23 @@
 
   <section id="shop-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="shop-title" hidden>
     <div class="sheet-grip" aria-hidden="true"></div>
-    <h2 id="shop-title" class="title">Seed shop</h2>
+    <h2 id="shop-title" class="title">LoosenUp Plus</h2>
     <p class="demo-flag">DEMO checkout. Nothing is charged.</p>
     <p id="shop-note" class="muted"></p>
-    <p class="muted">You have <strong id="shop-seeds">0</strong> Seeds. Each guided break plants 1 Seed.</p>
     <article class="card plan-card">
       <p class="eyebrow">Subscription</p>
-      <h3 class="plan-name">Full Bloom</h3>
+      <h3 class="plan-name">LoosenUp Plus</h3>
       <ul class="plan-perks">
-        <li>Every guided programme, all days: Better sleep in 21 days, Exam calm, Recovering from burnout</li>
-        <li>Every guided break with no Seeds needed</li>
-        <li>Every technique as it opens</li>
+        <li>Every guided programme, every day: Better sleep in 21 days, Exam calm, Recovering from burnout</li>
+        <li>New programmes as they arrive</li>
+        <li>Supports free calm breaks and SOS for everyone</li>
       </ul>
       <p class="price">₹149/mo <span class="or">or</span> USD 4.99/mo</p>
       <button class="btn btn-sun" type="button" data-sku="fullbloom">Choose monthly (demo)</button>
       <p class="price">₹799/yr <span class="or">or</span> USD 34.99/yr <em class="save">Save 55%</em></p>
       <button class="btn btn-soft" type="button" data-sku="fullbloomYear">Choose yearly (demo)</button>
     </article>
-    <div class="packs">
-      <button class="pack" type="button" data-sku="seeds10"><strong>10 Seeds</strong><span>₹99 or USD 1.99</span></button>
-      <button class="pack" type="button" data-sku="seeds30"><em class="ribbon">Popular</em><strong>30 Seeds</strong><span>₹249 or USD 4.99</span></button>
-      <button class="pack" type="button" data-sku="seeds100"><em class="ribbon">Best value</em><strong>100 Seeds</strong><span>₹699 or USD 12.99</span></button>
-    </div>
-    <p class="fine">Quick breeze is always free. Prices are placeholders while LoosenUp is in preview.</p>
-    <button id="shop-quick" class="btn btn-soft" type="button">Take a Quick breeze</button>
+    <p class="fine">Every calm break, tool and SOS stays free. Prices are placeholders while LoosenUp is in preview.</p>
     <button id="shop-close" class="btn btn-ghost" type="button">Close</button>
   </section>
 
@@ -933,9 +906,9 @@
   <section id="confirm-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirm-title" hidden>
     <div class="sheet-grip" aria-hidden="true"></div>
     <h2 id="confirm-title" class="title">Start fresh?</h2>
-    <p class="muted">This clears your garden, Seeds and history on this device so you can begin again.</p>
+    <p class="muted">This clears your history and settings on this device so you can begin again.</p>
     <button id="reset-confirm" class="btn btn-soft" type="button">Yes, start fresh</button>
-    <button id="reset-cancel" class="btn btn-ghost" type="button">Keep my garden</button>
+    <button id="reset-cancel" class="btn btn-ghost" type="button">Keep my data</button>
   </section>
 
   <div id="lock-screen" class="lock" role="dialog" aria-modal="true" aria-labelledby="lock-title" hidden>

@@ -16,7 +16,7 @@ test('AT15 SOS button is reachable from every screen, even before onboarding', (
   assert.equal(app.visible('#support-sheet'), true);
   app.click('#support-close');
   onboard(app);
-  for (const s of ['checkin', 'today', 'play', 'garden', 'week', 'me']) {
+  for (const s of ['checkin', 'today', 'play', 'progress', 'me']) {
     app.B.go(s);
     assert.ok(app.visible('#sos-btn'), `SOS visible on ${s}`);
   }
@@ -34,7 +34,7 @@ test('AT15 SOS sheet offers helplines, a breather and trusted-person setup', () 
   assert.equal(app.visible('#trusted-setup'), true, 'no trusted person yet, so setup shows');
   app.click('#sos-breathe');
   assert.equal(app.B.currentScreen(), 'session');
-  assert.equal(app.B.state().seeds, 5, 'SOS breather never costs a Seed');
+  assert.equal(app.B.currentScreen(), 'session', 'the SOS breather starts straight away');
 });
 
 test('AT15 trusted person is saved on device and the alert pre-fills a message', () => {

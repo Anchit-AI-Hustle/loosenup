@@ -49,12 +49,12 @@ test('AT29 one programme day a calendar day: the day runs the paired exercise an
   assert.match(app.$('#program-day-title').textContent, /Dim the last hour/);
 });
 
-test('AT29 days 1 to 3 are free; day 4 opens the Full Bloom shop; Full Bloom unlocks it', () => {
+test('AT29 days 1 to 3 are free; day 4 opens LoosenUp Plus, which unlocks it', () => {
   const app = ready();
   for (let d = 1; d <= 3; d++) { app.B.setNow(day(d)); app.B.openProgram('exam'); doDay(app); }
   app.B.setNow(day(4));
   app.B.openProgram('exam');
-  assert.match(app.$('#program-start').textContent, /Unlock with Full Bloom/);
+  assert.match(app.$('#program-start').textContent, /Unlock with LoosenUp Plus/);
   app.click('#program-start');
   assert.equal(app.visible('#shop-sheet'), true);
   assert.match(app.$('#shop-note').textContent, /Day 4 onwards/);
@@ -66,7 +66,7 @@ test('AT29 days 1 to 3 are free; day 4 opens the Full Bloom shop; Full Bloom unl
   assert.match(app.$('#program-day-title').textContent, /Sleep is study time/);
 });
 
-test('AT29 Full Bloom is ₹149 a month or ₹799 a year and lists the programmes', () => {
+test('AT29 LoosenUp Plus is ₹149 a month or ₹799 a year and lists the programmes', () => {
   const app = ready();
   app.B.openShop();
   const t = app.$('#shop-sheet').textContent.replace(/\s+/g, ' ');

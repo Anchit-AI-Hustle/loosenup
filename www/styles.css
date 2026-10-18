@@ -42,6 +42,9 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* Nothing may ever push the page sideways on a phone, even mid-animation. */
+html, body { max-width: 100%; overflow-x: hidden; }
+@supports (overflow: clip) { html, body { overflow-x: clip; } }
 body {
   margin: 0;
   min-height: 100vh;
@@ -842,6 +845,44 @@ body.locked #support-sheet [data-tool] { display: none; }
   .ms-sun, .ms-cloud, .ms-glow, .mood-sky::before { transition: none; }
 }
 
+/* ---------- Mood faces and the five-level scale ---------- */
+.moods .mood { --mc: #F2DC9B; transition: transform .25s cubic-bezier(.3, 1.5, .5, 1), opacity .2s ease, background .2s ease; }
+.moods .mood svg { width: 42px; height: 42px; overflow: visible; }
+.mood .face { fill: var(--mc); stroke: color-mix(in srgb, var(--mc) 70%, #223038); stroke-width: 1.2; }
+.mood .fx { fill: none; stroke: #2B3540; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.mood .fx.thin { stroke-width: 1.5; }
+.mood .fe { fill: #2B3540; }
+.mood .fm { fill: #2B3540; }
+.mood .tear { fill: #5FA8E8; }
+.mood .cheek { fill: #FF8E7A; opacity: .55; }
+.moods.has-pick .mood[aria-pressed="false"] { opacity: .55; }
+.moods .mood[aria-pressed="true"] { background: color-mix(in srgb, var(--mc) 30%, #fff); color: var(--ink); border-color: color-mix(in srgb, var(--mc) 80%, #223038); transform: translateY(-3px) scale(1.06); }
+.moods .mood[aria-pressed="true"] svg { animation: face-pop .45s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes face-pop { 0% { transform: scale(.8) rotate(-6deg); } 100% { transform: scale(1) rotate(0); } }
+.mood-scale { --lv: 0; position: relative; height: 24px; margin: 10px 6% 0; }
+.mood-track { position: absolute; left: 0; right: 0; top: 9px; height: 6px; border-radius: 99px; background: linear-gradient(90deg, #9DB4D6, #B8C7DA 25%, #F2DC9B 50%, #FFD27A 75%, #FFB547); opacity: .45; }
+.mood-fill { display: block; height: 100%; width: calc(var(--lv) * 100%); border-radius: inherit; background: linear-gradient(90deg, #9DB4D6, #F2DC9B 50%, #FFB547); transition: width .45s cubic-bezier(.2, .8, .2, 1); }
+.mood-scale[data-level="0"] .mood-fill { width: 0; }
+.mood-ticks { position: absolute; left: 0; right: 0; top: 7px; display: flex; justify-content: space-between; }
+.mood-ticks b { width: 10px; height: 10px; border-radius: 50%; background: #fff; border: 2px solid rgba(34, 48, 56, .18); }
+.mood-knob {
+  position: absolute; top: 2px; left: calc(var(--lv) * 100%); width: 20px; height: 20px; margin-left: -10px; border-radius: 50%;
+  background: #fff; border: 3px solid #FFB547; box-shadow: 0 4px 10px -3px rgba(242, 167, 43, .8);
+  transition: left .45s cubic-bezier(.3, 1.4, .5, 1), opacity .2s ease;
+}
+.mood-scale[data-level="0"] .mood-knob { opacity: 0; }
+.mood-scale-ends { display: flex; justify-content: space-between; margin: 4px 4% 0; font-size: 12.5px; font-weight: 700; color: var(--ink-2); }
+@media (prefers-reduced-motion: reduce) { .moods .mood, .mood-fill, .mood-knob { transition: none; } .moods .mood[aria-pressed="true"] svg { animation: none; } }
+
+/* ---------- Hero readability: the greeting always reads clearly over the sky ---------- */
+.sky-card .sky-sun { width: 84px; height: 84px; opacity: .92; }
+.sky-card .sky-copy { position: relative; z-index: 2; max-width: 64%; }
+.sky-card .sky-copy h1, .sky-card .sky-copy .eyebrow {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .7), 0 0 14px rgba(255, 255, 255, .9), 0 0 28px rgba(255, 255, 255, .7);
+}
+.sky-card .sky-copy h1 { overflow-wrap: anywhere; }
+@media (max-width: 360px) { .sky-card .sky-copy { max-width: 70%; } .sky-card .sky-sun { width: 68px; height: 68px; } }
+
 /* ---------- Dark mode (html[data-theme="dark"], set from Auto, Light or Dark) ---------- */
 html[data-theme="dark"] {
   --sky: #0E1626; --sky-2: #14213A; --dawn: #1E2232;
@@ -887,3 +928,4 @@ html[data-theme="dark"] .mood-sky { background: linear-gradient(180deg, #24365A 
 html[data-theme="dark"] .mood-sky::before { background: linear-gradient(180deg, #151D2C 0%, #222C3D 100%); }
 html[data-theme="dark"] .ms-cloud { background: #C9D3E0; box-shadow: 18px -12px 0 4px #C9D3E0, 44px -2px 0 0 #C9D3E0; }
 html[data-theme="dark"] .ms-value { background: rgba(23, 32, 51, .8); }
+html[data-theme="dark"] .sky-card .sky-copy h1, html[data-theme="dark"] .sky-card .sky-copy .eyebrow { text-shadow: 0 0 14px rgba(10, 16, 28, .9), 0 0 28px rgba(10, 16, 28, .7); }
