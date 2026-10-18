@@ -8,7 +8,7 @@ export const KEEP_EN = [
   'Breath Bloom', 'Petal Pairs', 'Sunbeam Catch', 'Calm Pairs', 'Breathing Ring', 'LoosenUp Plus', 'Sigh of relief', 'Slow breeze', 'Here and now', 'Soft release', 'Let it out',
   'Kind words', 'Desk reset', 'Steady square', 'Pause before replying', 'Cool down', 'Warm wishes', 'Quick breeze',
   'findahelpline.com', 'Vandrevala Foundation', 'iCall (TISS)', 'iCall', 'Stanley-Brown', 'WHO-5', 'RCI', 'NMC', 'MBBS', 'MD', 'CBT', 'OPD',
-  'USD', 'Android', 'iPhone', 'Safari', 'Chrome', 'Share', 'Add to Home Screen', 'Install app', 'loosenup-ios.anchit-tandon.com',
+  'USD', 'Android', 'iPhone', 'Safari', 'Chrome', 'Share', 'Add to Home Screen', 'Install app', 'loosenup.anchit-tandon.com',
   'English', 'Asha', 'Rao', 'Dr', 'Meera', 'Seed shop', 'x7', 'LUAB12CD', 'Amaha', 'Mpower', 'BMC', 'NCR', 'AI', 'WhatsApp', 'NGO', 'OPD', 'Anchit'
 ];
 

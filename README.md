@@ -8,8 +8,8 @@ The brand mark is a petal sun that opens on every in-breath, unfurls on the resu
 
 > A wellbeing companion, not medical care.
 
-- **Live app:** https://loosenup-ios.anchit-tandon.com (iPhone and web), https://loosenup-android.anchit-tandon.com (Android install page), also https://loosenup.vercel.app
-- **QR codes:** [loosenup-android-qr.png](loosenup-android-qr.png), [loosenup-ios-qr.png](loosenup-ios-qr.png)
+- **Live app:** https://loosenup.anchit-tandon.com (website and mobile website). **Every downloadable signed app:** https://loosenup.anchit-tandon.com/get. Also https://loosenup.vercel.app
+- **QR code:** [loosenup-get-qr.png](loosenup-get-qr.png) opens /get
 - **Android APK:** `downloads/loosenup-android.apk` (served at `/download/loosenup-android.apk`; also `dist/loosenup-android-debug-v1.3.1.apk`)
 - **Repository:** https://github.com/Anchit-AI-Hustle/loosenup (public)
 
@@ -17,11 +17,11 @@ The brand mark is a petal sun that opens on every in-breath, unfurls on the resu
 
 | Platform | Link | QR code |
 | --- | --- | --- |
-| Android | https://loosenup-android.anchit-tandon.com | `loosenup-android-qr.png` |
-| iPhone | https://loosenup-ios.anchit-tandon.com | `loosenup-ios-qr.png` |
+| Android | https://loosenup.anchit-tandon.com/get | `loosenup-android-qr.png` |
+| iPhone | https://loosenup.anchit-tandon.com | `loosenup-ios-qr.png` |
 
-- **Android (direct install):** open the Android link on the phone and tap **Download for Android**, open `LoosenUp.apk`, allow your browser to install apps if asked (Settings, then Install unknown apps), then tap Install. Direct file: https://loosenup-android.anchit-tandon.com/download/loosenup-android.apk. The full web app is at `/?app=1` on the same domain.
-- **iPhone (native app):** open https://loosenup-ios.anchit-tandon.com/install.html in Safari on a registered test iPhone and tap **Install the iPhone app** (a development-signed build served with an Apple install manifest; it renews every 7 days and updates itself in between). **Any iPhone:** open the iPhone link in Safari, tap **Share**, then **Add to Home Screen**. Safari shows this tip on the welcome screen. A native iPhone install needs TestFlight, which needs an Apple Developer account (see Native apps below).
+- **Android (direct install):** open the Android link on the phone and tap **Download for Android**, open `LoosenUp.apk`, allow your browser to install apps if asked (Settings, then Install unknown apps), then tap Install. Direct file: https://loosenup.anchit-tandon.com/download/loosenup-android.apk. The full web app is at https://loosenup.anchit-tandon.com.
+- **iPhone (native app):** open https://loosenup.anchit-tandon.com/install.html in Safari on a registered test iPhone and tap **Install the iPhone app** (a development-signed build served with an Apple install manifest; it renews every 7 days and updates itself in between). **Any iPhone:** open the iPhone link in Safari, tap **Share**, then **Add to Home Screen**. Safari shows this tip on the welcome screen. A native iPhone install needs TestFlight, which needs an Apple Developer account (see Native apps below).
 
 Both domains (and https://loosenup.vercel.app) serve the same Vercel project. `anchit-tandon.com` uses Vercel DNS, so HTTPS is automatic.
 
@@ -44,7 +44,7 @@ Both domains (and https://loosenup.vercel.app) serve the same Vercel project. `a
 | Learn | Nine one-minute lessons: long breath out, thoughts are guesses, action first on heavy days, sleep, self-kindness, boundaries at work, repair after a disagreement, supporting a friend, and when to talk to a professional. Each ends with a takeaway and a Try it button that opens the matching break or tool. |
 | Audio-guided breaks | Optional voice narration (intro, each cue, a kind close), soft chimes when the breath changes, and a background bed of rain, ocean or brown noise, all remembered for next time. |
 | Backup and restore | Save a JSON backup file and restore it on a new phone. The previous data is kept for undo. |
-| Live updates | The iPhone and Android apps check /updates/latest.json on loosenup-ios.anchit-tandon.com, download the checksum-verified bundle and apply it next launch (@capgo/capacitor-updater in self-hosted mode, no third-party servers). Run scripts/build-web-update.sh before each deploy. |
+| Live updates | The iPhone and Android apps check /updates/latest.json on loosenup.anchit-tandon.com, download the checksum-verified bundle and apply it next launch (@capgo/capacitor-updater in self-hosted mode, no third-party servers). Run scripts/build-web-update.sh before each deploy. |
 | First open | Welcome (first name), a three-step "How LoosenUp helps" screen (notice how you feel, take two calm minutes, see your Calm gain), then straight into the first break. No paywall, nothing to buy. |
 | Break loop | Calm before (1 to 10) and a context chip, an auto-picked technique with the reason, the guided session (breathing orb or step counter, optional device voice, pause, finish early), calm after, then the result with the rising sun. |
 | Techniques | Everyday: Sigh of relief, Slow breeze, Here and now, Soft release (opens after 3 breaks), Let it out (opens after 5 breaks). Work: Desk reset, Steady square. Relationships: Pause before replying, Cool down, Warm wishes. Low days: Kind words. Quick breeze is a 60s preset that is always free. |

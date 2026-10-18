@@ -664,7 +664,7 @@
     'tap Share, then Add to Home Screen. LoosenUp then opens like an app and works offline.': 'Share पर टैप करें, फिर Add to Home Screen। तब LoosenUp एक ऐप की तरह खुलता है और बिना इंटरनेट चलता है।',
     'LoosenUp is installed. Lovely to have you here.': 'LoosenUp इंस्टॉल हो गया है। आपका यहाँ होना बहुत अच्छा लगा।',
     'Add LoosenUp to your home screen for quick, offline breaks.': 'जल्दी, बिना इंटरनेट वाले ब्रेक के लिए LoosenUp को होम स्क्रीन पर जोड़ें।',
-    'On iPhone: open loosenup-ios.anchit-tandon.com in Safari, tap Share, then Add to Home Screen.': 'iPhone पर: Safari में loosenup-ios.anchit-tandon.com खोलें, Share पर टैप करें, फिर Add to Home Screen।',
+    'On iPhone: open loosenup.anchit-tandon.com in Safari, tap Share, then Add to Home Screen.': 'iPhone पर: Safari में loosenup.anchit-tandon.com खोलें, Share पर टैप करें, फिर Add to Home Screen।',
     'LoosenUp is on your home screen.': 'LoosenUp आपकी होम स्क्रीन पर है।',
     'SOS and support': 'SOS और सहायता',
     'App lock': 'ऐप लॉक', 'Keep your notes private with a PIN.': 'PIN से अपने नोट्स निजी रखें।', 'Set a PIN': 'PIN सेट करें',

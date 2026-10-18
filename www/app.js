@@ -2,11 +2,13 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.0.1';
+  var VERSION = '2.0.2';
   var KEY = 'loosenup.v1';
-  var PUBLIC_URL = 'https://loosenup-ios.anchit-tandon.com';
-  var ANDROID_URL = 'https://loosenup-android.anchit-tandon.com';
-  var IOS_URL = 'https://loosenup-ios.anchit-tandon.com';
+  // One home for the website, the mobile website and every app download.
+  var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
+  var GET_URL = PUBLIC_URL + '/get';
+  var ANDROID_URL = GET_URL;
+  var IOS_URL = GET_URL;
   var WEEKLY_FREE_SEEDS = 2;
   var DAILY_NUDGES = 2;
   var MILESTONES = [3, 7, 21, 30];
@@ -1302,7 +1304,7 @@
   function shareUrl() { return /^https?:$/.test(location.protocol) && !isNative() && location.hostname !== 'localhost' ? location.origin : PUBLIC_URL; }
   function shareSunbeam() {
     var url = shareUrl();
-    var text = 'Two calm minutes that help me feel lighter. Try LoosenUp. Android: ' + ANDROID_URL + '  iPhone: ' + IOS_URL;
+    var text = 'Two calm minutes that help me feel lighter. Try LoosenUp: ' + GET_URL;
     var rewardShare = function () {
       addBadge('sharer');
       state.referralDay = dayKey(now());
@@ -1344,7 +1346,7 @@
     $('install-btn').hidden = !installEvt;
     if (isStandalone()) setText('install-text', 'LoosenUp is installed. Lovely to have you here.');
     else if (installEvt) setText('install-text', 'Add LoosenUp to your home screen for quick, offline breaks.');
-    else if (ios) setText('install-text', 'On iPhone: open loosenup-ios.anchit-tandon.com in Safari, tap Share, then Add to Home Screen.');
+    else if (ios) setText('install-text', 'On iPhone: open loosenup.anchit-tandon.com in Safari, tap Share, then Add to Home Screen.');
     else setText('install-text', 'On Android: open the Chrome menu, then Install app. On iPhone: Safari Share, then Add to Home Screen.');
   }
 
@@ -1562,7 +1564,7 @@
 
   /* ---------- Organisations: join code, anonymous weekly pulse, support line ---------- */
   // The app only ever sends weekly averages, and only after the person turns sharing on.
-  var ORG_API = 'https://loosenup-ios.anchit-tandon.com/api/org';
+  var ORG_API = PUBLIC_URL + '/api/org';
   function orgCall(body) {
     if (typeof fetch !== 'function') return Promise.reject(new Error('offline'));
     return fetch(ORG_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
@@ -2796,7 +2798,7 @@
   // The native apps check our own domain for a newer web bundle, download it in the
   // background (checksum verified) and switch to it the next time LoosenUp opens.
   // Nothing is sent to third parties. If an update fails to start, the plugin rolls back.
-  var UPDATE_MANIFEST = 'https://loosenup-ios.anchit-tandon.com/updates/latest.json';
+  var UPDATE_MANIFEST = PUBLIC_URL + '/updates/latest.json';
   function newerVersion(a, b) {
     var x = String(a).split('.').map(Number), y = String(b).split('.').map(Number);
     for (var i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); }

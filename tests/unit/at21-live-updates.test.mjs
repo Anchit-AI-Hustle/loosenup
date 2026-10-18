@@ -23,7 +23,7 @@ test('AT21 the update bundle matches this release exactly', () => {
   assert.ok(read('www/app.js').includes(`var VERSION = '${pkg.version}'`), 'app.js VERSION = package.json');
   const zip = path.join(ROOT, 'downloads', 'updates', `loosenup-web-${m.version}.zip`);
   assert.ok(existsSync(zip), 'bundle zip exists');
-  assert.equal(m.url, `https://loosenup-ios.anchit-tandon.com/updates/loosenup-web-${m.version}.zip`);
+  assert.equal(m.url, `https://loosenup.anchit-tandon.com/updates/loosenup-web-${m.version}.zip`);
   assert.equal(createHash('sha256').update(readFileSync(zip)).digest('hex'), m.checksum, 'checksum matches');
   const zipped = execFileSync('unzip', ['-p', zip, 'app.js']).toString();
   const h = (x) => createHash('sha256').update(x).digest('hex');
@@ -40,7 +40,7 @@ test('AT21 the updater stays on our own server and the manifest is fetchable fro
   assert.ok(rule.headers.some((h) => h.key === 'Access-Control-Allow-Origin' && h.value === '*'));
   assert.match(v.buildCommand, /cp downloads\/updates\/\* site\/updates\//);
   const { B } = makeApp({ now: day(1) });
-  assert.equal(B.updateManifest, 'https://loosenup-ios.anchit-tandon.com/updates/latest.json');
+  assert.equal(B.updateManifest, 'https://loosenup.anchit-tandon.com/updates/latest.json');
 });
 
 test('AT21 in a browser (not the phone apps) live updates stay off', async () => {

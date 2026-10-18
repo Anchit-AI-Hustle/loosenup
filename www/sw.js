@@ -1,5 +1,5 @@
 /* LoosenUp service worker: precache the shell, cache-first for same-origin GET. */
-var CACHE = 'loosenup-v2.0.1';
+var CACHE = 'loosenup-v2.0.2';
 var SHELL = [
   '/',
   '/index.html',
@@ -38,11 +38,9 @@ self.addEventListener('fetch', function (event) {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    // The Android domain's root is the install page unless ?app is present.
-    var androidInstall = url.hostname.indexOf('loosenup-android.') === 0 && !url.searchParams.has('app');
-    var isAppShell = (url.pathname === '/' || url.pathname === '/index.html') && !androidInstall;
+    var isAppShell = url.pathname === '/' || url.pathname === '/index.html';
     if (!isAppShell) {
-      // Other pages (like /install.html) come from the network, with any cached copy as an offline fallback.
+      // Other pages (like /get) come from the network, with any cached copy as an offline fallback.
       event.respondWith(fetch(request).catch(function () {
         return caches.match(request).then(function (r) { return r || caches.match('/index.html'); });
       }));

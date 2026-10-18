@@ -14,7 +14,7 @@ SUM=$(shasum -a 256 "$ZIP" | cut -d' ' -f1)
 cat > downloads/updates/latest.json <<JSON
 {
   "version": "$V",
-  "url": "https://loosenup-ios.anchit-tandon.com/updates/loosenup-web-$V.zip",
+  "url": "https://loosenup.anchit-tandon.com/updates/loosenup-web-$V.zip",
   "checksum": "$SUM"
 }
 JSON

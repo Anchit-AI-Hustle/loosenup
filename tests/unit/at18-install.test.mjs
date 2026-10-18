@@ -41,9 +41,9 @@ test('AT27 the iPhone app installs from a link: install button, Apple manifest a
   const html = read('www/install.html');
   const link = html.match(/id="ipa-install"[^>]*href="([^"]+)"/) || html.match(/href="([^"]+)"[^>]*id="ipa-install"/);
   assert.ok(link, 'install button present');
-  assert.equal(link[1].replace(/&amp;/g, '&'), 'itms-services://?action=download-manifest&url=https://loosenup-ios.anchit-tandon.com/loosenup-ios.plist');
+  assert.equal(link[1].replace(/&amp;/g, '&'), 'itms-services://?action=download-manifest&url=https://loosenup.anchit-tandon.com/loosenup-ios.plist');
   const plist = read('www/loosenup-ios.plist');
-  assert.match(plist, /<string>software-package<\/string>\s*<key>url<\/key><string>https:\/\/loosenup-ios\.anchit-tandon\.com\/download\/loosenup-ios\.ipa<\/string>/);
+  assert.match(plist, /<string>software-package<\/string>\s*<key>url<\/key><string>https:\/\/loosenup\.anchit-tandon\.com\/download\/loosenup-ios\.ipa<\/string>/);
   assert.match(plist, /<key>bundle-identifier<\/key><string>com\.loosenup\.calm<\/string>/);
   assert.match(plist, /<key>title<\/key><string>LoosenUp<\/string>/);
   const ipa = readFileSync(path.join(ROOT, 'downloads', 'loosenup-ios.ipa'));

@@ -23,7 +23,7 @@ test('AT30 joining an organisation with its code, sharing off by default', async
   assert.equal(await app.B.joinOrg('WRONG1'), false);
   assert.match(app.$('#org-status').textContent, /not found/);
   assert.equal(await app.B.joinOrg('luab23cd'), true);
-  assert.equal(calls.at(-1).url, 'https://loosenup-ios.anchit-tandon.com/api/org');
+  assert.equal(calls.at(-1).url, 'https://loosenup.anchit-tandon.com/api/org');
   const o = app.B.state().org;
   assert.equal(o.name, 'Riverside College');
   assert.equal(o.share, false, 'nothing is shared until the person turns it on');
