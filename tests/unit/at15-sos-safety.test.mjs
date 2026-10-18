@@ -22,37 +22,60 @@ test('AT15 SOS button is reachable from every screen, even before onboarding', (
   }
 });
 
-test('AT15 SOS sheet offers helplines, a breather and trusted-person setup', () => {
+test('AT15 SOS sheet: three large ranked actions, one grounding line, everything else under More options', () => {
   const app = ready();
   app.click('#sos-btn');
-  const t = app.$('#support-sheet').textContent;
-  assert.match(t, /14416/);
-  assert.match(t, /112/);
-  assert.match(t, /findahelpline\.com/);
-  assert.ok(app.$('#support-sheet a[href="tel:14416"]'));
-  assert.ok(app.$('#support-sheet a[href="tel:112"]'));
-  assert.equal(app.visible('#trusted-setup'), true, 'no trusted person yet, so setup shows');
+  const sheet = app.$('#support-sheet');
+  const actions = [...sheet.children].filter((e) => e.classList.contains('sos-action'));
+  assert.deepEqual(actions.map((a) => a.id), ['sos-call', 'sos-alert', 'sos-112'], 'Tele-MANAS, then text, then 112');
+  assert.equal(actions[0].getAttribute('href'), 'tel:14416');
+  assert.match(actions[0].textContent, /Call Tele-MANAS 14416/);
+  assert.equal(actions[1].getAttribute('href'), 'https://wa.me/919999666555', 'no trusted person yet, so text Vandrevala on WhatsApp');
+  assert.match(actions[1].textContent, /Text Vandrevala on WhatsApp/);
+  assert.equal(actions[2].getAttribute('href'), 'tel:112');
+  assert.ok(actions[2].classList.contains('btn-sos'), '112 uses the SOS colour');
+  assert.equal(sheet.querySelectorAll('.sos-ground p').length, 1, 'one grounding line');
+  const more = app.$('#sos-more');
+  assert.equal(more.tagName, 'DETAILS');
+  assert.equal(more.open, false, 'More options starts folded');
+  for (const sel of ['[data-tool="safety"]', '[data-tool="support"]', 'a[href="https://findahelpline.com"]', '#sos-add-trusted', '#sos-org', '#sos-location']) {
+    assert.ok(more.querySelector(sel), sel + ' is folded under More options');
+  }
+  const loose = [...sheet.querySelectorAll('a, button')].filter((e) => !more.contains(e)).map((e) => e.id);
+  assert.deepEqual(loose, ['sos-breathe', 'sos-call', 'sos-alert', 'sos-112', 'support-close'], 'nothing else competes on the first view');
+  assert.equal(sheet.querySelector('input'), null, 'no trusted-person form inside the crisis sheet');
   app.click('#sos-breathe');
-  assert.equal(app.B.currentScreen(), 'session');
-  assert.equal(app.B.currentScreen(), 'session', 'the SOS breather starts straight away');
+  assert.equal(app.B.currentScreen(), 'session', 'Breathe now starts straight away');
+  assert.equal(app.visible('#support-sheet'), false);
 });
 
-test('AT15 trusted person is saved on device and the alert pre-fills a message', () => {
+test('AT15 the trusted person is set up in Me, then SOS texts them in one tap', () => {
   const app = ready();
   app.click('#sos-btn');
+  app.click('#sos-add-trusted');
+  assert.equal(app.B.currentScreen(), 'me');
+  assert.equal(app.visible('#support-sheet'), false);
+  assert.equal(app.$('#screen-me article').id, 'trusted-card', 'the trusted person is the first card in Me');
   app.setValue('#trusted-name', 'Meera');
   app.setValue('#trusted-phone', '+91 98765 43210');
   app.click('#trusted-save');
   const s = app.B.state();
   assert.deepEqual(JSON.parse(JSON.stringify(s.trusted)), { name: 'Meera', phone: '+919876543210' });
   assert.equal(app.visible('#trusted-setup'), false);
+  assert.match(app.$('#me-trusted').textContent, /Meera/);
+  app.click('#sos-btn');
   const a = app.$('#sos-alert');
-  assert.match(a.textContent, /Message Meera/);
+  assert.match(a.textContent, /Text Meera now/);
   const href = a.getAttribute('href');
   assert.match(href, /^sms:\+919876543210\?&body=/);
   const body = decodeURIComponent(href.split('body=')[1]);
   assert.match(body, /could really use you right now/);
   assert.match(body, /call me/i);
+  assert.equal(app.$('#sos-whatsapp').hidden, false, 'Vandrevala WhatsApp stays one fold away');
+  assert.equal(app.$('#sos-add-trusted').hidden, true);
+  app.click('#trusted-edit');
+  assert.equal(app.visible('#trusted-setup'), true);
+  assert.equal(app.$('#trusted-name').value, 'Meera');
 });
 
 test('AT15 SOS alert can include a location link only when asked', () => {

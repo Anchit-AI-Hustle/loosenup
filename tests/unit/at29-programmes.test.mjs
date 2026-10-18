@@ -13,9 +13,10 @@ const doDay = (app, before = 4, after = 7) => {
   app.click('#after-next');
 };
 
-test('AT29 three guided programmes are listed from the Today toolkit', () => {
+test('AT29 three guided programmes are listed from the Calm tab', () => {
   const app = ready();
-  app.click('#screen-today [data-tool="programs"]');
+  app.click('[data-tab="play"]');
+  app.click('#panel-breathe [data-tool="programs"]');
   assert.equal(app.B.currentScreen(), 'programs');
   const cards = [...app.document.querySelectorAll('#program-list [data-program]')];
   assert.deepEqual(cards.map((c) => c.getAttribute('data-program')), ['sleep', 'exam', 'burnout']);

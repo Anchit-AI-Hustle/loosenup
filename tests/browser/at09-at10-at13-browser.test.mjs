@@ -88,11 +88,16 @@ async function walkScreens(page, width, label) {
   await check('jar');
   await page.click('#good-close');
   await page.click('[data-tab="today"]');
-  for (const tool of ['support', 'safety', 'reframe', 'learn', 'wellbeing']) {
+  for (const tool of ['support', 'safety', 'reframe', 'learn']) {
     await page.click(`#screen-today .toolkit [data-tool="${tool}"]`);
     await check('tool-' + tool);
     await page.click(`#screen-${tool} [data-back]`);
   }
+  await page.click('[data-tab="progress"]');
+  await page.click('#screen-progress [data-tool="wellbeing"]');
+  await check('tool-wellbeing');
+  await page.click('#screen-wellbeing [data-back]');
+  await page.click('[data-tab="today"]');
   for (const seg of ['breathe', 'games', 'sounds']) {
     await page.click('[data-tab="play"]');
     await page.click(`[data-seg="${seg}"]`);
@@ -165,7 +170,8 @@ test('AT13 every visible button and tab is at least 48px tall and wide', async (
   await page.click('[data-tab="today"]');
   for (const seg of ['breathe', 'games', 'sounds']) { await page.click('[data-tab="play"]'); await page.click(`[data-seg="${seg}"]`); await measure('calm-' + seg); }
   await page.click('[data-tab="today"]');
-  for (const tool of ['support', 'safety', 'reframe', 'learn', 'wellbeing']) { await page.click(`#screen-today .toolkit [data-tool="${tool}"]`); await measure('tool-' + tool); await page.click(`#screen-${tool} [data-back]`); }
+  for (const tool of ['support', 'safety', 'reframe', 'learn']) { await page.click(`#screen-today .toolkit [data-tool="${tool}"]`); await measure('tool-' + tool); await page.click(`#screen-${tool} [data-back]`); }
+  await page.click('[data-tab="progress"]'); await page.click('#screen-progress [data-tool="wellbeing"]'); await measure('tool-wellbeing'); await page.click('#screen-wellbeing [data-back]'); await page.click('[data-tab="today"]');
   await page.click('#sos-btn'); await measure('sos'); await page.click('#support-close');
   await page.click('#jar-add'); await measure('jar'); await page.click('#good-close');
   await page.click('[data-space="relationships"]'); await measure('space-relationships'); await page.click('#checkin-back');

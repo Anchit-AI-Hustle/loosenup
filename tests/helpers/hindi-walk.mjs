@@ -56,6 +56,11 @@ export async function walkAll({ lang = 'hi' } = {}) {
   for (const g of ['pairs', 'catch', 'bloom']) { B.openGame(g); await grab(); B.finishCurrentGame(); await grab(); }
   for (let m = 1; m <= 5; m++) { B.go('today'); app.click(`[data-mood="${m}"]`); await grab(); }
   B.go('today'); app.click('#sos-btn'); await grab();
+  app.click('#support-close');
+  B.go('today'); app.click('#breathe-now'); await grab(); app.click('#session-audio'); await grab();
+  app.click('#session-finish'); await grab(); app.click('#after-next'); await grab(); app.click('#result-done');
+  B.setState({ trusted: { name: 'Meera', phone: '+919876543210' } }); B.go('me'); await grab(); app.click('#trusted-edit'); await grab();
+  B.go('today'); app.click('#sos-btn'); app.$('#sos-more').open = true; await grab();
   for (const sh of ['shop-sheet', 'checkout-sheet', 'jar-sheet', 'confirm-sheet', 'safety-sheet']) { const el = document.getElementById(sh); if (el) { el.hidden = false; B.translateDom(el); await grab(); el.hidden = true; } }
   return { app, seen };
 }

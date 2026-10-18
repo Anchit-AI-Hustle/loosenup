@@ -11,16 +11,25 @@ const withVoice = () => {
   return { app, spoken };
 };
 
-test('AT25 the pick screen offers voice, chimes and a background sound, remembered for next time', () => {
+test('AT25 the session offers voice, chimes and a background sound, remembered for next time', () => {
   const { app } = withVoice();
   app.click('[data-context="Hard to focus"]');
   app.click('#checkin-next');
+  app.click('#pick-begin');
+  app.click('#session-audio');
   assert.equal(app.$('[data-guide="chime"]').getAttribute('aria-pressed'), 'true', 'chimes on by default');
   app.click('[data-guide="voice"]');
   app.click('[data-bed="rain"]');
   const s = app.B.state();
   assert.equal(s.voice, true);
   assert.equal(s.bed, 'rain');
+  assert.equal(app.$('[data-bed="rain"]').getAttribute('aria-pressed'), 'true');
+  app.click('#session-finish');
+  app.click('#after-next');
+  app.click('#result-done');
+  app.click('#breathe-now');
+  app.click('#session-audio');
+  assert.equal(app.$('[data-guide="voice"]').getAttribute('aria-pressed'), 'true', 'remembered for the next session');
   assert.equal(app.$('[data-bed="rain"]').getAttribute('aria-pressed'), 'true');
 });
 

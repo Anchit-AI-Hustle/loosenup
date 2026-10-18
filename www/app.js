@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.1.0';
+  var VERSION = '2.2.0';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -14,6 +14,23 @@
   var MILESTONES = [3, 7, 21, 30];
   var GAME_XP = 5;
   var DAILY_GAME_REWARDS = 3;
+
+  // Every helpline number comes from www/helplines.js (one source, checked by a unit test).
+  var HL = window.LoosenUpHelplines || {
+    telemanas: { tel: 'tel:14416' }, vandrevala: { tel: 'tel:+919999666555', whatsapp: 'https://wa.me/919999666555' },
+    icall: { tel: 'tel:9152987821', email: 'icall@tiss.edu' }, emergency: { tel: 'tel:112' }, elsewhere: 'https://findahelpline.com',
+    safetyPlanText: 'Tele-MANAS 14416 (24x7, free)\nVandrevala Foundation +91 9999 666 555 (24x7, call or WhatsApp)\niCall 9152987821 (Mon to Sat, 8am to 9pm)\nEmergency 112'
+  };
+  function helplineHref(path) {
+    var p = path.split('.'), v = HL[p[0]];
+    if (p[1] === 'mailto') return v && v.email ? 'mailto:' + v.email : null;
+    if (p[1]) v = v && v[p[1]];
+    return typeof v === 'string' ? v : null;
+  }
+  function applyHelplines() {
+    var els = document.querySelectorAll('[data-hl]');
+    for (var i = 0; i < els.length; i++) { var h = helplineHref(els[i].getAttribute('data-hl')); if (h) els[i].setAttribute('href', h); }
+  }
 
   var TEST = window.__LOOSENUP_TEST__ || {};
   var nowOverride = TEST.now ? new Date(TEST.now) : null;
@@ -267,7 +284,7 @@
     var stats = {};
     state.sessions.forEach(function (s) {
       var ctxs = s.contexts || [s.context];
-      if (ctxs.indexOf(ctx) === -1 || !TECH[s.technique] || s.technique === 'quick') return;
+      if (ctxs.indexOf(ctx) === -1 || !TECH[s.technique] || s.technique === 'quick' || !isRated(s)) return;
       var st = stats[s.technique] || (stats[s.technique] = { n: 0, sum: 0 });
       st.n++; st.sum += s.gain;
     });
@@ -314,9 +331,13 @@
   function completeSession(input) {
     var d = now();
     var dk = dayKey(d);
-    var before = clampScore(input.before), after = clampScore(input.after);
-    var gain = after - before;
-    var r = { gain: gain, shownGain: Math.max(0, gain), before: before, after: after, rainDayUsed: false, freshRun: false,
+    // The before rating is optional (Breathe now asks for it in one tap at the end). Without it,
+    // the break still counts, but it has no Calm gain and stays out of every average.
+    var rated = input.before != null && input.before !== '';
+    var after = clampScore(input.after);
+    var before = rated ? clampScore(input.before) : null;
+    var gain = rated ? after - before : null;
+    var r = { gain: gain, shownGain: rated ? Math.max(0, gain) : 0, rated: rated, before: before, after: after, rainDayUsed: false, freshRun: false,
       milestone: null, newBadges: [], unlocked: [] };
 
     var ctxList = (input.contexts && input.contexts.length ? input.contexts : [input.context || 'Just a quick lift']).slice(0, 8);
@@ -344,7 +365,7 @@
     if (st.count >= 21) addBadge('streak21', r.newBadges);
     if (st.count >= 30) addBadge('streak30', r.newBadges);
     if (breaksDone() >= 10) addBadge('ten', r.newBadges);
-    if (gain >= 5) addBadge('bigLift', r.newBadges);
+    if (rated && gain >= 5) addBadge('bigLift', r.newBadges);
     var tried = {};
     state.sessions.forEach(function (x) { tried[x.technique] = true; });
     if (CHOOSABLE.every(function (id) { return tried[id]; })) addBadge('explorer', r.newBadges);
@@ -353,6 +374,12 @@
     return r;
   }
 
+  function isRated(s) { return typeof s.gain === 'number'; }
+  function ratedOnly(list) { return list.filter(isRated); }
+  function avgGain(list) {
+    var r = ratedOnly(list);
+    return r.length ? Math.round(10 * r.reduce(function (a, x) { return a + Math.max(0, x.gain); }, 0) / r.length) / 10 : 0;
+  }
   function clampScore(v) { v = Math.round(Number(v)); return isNaN(v) ? 5 : Math.max(1, Math.min(10, v)); }
 
   // Every calm break is free, always.
@@ -464,11 +491,12 @@
     closeSheets();
     toast('Welcome to LoosenUp Plus (demo). Every programme is open.');
   }
-  function openSupport(editing) {
-    renderSos(editing);
+  function openSupport() {
+    renderSos();
     renderOrg();
+    var more = $('sos-more');
+    if (more) more.open = false;
     openSheet('support-sheet');
-    if (editing && $('trusted-name').focus) $('trusted-name').focus();
   }
 
   /* ---------- Check-in and pick ---------- */
@@ -720,6 +748,7 @@
     setText('session-pause', 'Pause');
     $('session-pause').setAttribute('aria-pressed', 'false');
     renderVoiceButtons();
+    toggleAudioPanel(false);
     setText('session-finish', 'Finish early');
     renderHow(id);
     renderPatternStrip(t);
@@ -886,11 +915,52 @@
     $('letitout-text').value = '';
     run = null;
     var after = $('calm-after');
-    after.value = String(flow.before);
+    after.value = String(flow.before != null ? flow.before : 5);
     after.dispatchEvent(new Event('input'));
+    // Breathe now skips the check-in, so the before rating is one optional tap here.
+    var asks = flow.mode === 'now';
+    flow.beforeTap = null;
+    $('before-tap').hidden = !asks;
+    $('after-step').hidden = asks;
+    renderBeforeTap();
     go('after');
     if (sessionBed) { stopSound(false); sessionBed = false; }
     speak(OUTRO);
+  }
+
+  function renderBeforeTap() {
+    var b = document.querySelectorAll('[data-before]');
+    for (var i = 0; i < b.length; i++) b[i].setAttribute('aria-pressed', String(+b[i].getAttribute('data-before') === flow.beforeTap));
+    setText('after-next', flow.mode === 'now' && flow.beforeTap == null ? 'Finish' : 'See my Calm gain');
+  }
+  function tapBefore(v) {
+    flow.beforeTap = flow.beforeTap === v ? null : v;
+    renderBeforeTap();
+    haptic('light');
+  }
+
+  // One tap from Today or SOS: straight into a guided breath, no check-in and no Pick screen.
+  function breatheNow() {
+    closeSheets(true);
+    flow = { mode: 'now', before: null, beforeTap: null, context: 'Just a quick lift', contexts: ['Just a quick lift'], technique: 'quick', space: null };
+    return beginBreak('quick');
+  }
+
+  // Voice, chimes and background sound live in a small panel inside the session.
+  function toggleAudioPanel(open) {
+    var panel = $('session-audio-panel');
+    var show = open != null ? !!open : panel.hidden;
+    panel.hidden = !show;
+    $('session-audio').setAttribute('aria-expanded', String(show));
+    if (show) renderGuide();
+  }
+  function setBed(bed) {
+    state.bed = bed;
+    save();
+    renderGuide();
+    if (!run) return;
+    if (sessionBed) { stopSound(true); sessionBed = false; }
+    if (bed !== 'none' && !audio) sessionBed = playSound(bed, 0.35);
   }
 
   function togglePause() {
@@ -997,8 +1067,7 @@
   }
   function renderVoiceButtons() {
     var on = !!state.voice;
-    setText('session-voice', on ? 'Voice on' : 'Voice off');
-    $('session-voice').setAttribute('aria-pressed', String(on));
+    renderGuide();
     setText('voice-toggle', on ? 'Voice is on' : 'Voice is off');
     $('voice-toggle').setAttribute('aria-pressed', String(on));
   }
@@ -1013,7 +1082,7 @@
   /* ---------- Result ---------- */
 
   function finishAfter() {
-    var before = flow.before;
+    var before = flow.mode === 'now' ? flow.beforeTap : flow.before;
     var after = clampScore($('calm-after').value);
     var r = completeSession({ technique: flow.technique || 'quick', context: flow.context || 'Just a quick lift', contexts: flow.contexts, before: before, after: after });
     completeProgramDay(r);
@@ -1025,8 +1094,7 @@
   function weekStats() {
     var wk = weekKey(now());
     var ses = state.sessions.filter(function (x) { return weekKey(new Date(x.ts)) === wk; });
-    var avg = ses.length ? Math.round(10 * ses.reduce(function (a, x) { return a + Math.max(0, x.gain); }, 0) / ses.length) / 10 : 0;
-    return { n: ses.length, avg: avg };
+    return { n: ses.length, avg: avgGain(ses) };
   }
   function renderResult(r) {
     var name = state.name || 'friend';
@@ -1034,13 +1102,14 @@
     var g = $('result-gain');
     g.textContent = signed(r.shownGain);
     g.setAttribute('aria-label', signed(r.shownGain) + ' Calm gain');
-    setText('result-change', 'From ' + r.before + ' to ' + r.after + ' out of 10');
+    g.parentNode.hidden = !r.rated;
+    setText('result-change', r.rated ? 'From ' + r.before + ' to ' + r.after + ' out of 10' : 'Calm now: ' + r.after + ' out of 10');
     var ws = weekStats();
     setText('result-streak', plural(state.streak.count, 'day in a row', 'days in a row'));
     setText('result-week', plural(ws.n, 'break this week', 'breaks this week'));
     setText('result-avg', signed(ws.avg) + ' average Calm gain');
     var items = [];
-    if (r.gain <= 0) items.push('You showed up, and that counts.');
+    if (r.rated && r.gain <= 0) items.push('You showed up, and that counts.');
     if (r.rainDayUsed) items.push('A rest day kept your streak going.');
     if (r.freshRun) items.push('A fresh streak starts today.');
     if (r.milestone) items.push(plural(r.milestone, 'day in a row', 'days in a row') + '! Milestone reached.');
@@ -1050,7 +1119,7 @@
     ul.textContent = '';
     items.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
     ul.hidden = !items.length;
-    var note = r.gain <= 0 ? 'You made time for yourself today, and that is what matters most.' : NOTES[(breaksDone() - 1) % NOTES.length];
+    var note = r.rated && r.gain <= 0 ? 'You made time for yourself today, and that is what matters most.' : NOTES[(breaksDone() - 1) % NOTES.length];
     setText('result-note', note);
     // Restart the sunrise animation.
     var rise = document.querySelector('.rs-rise');
@@ -1094,12 +1163,6 @@
     renderProgramCard();
     renderSky();
     setText('today-title', greeting());
-    var ws = weekStats();
-    setText('today-streak', state.streak.count ? String(state.streak.count) : '0');
-    setText('today-week', String(ws.n));
-    setText('today-avg', signed(ws.avg));
-    var wk = weekKey(now());
-    setText('today-rain', state.rainDayWeek === wk ? 'This week\'s rest day is already used.' : 'One rest day a week keeps your streak going.');
     var ul = $('today-recent');
     ul.textContent = '';
     var recent = state.sessions.slice(-3).reverse();
@@ -1114,7 +1177,7 @@
       a.textContent = (TECH[s.technique] ? TECH[s.technique].name : 'Break') + ', ' + (s.contexts || [s.context]).join(' + ');
       var g = document.createElement('span');
       g.className = 'g';
-      g.textContent = signed(Math.max(0, s.gain)) + ' Calm gain';
+      g.textContent = isRated(s) ? signed(Math.max(0, s.gain)) + ' Calm gain' : '';
       li.appendChild(a); li.appendChild(g);
       ul.appendChild(li);
     });
@@ -1234,17 +1297,36 @@
     body = tr(body);
     return 'sms:' + t.phone + '?&body=' + encodeURIComponent(body);
   }
-  function renderSos(editing) {
+  // SOS: three ranked actions. The middle one texts the trusted person, or Vandrevala on WhatsApp
+  // when nobody is set up yet. Everything else waits under More options.
+  function renderSos() {
     var t = state.trusted;
     var a = $('sos-alert');
-    a.hidden = !t;
-    if (t) { a.textContent = 'Message ' + t.name + ' now'; a.setAttribute('href', sosHref(null)); }
+    if (t) {
+      setText('sos-text-title', 'Text ' + t.name + ' now');
+      setText('sos-text-sub', 'Opens your messages with a note ready to send');
+      a.setAttribute('href', sosHref(null));
+      a.removeAttribute('target');
+    } else {
+      setText('sos-text-title', 'Text Vandrevala on WhatsApp');
+      setText('sos-text-sub', 'Free, 24x7, if talking is hard');
+      a.setAttribute('href', HL.vandrevala.whatsapp);
+      a.setAttribute('target', '_blank');
+    }
+    $('sos-whatsapp').hidden = !t;
+    $('sos-add-trusted').hidden = !!t;
     $('sos-location').hidden = !t;
     setText('sos-location', 'Add my location to the message: ' + (state.sosLocation ? 'on' : 'off'));
     $('sos-location').setAttribute('aria-pressed', String(!!state.sosLocation));
+  }
+  // The trusted person is set up in Me, never inside the crisis sheet.
+  function renderTrusted(editing) {
+    var t = state.trusted;
     $('trusted-setup').hidden = !!t && !editing;
     $('trusted-edit').hidden = !t || !!editing;
     if (editing && t) { $('trusted-name').value = t.name; $('trusted-phone').value = t.phone; }
+    setText('me-trusted', t ? 'Trusted person: ' + t.name + ' (' + t.phone + '). SOS can message them in one tap.'
+      : 'Add a trusted person so SOS can message them in one tap.');
   }
   function saveTrusted() {
     var name = ($('trusted-name').value || '').trim().slice(0, 40);
@@ -1252,9 +1334,17 @@
     if (phone.replace(/\D/g, '').length < 6) { toast('Add their phone number, with the country code if you can.'); return; }
     state.trusted = { name: name || 'my trusted person', phone: phone };
     save();
-    renderSos(false);
-    if (current === 'me') renderMe();
+    renderTrusted(false);
+    renderSos();
     toast('Saved. SOS can now message ' + state.trusted.name + ' in one tap.');
+  }
+  function setUpTrusted() {
+    closeSheets(true);
+    go('me');
+    renderTrusted(!!state.trusted);
+    var f = $('trusted-name');
+    if (f.scrollIntoView) f.scrollIntoView({ block: 'center' });
+    if (f.focus) f.focus();
   }
   function sendSos(e) {
     if (!state.trusted) return;
@@ -1306,8 +1396,7 @@
     setText('prog-streak', String(state.streak.count || 0));
     setText('prog-best', 'Best: ' + plural(state.streak.best || 0, 'day', 'days'));
     setText('prog-total', String(all.length));
-    var avg = all.length ? Math.round(10 * all.reduce(function (a, x) { return a + Math.max(0, x.gain); }, 0) / all.length) / 10 : 0;
-    setText('prog-avg', signed(avg));
+    setText('prog-avg', signed(avgGain(all)));
     var wb = state.wellbeing && state.wellbeing.length ? state.wellbeing[state.wellbeing.length - 1] : null;
     setText('prog-wb', wb ? wb.score + ' / 100' : 'Not yet');
     setText('prog-wb-note', wb ? wellbeingNote(wb.score).split('. ')[0] + '.' : 'Take the two-week check below.');
@@ -1330,7 +1419,7 @@
     var weekSessions = [];
     state.sessions.forEach(function (s) {
       var d = byKey[s.day];
-      if (d) { d.n++; d.gain += Math.max(0, s.gain); weekSessions.push(s); }
+      if (d) { d.n++; d.gain += isRated(s) ? Math.max(0, s.gain) : 0; weekSessions.push(s); }
     });
     var max = Math.max(5, Math.max.apply(null, days.map(function (d) { return d.gain; })));
     svg('line', { x1: 10, y1: 150, x2: 330, y2: 150, stroke: 'rgba(34,48,56,.15)', 'stroke-width': 2 }, c);
@@ -1346,9 +1435,8 @@
       var t = svg('text', { x: x + 16, y: 172, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: '#4A5A63' }, c);
       t.textContent = d.label;
     });
-    var total = weekSessions.reduce(function (a, s) { return a + Math.max(0, s.gain); }, 0);
     setText('week-count', String(weekSessions.length));
-    setText('week-avg', weekSessions.length ? signed(Math.round(total / weekSessions.length * 10) / 10) : '+0');
+    setText('week-avg', signed(avgGain(weekSessions)));
     c.setAttribute('aria-label', 'Calm gain for the last 7 days: ' + days.map(function (d) { return d.label + ' ' + signed(d.gain); }).join(', '));
     // Mood line: 1 (very heavy) low on the chart to 5 (bright) high.
     var moodBy = {};
@@ -1374,7 +1462,7 @@
   }
 
   function insights() {
-    var all = state.sessions;
+    var all = ratedOnly(state.sessions);
     if (!all.length) return { tech: 'Take a break or two and we will show you what lifts you most.', time: '' };
     var by = function (keyFn) {
       var m = {};
@@ -1404,9 +1492,7 @@
     renderVoiceButtons();
     renderInstall();
     renderLockCard();
-    setText('me-trusted', state.trusted ? 'Trusted person: ' + state.trusted.name + ' (' + state.trusted.phone + '). SOS can message them in one tap.'
-      : 'Add a trusted person so SOS can message them in one tap.');
-    setText('open-trusted', state.trusted ? 'Change my trusted person' : 'Set up my trusted person');
+    renderTrusted(false);
   }
 
   var RENDER = { programs: renderPrograms, program: renderProgram, learn: renderLearn, support: renderSupport, safety: renderSafety, reframe: startReframe, sounds: function () {}, wellbeing: renderWellbeing,
@@ -1734,7 +1820,7 @@
     var count = {};
     ses.forEach(function (x) { (x.contexts || [x.context]).forEach(function (c) { if (c) count[c] = (count[c] || 0) + 1; }); });
     var top = Object.keys(count).sort(function (a, b) { return count[b] - count[a]; }).slice(0, 3);
-    return { week: week, mood: avg(moods.map(function (m) { return m.mood; })), calmGain: avg(ses.map(function (x) { return x.gain; })), breaks: ses.length, contexts: top };
+    return { week: week, mood: avg(moods.map(function (m) { return m.mood; })), calmGain: avg(ratedOnly(ses).map(function (x) { return x.gain; })), breaks: ses.length, contexts: top };
   }
   // Sends last week's pulse once, if sharing is on and there is something to share.
   function sendPulse() {
@@ -2427,7 +2513,7 @@
   }
 
   // Find support
-  var DEFAULT_PROS = 'Tele-MANAS 14416 (24x7, free)\nVandrevala Foundation +91 9999 666 555 (24x7, call or WhatsApp)\niCall 9152987821 (Mon to Sat, 8am to 9pm)\nEmergency 112';
+  var DEFAULT_PROS = HL.safetyPlanText;
   function renderSupport() {
     var links = document.querySelectorAll('[data-near]');
     for (var i = 0; i < links.length; i++) {
@@ -3092,7 +3178,9 @@
     var guide = el.getAttribute('data-guide');
     if (guide) { if (guide === 'voice') state.voice = !state.voice; else state.chime = !state.chime; save(); renderGuide(); renderVoiceButtons(); if (guide === 'chime' && state.chime) chime(); haptic('light'); return; }
     var bed = el.getAttribute('data-bed');
-    if (bed) { state.bed = bed; save(); renderGuide(); haptic('light'); return; }
+    if (bed) { setBed(bed); haptic('light'); return; }
+    var beforeV = el.getAttribute('data-before');
+    if (beforeV) { tapBefore(+beforeV); return; }
     var lessonId = el.getAttribute('data-lesson');
     if (lessonId) { openLesson(lessonId); return; }
     var themeChoice = el.getAttribute('data-theme-choice');
@@ -3172,27 +3260,24 @@
       case 'pick-quick': beginBreak('quick'); break;
       case 'session-finish': endSession(false); break;
       case 'session-pause': togglePause(); break;
-      case 'session-voice': case 'voice-toggle': toggleVoice(); break;
+      case 'session-audio': toggleAudioPanel(); break;
+      case 'voice-toggle': toggleVoice(); break;
       case 'step-next': if (run && TECH[run.id].steps && run.step < TECH[run.id].steps.length - 1) { run.ready = 0; showStep(run.step + 1); } break;
       case 'after-next': finishAfter(); break;
       case 'result-done': go('today'); break;
       case 'game-back': go(lastTab || 'play'); break;
       case 'game-again': if (game) openGame(game.id); break;
       case 'start-break': startCheckin('guided'); break;
-      case 'quick-breeze': startCheckin('quick'); break;
+      case 'breathe-now': breatheNow(); break;
       case 'open-shop': openShop(); break;
       case 'shop-close': case 'checkout-cancel': case 'support-close': case 'reset-cancel': closeSheets(); document.body.classList.remove('lock-sos'); break;
       case 'checkout-confirm': demoPurchase(pendingSku); break;
       case 'open-support': case 'sos-btn': case 'support-card-sos': openSupport(); break;
-      case 'open-trusted': openSupport(true); break;
-      case 'trusted-edit': renderSos(true); break;
+      case 'sos-add-trusted': setUpTrusted(); break;
+      case 'trusted-edit': renderTrusted(true); break;
       case 'trusted-save': saveTrusted(); break;
-      case 'sos-location': state.sosLocation = !state.sosLocation; save(); renderSos(false); break;
-      case 'sos-breathe':
-        closeSheets(true);
-        flow = { mode: 'quick', before: 5, context: 'Just a quick lift', technique: 'quick', space: null };
-        beginBreak('quick');
-        break;
+      case 'sos-location': state.sosLocation = !state.sosLocation; save(); renderSos(); break;
+      case 'sos-breathe': breatheNow(); break;
       case 'safety-yes': openSupport(); break;
       case 'safety-no':
         closeSheets();
@@ -3289,6 +3374,7 @@
     ['rf-before', 'rf-after'].forEach(function (id) { $(id).addEventListener('input', function () { setText(id + '-out', $(id).value); }); });
     $('sound-volume').addEventListener('input', function () { if (audio) audio.out.gain.setTargetAtTime(soundVolume(), audio.ctx.currentTime, 0.3); });
     $('backup-import').addEventListener('change', onImport);
+    applyHelplines();
     $('scrim').addEventListener('click', function () { closeSheets(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('scrim').hidden) closeSheets(); });
     addPetals($('orb-petals'), 0, 0, 1);
@@ -3370,6 +3456,8 @@
     isUnlocked: isUnlocked,
     completeSession: completeSession,
     beginBreak: beginBreak,
+    breatheNow: breatheNow,
+    helplines: HL,
     openShop: function (note) { openShop(note); },
     demoPurchase: demoPurchase,
     isCrisis: isCrisis,

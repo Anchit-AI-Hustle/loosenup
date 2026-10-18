@@ -87,12 +87,19 @@
 
       <article class="card">
         <h2 class="subtitle">Need support right now?</h2>
-        <a class="btn btn-sos" href="tel:14416">Call Tele-MANAS 14416 (India, free, 24x7)</a>
-        <a class="btn btn-soft" href="tel:112">Emergency: call 112</a>
+        <a class="btn btn-sos" href="tel:14416" data-hl="telemanas.tel">Call Tele-MANAS 14416 (India, free, 24x7)</a>
+        <a class="btn btn-soft" href="https://wa.me/919999666555" data-hl="vandrevala.whatsapp" target="_blank" rel="noopener">Text Vandrevala on WhatsApp (+91 9999 666 555)</a>
+        <a class="btn btn-soft" href="tel:112" data-hl="emergency.tel">Emergency: call 112</a>
       </article>
     </main>
 
     <p class="footnote">A wellbeing companion, not medical care.</p>
   </div>
+  <script src="/helplines.js"></script>
+  <script>
+    /* Helpline links come from the same source as the app (www/helplines.js). */
+    (function () { var H = window.LoosenUpHelplines; if (!H) return;
+      document.querySelectorAll('[data-hl]').forEach(function (a) { var p = a.getAttribute('data-hl').split('.'); var v = H[p[0]] && H[p[0]][p[1]]; if (v) a.setAttribute('href', v); }); })();
+  </script>
 </body>
 </html>

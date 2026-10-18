@@ -7,6 +7,7 @@ const root = new URL('..', import.meta.url).pathname;
 const read = (f) => readFileSync(root + f, 'utf8');
 const dom = new JSDOM(read('www/index.html').replace(/<script\b[^>]*src=[^>]*><\/script>/g, ''), { url: 'https://loosenup.test/', runScripts: 'outside-only', pretendToBeVisual: true });
 dom.window.eval(read('www/i18n.js'));
+dom.window.eval(read('www/helplines.js'));
 dom.window.eval(read('www/partners.js'));
 dom.window.eval(read('www/app.js'));
 const B = dom.window.LoosenUp;

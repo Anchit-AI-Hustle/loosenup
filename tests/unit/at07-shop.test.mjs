@@ -45,14 +45,11 @@ test('AT7 a demo purchase changes the plan only after a clearly labelled confirm
   assert.match(app.$('#me-plan').textContent, /LoosenUp Plus/);
 });
 
-test('AT7 Quick breeze starts from Today without any shop', () => {
+test('AT7 Breathe now starts a free guided breath from Today without any shop', () => {
   const app = makeApp({ now: day(1), rng: () => 0.99 });
   onboard(app);
   app.B.go('today');
-  app.click('#quick-breeze');
-  app.setValue('#calm-before', 5);
-  app.click('[data-context="Just a quick lift"]');
-  app.click('#checkin-next');
+  app.click('#breathe-now');
   assert.equal(app.B.currentScreen(), 'session');
   app.click('#session-finish');
   app.setValue('#calm-after', 7);

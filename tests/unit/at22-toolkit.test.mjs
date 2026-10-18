@@ -11,15 +11,16 @@ const ready = (opts = {}) => {
 
 test('AT22 Today shows the toolkit and each tool opens its screen with a way back', () => {
   const app = ready();
-  for (const t of ['support', 'safety', 'reframe', 'wellbeing']) {
+  const tiles = [...app.document.querySelectorAll('#screen-today .toolkit [data-tool]')].map((b) => b.getAttribute('data-tool'));
+  assert.deepEqual(tiles, ['support', 'safety', 'reframe', 'learn'], 'four toolkit tiles, no repeats of Calm or Progress');
+  for (const t of ['support', 'safety', 'reframe']) {
     app.click(`#screen-today [data-tool="${t}"]`);
     assert.equal(app.B.currentScreen(), t);
     app.click(`#screen-${t} [data-back]`);
     assert.equal(app.B.currentScreen(), 'today');
   }
-  app.click('#screen-today [data-tool="sounds"]');
-  assert.equal(app.B.currentScreen(), 'play', 'Calm sounds opens the Sounds tab of Calm');
-  assert.equal(app.visible('#panel-sounds'), true);
+  app.click('#screen-progress [data-tool="wellbeing"]');
+  assert.equal(app.B.currentScreen(), 'wellbeing', 'the wellbeing check lives on Progress');
 });
 
 test('AT22 Find support lists verified helplines with working links', () => {
