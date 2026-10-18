@@ -222,7 +222,7 @@ main:focus { outline: none; }
 .pick-name { font-family: var(--display); font-size: 30px; font-weight: 650; letter-spacing: -.3px; }
 .pick-desc { color: var(--ink-2); }
 .pick-reason { background: rgba(237, 247, 255, .9); border-radius: 18px; padding: 12px 14px; }
-.tag { display: inline-block; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .8px; color: var(--leaf-2); }
+.tag { display: inline-block; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .8px; color: var(--leaf-2); white-space: nowrap; }
 
 /* Session: the petal sun blooms with each breath */
 .session { align-items: stretch; }
@@ -440,7 +440,7 @@ button, a, .chip, .mood { touch-action: manipulation; }
 .hero .sky-hills { opacity: .95; }
 .today { gap: 18px; }
 .block { display: flex; flex-direction: column; gap: 10px; }
-.block-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.block-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 
 /* Spaces: a swipeable row */
 .spaces.carousel {
@@ -583,7 +583,7 @@ select.text-input { -webkit-appearance: none; appearance: none; }
   padding: 0 calc(14px + var(--safe-right)) calc(12px + env(safe-area-inset-bottom, 0px)) calc(14px + var(--safe-left));
 }
 .tabbar-inner {
-  pointer-events: auto; max-width: 460px; margin: 0 auto; padding: 6px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px;
+  pointer-events: auto; max-width: 460px; margin: 0 auto; padding: 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
   background: rgba(255, 255, 255, .86); border: 1px solid var(--glass-line); border-radius: 999px;
   -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: 0 16px 40px -18px rgba(34, 48, 56, .45);
 }
