@@ -6,6 +6,9 @@
   "outputDirectory": "site",
   "cleanUrls": false,
   "trailingSlash": false,
+  "git": {
+    "deploymentEnabled": false
+  },
   "headers": [
     {
       "source": "/updates/(.*)",
