@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { makeApp, onboard, day, read } from '../helpers/app.mjs';
+import { sign } from '../../api/_db.js';
 
 // A stand-in for /api/org inside the app's window.
-function withServer(app, org = { name: 'Riverside College', kind: 'college', joinCode: 'LUAB23CD', supportName: 'Student Wellness Centre', supportPhone: '+91 80 1234 5678' }) {
+function withServer(app, org = { name: 'Riverside College', kind: 'college', joinCode: 'LUAB23CD', supportName: 'Student Wellness Centre', supportPhone: '+91 80 1234 5678', memberId: 'srv'.repeat(12), memberPass: 'signed-pass' }) {
   const calls = [];
   app.window.fetch = async (url, opts) => {
     const body = JSON.parse(opts.body);
@@ -28,6 +29,8 @@ test('AT30 joining an organisation with its code, sharing off by default', async
   assert.equal(o.name, 'Riverside College');
   assert.equal(o.share, false, 'nothing is shared until the person turns it on');
   assert.ok(o.member.length >= 32, 'a random member id, not tied to the person');
+  assert.equal(o.member, 'srv'.repeat(12), 'the id the server signed');
+  assert.equal(o.pass, 'signed-pass');
   assert.equal(app.visible('#org-joined'), true);
   assert.match(app.$('#org-share').textContent, /off/);
 });
@@ -48,7 +51,7 @@ test('AT30 the weekly pulse is only averages and allowed feelings, sent once per
   const pulses = calls.filter((c) => c.body.action === 'pulse');
   assert.equal(pulses.length, 1);
   const p = pulses[0].body;
-  assert.deepEqual(Object.keys(p).sort(), ['action', 'breaks', 'calmGain', 'code', 'contexts', 'member', 'mood', 'week'].sort());
+  assert.deepEqual(Object.keys(p).sort(), ['action', 'breaks', 'calmGain', 'code', 'contexts', 'member', 'mood', 'pass', 'week'].sort());
   assert.equal(p.week, '2026-W41');
   assert.equal(p.mood, 3);
   assert.equal(p.calmGain, 3);
@@ -111,7 +114,7 @@ test('AT30 API: the dashboard hides any week with fewer than 5 people', async ()
 test('AT30 API: pulses keep only allowed fields and feelings; members are stored as a hash', async () => {
   const { call, queries } = await apiWith((q) => (q.includes('WHERE join_code') ? [{ id: 9, name: 'X', kind: 'company', join_code: 'LUAB23CD' }] : []));
   const member = 'm'.repeat(36);
-  const r = await call('POST', { body: { action: 'pulse', code: 'LUAB23CD', member, week: '2026-W42', mood: 9, calmGain: 3, breaks: 4, contexts: ['Busy mind', 'my secret diary', 'Feeling low', 'Low energy', 'Winding down'], note: 'hi' } });
+  const r = await call('POST', { body: { action: 'pulse', code: 'LUAB23CD', member, pass: sign('9:' + member), week: '2026-W42', mood: 9, calmGain: 3, breaks: 4, contexts: ['Busy mind', 'my secret diary', 'Feeling low', 'Low energy', 'Winding down'], note: 'hi' } });
   assert.equal(r.status, 200);
   const ins = queries.find((q) => q.query.includes('INSERT INTO lu_pulses'));
   assert.equal(ins.params[3], 5, 'mood is clamped to 1 to 5');
@@ -119,7 +122,7 @@ test('AT30 API: pulses keep only allowed fields and feelings; members are stored
   assert.notEqual(ins.params[2], member, 'member id is hashed');
   assert.equal(ins.params[7].length, 64, 'network stored only as a hash');
   assert.ok(!JSON.stringify(ins.params).includes('secret'));
-  const bad = await call('POST', { body: { action: 'pulse', code: 'LUAB23CD', member, week: 'last week' } });
+  const bad = await call('POST', { body: { action: 'pulse', code: 'LUAB23CD', member, pass: sign('9:' + member), week: 'last week' } });
   assert.equal(bad.status, 400);
 });
 

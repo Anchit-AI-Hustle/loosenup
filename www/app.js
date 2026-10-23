@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.2.0';
+  var VERSION = '2.3.0';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -178,10 +178,11 @@
   // Milestones, in plain words. Ids stay stable so saved progress keeps working.
   var BADGES = {
     first: ['First break', 'Your first calm break'],
-    streak3: ['3 days in a row', 'Three days of practice in a row'],
-    streak7: ['7 days in a row', 'A full week of practice'],
-    streak21: ['21 days in a row', 'Three weeks: a real habit'],
-    streak30: ['30 days in a row', 'A whole month of practice'],
+    streak3: ['3 calm days', 'Three days with a calm break'],
+    streak7: ['7 calm days', 'Seven days with a calm break'],
+    streak21: ['21 calm days', 'Twenty one days: a real habit'],
+    streak30: ['30 calm days', 'Thirty days with a calm break'],
+    goal: ['Weekly goal', 'Met your weekly goal'],
     ten: ['Ten breaks', 'Ten calm breaks taken'],
     bigLift: ['Big lift', 'A Calm gain of +5 or more'],
     explorer: ['Explorer', 'Tried every exercise'],
@@ -254,6 +255,7 @@
       games: { day: null, count: 0 }, gameBest: { pairs: null, catch: 0, bloom: 0 },
       moods: [], smallSteps: [], goodThings: [], trusted: null, sosLocation: false, jarXp: { day: null, count: 0 },
       careTeam: null, safetyPlan: null, wellbeing: [], toolXp: { day: null, count: 0 }, reframes: 0, theme: 'auto', lang: 'en', programs: {}, org: null, emotions: [], safetyAskedDay: null, lessonsDone: [], chime: true, bed: 'none',
+      lengthMin: 2, weeklyGoal: 3, hapticBreath: false, textSize: 'normal', journal: [], sleepAfter: 15,
       lock: { enabled: false, salt: '', hash: '', bio: false }
     };
   }
@@ -340,6 +342,7 @@
     var r = { gain: gain, shownGain: rated ? Math.max(0, gain) : 0, rated: rated, before: before, after: after, rainDayUsed: false, freshRun: false,
       milestone: null, newBadges: [], unlocked: [] };
 
+    var goalBefore = weekGoal();
     var ctxList = (input.contexts && input.contexts.length ? input.contexts : [input.context || 'Just a quick lift']).slice(0, 8);
     state.sessions.push({ ts: d.getTime(), day: dk, technique: input.technique, context: ctxList[0], contexts: ctxList,
       before: before, after: after, gain: gain });
@@ -359,11 +362,18 @@
       }
     }
 
+    var goalAfter = weekGoal();
+    r.goalMet = goalBefore.days < goalBefore.goal && goalAfter.days >= goalAfter.goal;
     addBadge('first', r.newBadges);
-    if (st.count >= 3) addBadge('streak3', r.newBadges);
-    if (st.count >= 7) addBadge('streak7', r.newBadges);
-    if (st.count >= 21) addBadge('streak21', r.newBadges);
-    if (st.count >= 30) addBadge('streak30', r.newBadges);
+    // Milestones count calm days in total, never days in a row, so a quiet day never resets anything.
+    var calmDays = {};
+    state.sessions.forEach(function (x) { calmDays[x.day] = true; });
+    var nDays = Object.keys(calmDays).length;
+    if (nDays >= 3) addBadge('streak3', r.newBadges);
+    if (nDays >= 7) addBadge('streak7', r.newBadges);
+    if (nDays >= 21) addBadge('streak21', r.newBadges);
+    if (nDays >= 30) addBadge('streak30', r.newBadges);
+    if (r.goalMet) addBadge('goal', r.newBadges);
     if (breaksDone() >= 10) addBadge('ten', r.newBadges);
     if (rated && gain >= 5) addBadge('bigLift', r.newBadges);
     var tried = {};
@@ -735,8 +745,10 @@
     var t = TECH[id];
     flow.technique = id;
     var cycle = t.pattern ? t.pattern.reduce(function (a, p) { return a + p[1]; }, 0) : 0;
-    run = { id: id, left: t.seconds, paused: false, phase: -1, phaseLeft: 0, step: 0, stepLeft: 0, crisisShown: false,
-      ready: t.kind === 'journal' ? 0 : 3, round: 0, rounds: cycle ? Math.max(1, Math.round(t.seconds / cycle)) : 0, sub: 0, subLeft: 0, dots: 0 };
+    // The chosen length (1 to 10 minutes) applies to every exercise except the 60 second Quick breeze.
+    var secs = id === 'quick' ? t.seconds : (state.lengthMin || 2) * 60;
+    run = { id: id, left: secs, scale: secs / t.seconds, paused: false, phase: -1, phaseLeft: 0, step: 0, stepLeft: 0, crisisShown: false,
+      ready: t.kind === 'journal' ? 0 : 3, round: 0, rounds: cycle ? Math.max(1, Math.round(secs / cycle)) : 0, sub: 0, subLeft: 0, dots: 0 };
     var scr = $('screen-session');
     scr.classList.toggle('steps', t.kind === 'steps');
     scr.classList.toggle('journal', t.kind === 'journal');
@@ -792,7 +804,9 @@
     setText('orb-count', String(ph[1]));
     setText('round-count', 'Round ' + Math.min(run.round, run.rounds) + ' of ' + run.rounds);
     markPhase(run.phase);
-    $('screen-session').setAttribute('data-phase', ph[2] >= 1 ? (run.phase > 0 && t.pattern[run.phase - 1][2] >= 1 ? 'hold' : 'in') : 'out');
+    var kind = ph[2] >= 1 ? (run.phase > 0 && t.pattern[run.phase - 1][2] >= 1 ? 'hold' : 'in') : 'out';
+    $('screen-session').setAttribute('data-phase', kind);
+    try { window.dispatchEvent(new CustomEvent('lu:phase', { detail: { kind: kind === 'out' && run.phase > 0 && t.pattern[run.phase - 1][2] < 1 ? 'rest' : kind, secs: ph[1] } })); } catch (e) { /* older browsers */ }
     ringTo($('phase-ring'), ph[1]);
     speak(ph[0], true);
     chime();
@@ -813,7 +827,15 @@
     box.textContent = '';
     t.steps.forEach(function () { box.appendChild(document.createElement('i')); });
   }
-  function stepGuide(i) { return (STEP_GUIDE[run.id] || [])[i] || { icon: '', secs: Math.floor(TECH[run.id].seconds / TECH[run.id].steps.length) }; }
+  function stepGuide(i) {
+    var g = (STEP_GUIDE[run.id] || [])[i] || { icon: '', secs: Math.floor(TECH[run.id].seconds / TECH[run.id].steps.length) };
+    var k = run.scale || 1;
+    if (k === 1) return g;
+    var out = {};
+    for (var key in g) out[key] = g[key];
+    out.secs = Math.max(5, Math.round(g.secs * k));
+    return out;
+  }
   function showStep(i, preview) {
     var t = TECH[run.id];
     var g = stepGuide(i);
@@ -1050,8 +1072,9 @@
       window.speechSynthesis.speak(u);
     } else next();
   }
-  function speak(text, queue) {
-    if (!state.voice) return;
+  // force: always speak (sleep sessions are voice-led even when the voice guide is off).
+  function speak(text, queue, force) {
+    if (!state.voice && !force) return;
     if (voiceClips) {
       // Recorded clips and device voice share one queue so lines never overlap.
       if (!queue) stopVoice();
@@ -1091,6 +1114,19 @@
     haptic('success');
   }
 
+  // The weekly goal: days with at least one break this week (Monday to Sunday), against a goal people choose.
+  function weekGoal() {
+    var d = now();
+    var wd = (d.getDay() + 6) % 7;
+    var mon = new Date(d.getFullYear(), d.getMonth(), d.getDate() - wd, 12);
+    var days = {};
+    state.sessions.forEach(function (s) { days[s.day] = true; });
+    var week = [];
+    for (var i = 0; i < 7; i++) week.push(!!days[dayKey(new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i, 12))]);
+    var n = week.filter(Boolean).length;
+    return { days: n, goal: state.weeklyGoal || 3, week: week };
+  }
+  function goalText(g) { g = g || weekGoal(); return g.days + ' of ' + g.goal + ' days this week'; }
   function weekStats() {
     var wk = weekKey(now());
     var ses = state.sessions.filter(function (x) { return weekKey(new Date(x.ts)) === wk; });
@@ -1105,14 +1141,13 @@
     g.parentNode.hidden = !r.rated;
     setText('result-change', r.rated ? 'From ' + r.before + ' to ' + r.after + ' out of 10' : 'Calm now: ' + r.after + ' out of 10');
     var ws = weekStats();
-    setText('result-streak', plural(state.streak.count, 'day in a row', 'days in a row'));
+    var gw = weekGoal();
+    setText('result-streak', gw.days + ' of ' + gw.goal + ' days');
     setText('result-week', plural(ws.n, 'break this week', 'breaks this week'));
     setText('result-avg', signed(ws.avg) + ' average Calm gain');
     var items = [];
     if (r.rated && r.gain <= 0) items.push('You showed up, and that counts.');
-    if (r.rainDayUsed) items.push('A rest day kept your streak going.');
-    if (r.freshRun) items.push('A fresh streak starts today.');
-    if (r.milestone) items.push(plural(r.milestone, 'day in a row', 'days in a row') + '! Milestone reached.');
+    if (r.goalMet) items.push('Weekly goal met. Lovely.');
     if (r.programNote) items.push(r.programNote);
     r.newBadges.forEach(function (b) { if (b !== 'first' || breaksDone() === 1) items.push('Milestone: ' + BADGES[b][0]); });
     var ul = $('result-rewards');
@@ -1155,7 +1190,7 @@
     card.style.setProperty('--sy', (34 - Math.sin(t * Math.PI) * 16).toFixed(1) + '%');
     setText('today-date', d.toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' }));
     setText('today-sky-streak', state.sessions.length
-      ? plural(state.streak.count, 'day in a row', 'days in a row') + ' · ' + plural(state.sessions.length, 'break', 'breaks')
+      ? goalText() + ' · ' + plural(state.sessions.length, 'break', 'breaks')
       : 'Your first break is two minutes away');
   }
 
@@ -1185,6 +1220,7 @@
     renderMood();
     renderEmotions();
     renderSupportCard();
+    renderForYou();
     renderSteps();
     renderJar();
     $('check-due').hidden = !checkDue();
@@ -1379,9 +1415,13 @@
   function renderMilestones() {
     var ul = $('badges');
     ul.textContent = '';
+    // Earned milestones, plus the next one to look forward to.
+    var nextShown = false;
     Object.keys(BADGES).forEach(function (id) {
-      var li = document.createElement('li');
       var has = state.badges.indexOf(id) !== -1;
+      if (!has && nextShown) return;
+      if (!has) nextShown = true;
+      var li = document.createElement('li');
       if (!has) li.className = 'dim';
       var st = document.createElement('strong');
       st.textContent = BADGES[id][0];
@@ -1393,8 +1433,9 @@
   }
   function renderProgress() {
     var all = state.sessions;
-    setText('prog-streak', String(state.streak.count || 0));
-    setText('prog-best', 'Best: ' + plural(state.streak.best || 0, 'day', 'days'));
+    var gp = weekGoal();
+    setText('prog-streak', gp.days + ' / ' + gp.goal);
+    setText('prog-best', gp.days >= gp.goal ? 'Goal met this week' : 'Days this week');
     setText('prog-total', String(all.length));
     setText('prog-avg', signed(avgGain(all)));
     var wb = state.wellbeing && state.wellbeing.length ? state.wellbeing[state.wellbeing.length - 1] : null;
@@ -1486,9 +1527,11 @@
     setText('me-plan', state.plan === 'fullbloom' ? 'LoosenUp Plus (demo): every programme, every day.' : 'Free: every calm break, tool and SOS, always.');
     if (state.goldenHour) $('golden-time').value = state.goldenHour;
     $('golden-clear').hidden = !state.goldenHour;
+    // The phone apps schedule a local notification; the website sends a Web Push notification where the browser allows it.
+    var webPush = !isNative() && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
     setText('golden-help', state.goldenHour
-      ? 'Daily reminder set for ' + state.goldenHour + '. ' + (isNative() ? 'One gentle reminder arrives each day.' : 'A gentle note appears in the app from that time.')
-      : (isNative() ? 'Pick a daily time for one gentle reminder.' : 'Pick a daily time and a gentle note will appear in the app. The phone apps can send one daily reminder.'));
+      ? 'Daily reminder set for ' + state.goldenHour + '. ' + (isNative() || webPush ? 'One gentle reminder arrives each day.' : 'A gentle note appears in the app from that time.')
+      : (isNative() || webPush ? 'Pick a daily time for one gentle reminder.' : 'Pick a daily time and a gentle note will appear in the app. On iPhone, add LoosenUp to your home screen to get a daily notification.'));
     renderVoiceButtons();
     renderInstall();
     renderLockCard();
@@ -1830,7 +1873,8 @@
     if (o.sentWeek === week) return Promise.resolve(false);
     var p = weekPulse(week);
     if (!p) return Promise.resolve(false);
-    p.action = 'pulse'; p.code = o.code; p.member = o.member;
+    if (!o.pass) return Promise.resolve(false); // joined before 2.3: the person joins again in Me
+    p.action = 'pulse'; p.code = o.code; p.member = o.member; p.pass = o.pass;
     return orgCall(p).then(function () { state.org.sentWeek = week; save(); return true; }).catch(function () { return false; });
   }
   function joinOrg(code) {
@@ -1838,7 +1882,8 @@
     if (code.length < 6) { setText('org-status', 'Add the join code from your organisation.'); return Promise.resolve(false); }
     setText('org-status', 'Checking the code...');
     return orgCall({ action: 'join', code: code }).then(function (j) {
-      state.org = { code: j.joinCode, name: j.name, kind: j.kind, supportName: j.supportName || null, supportPhone: j.supportPhone || null, share: false, member: randomId(), sentWeek: null };
+      state.org = { code: j.joinCode, name: j.name, kind: j.kind, supportName: j.supportName || null, supportPhone: j.supportPhone || null, share: false,
+        member: j.memberId || randomId(), pass: j.memberPass || null, sentWeek: null };
       save();
       renderOrg();
       setText('org-status', 'You joined ' + j.name + '.');
@@ -1885,30 +1930,83 @@
     if (f === 'hindi') return (p.languages || []).indexOf('Hindi') !== -1;
     return true;
   }
+  function partnerCard(p) {
+    var c = mk('article', 'partner');
+    var head = mk('div', 'partner-head');
+    var nm = mk('strong', null, p.name); nm.setAttribute('data-no-tr', '');
+    head.appendChild(nm);
+    head.appendChild(mk('span', 'partner-type', p.type));
+    c.appendChild(head);
+    c.appendChild(mk('p', 'partner-desc', p.desc));
+    var meta = mk('p', 'partner-meta');
+    meta.appendChild(mk('span', 'partner-price', p.price));
+    if (p.modes && p.modes.length) meta.appendChild(mk('span', null, p.modes.map(function (m) { return m.charAt(0).toUpperCase() + m.slice(1); }).join(' · ')));
+    c.appendChild(meta);
+    if (p.languages && p.languages.length) c.appendChild(mk('p', 'fine', p.languages.join(', ')));
+    if (p.rating) { var r = mk('p', 'fine partner-rating', p.rating); r.setAttribute('data-no-tr', ''); c.appendChild(r); }
+    var a = mk('a', 'btn btn-soft', /^Free/.test(p.price) && /helpline/i.test(p.type) ? 'Open their site' : 'Book on their site');
+    a.href = p.url; a.target = '_blank'; a.rel = 'noopener';
+    c.appendChild(a);
+    return c;
+  }
+
+  // Talk to someone: three quick taps (when, how, language and budget), then the three best fits.
+  var matchPick = { when: 'now', how: 'phone', lang: 'any', budget: 'free' };
+  function lowestPrice(p) {
+    if (/^Free/.test(p.price)) return 0;
+    var m = /₹\s?([\d,]+)/.exec(p.price || '');
+    return m ? +m[1].replace(/,/g, '') : null;
+  }
+  function matchServices(pick) {
+    pick = pick || matchPick;
+    var all = partners().online.filter(function (p) { return !/^AI/.test(p.type); });
+    var fits = function (p, strictHow) {
+      var price = lowestPrice(p);
+      if (pick.budget === 'free' && price !== 0) return false;
+      if (pick.budget === 'low' && !(price !== null && price <= 1000)) return false;
+      if (pick.lang === 'hindi' && (p.languages || []).indexOf('Hindi') === -1) return false;
+      if (strictHow && (p.modes || []).indexOf(pick.how) === -1) return false;
+      return true;
+    };
+    var score = function (p) {
+      var sc = 0, open247 = /24x7/.test(p.desc || '');
+      if (pick.when === 'now') sc += open247 ? 3 : /helpline/i.test(p.type) ? 1 : 0;
+      else sc += /helpline/i.test(p.type) ? 0 : 2;
+      if ((p.modes || []).indexOf(pick.how) !== -1) sc += 2;
+      if ((p.languages || []).indexOf('Hindi') !== -1) sc += 0.5;
+      return sc;
+    };
+    var strict = all.filter(function (p) { return fits(p, true); });
+    var loose = all.filter(function (p) { return strict.indexOf(p) === -1 && fits(p, false); });
+    var byScore = function (a, b) { return score(b) - score(a); };
+    var top = strict.sort(byScore).slice(0, 3);
+    var relaxed = top.length < 3;
+    if (relaxed) top = top.concat(loose.sort(byScore).slice(0, 3 - top.length));
+    return { list: top, relaxed: relaxed && top.length > strict.length };
+  }
+  function renderMatch() {
+    var box = $('match-list');
+    if (!box) return;
+    var chips = document.querySelectorAll('[data-match]');
+    for (var i = 0; i < chips.length; i++) { var kv = chips[i].getAttribute('data-match').split(':'); chips[i].setAttribute('aria-pressed', String(matchPick[kv[0]] === kv[1])); }
+    var m = matchServices();
+    box.textContent = '';
+    m.list.forEach(function (p) { box.appendChild(partnerCard(p)); });
+    setText('match-note', !m.list.length ? 'Nothing fits all of that yet. Try Any price, or call Tele-MANAS on 14416, free and open 24x7.'
+      : m.relaxed ? 'Some of these talk in a different way than you picked.' : (matchPick.when === 'now' ? 'Open now, or open 24x7.' : 'Bookable this week.'));
+  }
+  function openFold(id) {
+    var d = $(id);
+    if (!d) return;
+    d.open = true;
+    if (d.scrollIntoView) d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
   function renderPartners() {
     var box = $('partner-list');
     if (!box) return;
     box.textContent = '';
     var list = partners().online.filter(function (p) { return partnerMatches(p, partnerFilter); });
-    list.forEach(function (p) {
-      var c = mk('article', 'partner');
-      var head = mk('div', 'partner-head');
-      var nm = mk('strong', null, p.name); nm.setAttribute('data-no-tr', '');
-      head.appendChild(nm);
-      head.appendChild(mk('span', 'partner-type', p.type));
-      c.appendChild(head);
-      c.appendChild(mk('p', 'partner-desc', p.desc));
-      var meta = mk('p', 'partner-meta');
-      meta.appendChild(mk('span', 'partner-price', p.price));
-      if (p.modes && p.modes.length) meta.appendChild(mk('span', null, p.modes.map(function (m) { return m.charAt(0).toUpperCase() + m.slice(1); }).join(' · ')));
-      c.appendChild(meta);
-      if (p.languages && p.languages.length) c.appendChild(mk('p', 'fine', p.languages.join(', ')));
-      if (p.rating) { var r = mk('p', 'fine partner-rating', p.rating); r.setAttribute('data-no-tr', ''); c.appendChild(r); }
-      var a = mk('a', 'btn btn-soft', /^Free/.test(p.price) && /helpline/i.test(p.type) ? 'Open their site' : 'Book on their site');
-      a.href = p.url; a.target = '_blank'; a.rel = 'noopener';
-      c.appendChild(a);
-      box.appendChild(c);
-    });
+    list.forEach(function (p) { box.appendChild(partnerCard(p)); });
     if (!list.length) box.appendChild(mk('p', 'muted', 'Nothing matches that filter yet.'));
     setText('partner-note', 'LoosenUp is not paid by these services. Details were checked on their official sites on ' + partners().checked + '; confirm prices before you book.');
     var chips = document.querySelectorAll('[data-pfilter]');
@@ -2034,15 +2132,45 @@
       b.appendChild(f); b.appendChild(n); b.appendChild(d);
       box.appendChild(b);
     });
-    // Suggest one exercise for the strongest difficult emotion.
-    var best = null;
+    renderForYou();
+  }
+  // The strongest difficult emotion picked today, if any.
+  function strongestHard() {
+    var t = todayEmotions(), best = null;
     EMOTIONS.forEach(function (em) { var lv = t.e[em[0]] || 0; if (em[3] && lv && (!best || lv > best.lv)) best = { em: em, lv: lv }; });
-    $('emo-suggest').hidden = !best;
-    if (best) {
-      setText('emo-suggest-text', best.em[4]);
-      setText('emo-suggest-btn', 'Try ' + TECH[best.em[3]].name);
-      $('emo-suggest-btn').setAttribute('data-practice', best.em[3]);
-    }
+    return best;
+  }
+  // One exercise picked for right now: today's strongest hard feeling, then mood, then the time of day.
+  var TIME_PICK = {
+    Mornings: ['breeze', 'Slow, even breathing to start the day steady.'],
+    Afternoons: ['desk', 'Let the morning go from your shoulders without leaving your chair.'],
+    Evenings: ['cooldown', 'Long breaths out help the day settle.'],
+    'Quiet nights': ['sigh', 'Long breaths out tell your body it is time to rest.']
+  };
+  function forYou() {
+    var hard = strongestHard();
+    if (hard) return { id: hard.em[3], why: hard.em[4] };
+    var m = todayMood();
+    if (m && m <= 2) return { id: 'kind', why: 'A gentle self-compassion break for a heavy day.' };
+    var p = TIME_PICK[bucketOf(now().getTime())];
+    return { id: p[0], why: p[1] };
+  }
+  function renderForYou() {
+    if (!$('for-you')) return;
+    var f = forYou();
+    setText('for-you-name', TECH[f.id].name + ', ' + Math.round(((f.id === 'quick' ? TECH.quick.seconds : (state.lengthMin || 2) * 60)) / 60) + ' min');
+    setText('for-you-why', f.why);
+    setText('for-you-btn', 'Start');
+    $('for-you-btn').setAttribute('data-now', f.id);
+  }
+  // One tap from a card: straight into the guided exercise, with the optional before rating at the end.
+  function startNow(id) {
+    if (!TECH[id]) return 'unknown';
+    if (id === 'quick') return breatheNow();
+    if (TECH[id].kind === 'journal') { startPractice(id); return 'checkin'; }
+    closeSheets(true);
+    flow = { mode: 'now', before: null, beforeTap: null, context: 'Just a quick lift', contexts: ['Just a quick lift'], technique: id, space: null };
+    return beginBreak(id);
   }
   // Last 7 days: how often and how strongly each emotion showed up, with the week before for a trend.
   function emotionStats() {
@@ -2521,6 +2649,7 @@
       links[i].setAttribute('href', isIos() ? 'https://maps.apple.com/?q=' + encodeURIComponent(q) : 'https://www.google.com/maps/search/' + encodeURIComponent(q).replace(/%20/g, '+'));
     }
     renderCare(false);
+    renderMatch();
     renderPartners();
     renderInPerson();
   }
@@ -2705,6 +2834,18 @@
     var btns = document.querySelectorAll('[data-sound]');
     for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', 'false');
     setText('sound-status', 'Stopped. Tap a sound to begin again.');
+  }
+  function fadeSound(sec) {
+    if (!audio) return;
+    var a = audio;
+    audio = null;
+    clearTimeout(a.timer);
+    try {
+      a.out.gain.cancelScheduledValues(a.ctx.currentTime);
+      a.out.gain.setValueAtTime(a.out.gain.value, a.ctx.currentTime);
+      a.out.gain.linearRampToValueAtTime(0, a.ctx.currentTime + sec);
+      setTimeout(function () { try { a.ctx.close(); } catch (e) { /* already closed */ } }, sec * 1000 + 200);
+    } catch (e) { /* audio already gone */ }
   }
   var currentTimer = 0;
   function setSleepTimer(min) {
@@ -3195,6 +3336,10 @@
     if (dot !== null) { tapDot(+dot); return; }
     var seg = el.getAttribute('data-seg');
     if (seg) { setSeg(seg); haptic('light'); return; }
+    var nowId = el.getAttribute('data-now');
+    if (nowId) { startNow(nowId); haptic('light'); return; }
+    var match = el.getAttribute('data-match');
+    if (match) { var mp = match.split(':'); matchPick[mp[0]] = mp[1]; renderMatch(); haptic('light'); return; }
     var practice = el.getAttribute('data-practice');
     if (practice) { startPractice(practice); haptic('light'); return; }
     var langChoice = el.getAttribute('data-lang-choice');
@@ -3279,6 +3424,9 @@
       case 'sos-location': state.sosLocation = !state.sosLocation; save(); renderSos(); break;
       case 'sos-breathe': breatheNow(); break;
       case 'safety-yes': openSupport(); break;
+      case 'safety-moment': breatheNow(); toast('Help is one tap away in SOS, any time.'); break;
+      case 'match-prepare': openFold('prepare-fold'); break;
+      case 'match-all': openFold('book-fold'); break;
       case 'safety-no':
         closeSheets();
         setText('mood-done', MOOD_NOTES[1]);
@@ -3405,6 +3553,28 @@
     loadVoiceClips();
   }
 
+  /* ---------- Hooks for www/more.js (sleep, journal, goal, packs, games) ---------- */
+  var AFTER_RENDER = {};
+  var core = {
+    state: function () { return state; },
+    save: save, go: go, current: function () { return current; }, tr: tr, setText: setText, toast: toast,
+    register: function (name, fn) { RENDER[name] = fn; },
+    onRender: function (name, fn) {
+      var base = RENDER[name];
+      (AFTER_RENDER[name] = AFTER_RENDER[name] || []).push(fn);
+      if (base && !base.wrapped) {
+        RENDER[name] = function () { base(); (AFTER_RENDER[name] || []).forEach(function (f) { f(); }); };
+        RENDER[name].wrapped = true;
+      }
+    },
+    speak: speak, stopVoice: stopVoice,
+    playSound: function (kind, vol) { var ok = playSound(kind, vol); if (audio) clearTimeout(audio.timer); return ok; },
+    stopSound: stopSound, fadeSound: fadeSound,
+    isCrisis: isCrisis, openSupport: openSupport, startPractice: startPractice, TECH: TECH,
+    now: now, dayKey: dayKey, weekKey: weekKey, isNative: isNative, addBadge: function (id) { addBadge(id); save(); },
+    publicUrl: PUBLIC_URL, weekGoal: weekGoal
+  };
+
   /* ---------- Public API (used by the app shell and the test suite) ---------- */
 
   window.LoosenUp = {
@@ -3457,6 +3627,11 @@
     completeSession: completeSession,
     beginBreak: beginBreak,
     breatheNow: breatheNow,
+    startNow: startNow,
+    forYou: forYou,
+    weekGoal: weekGoal,
+    matchServices: matchServices,
+    core: core,
     helplines: HL,
     openShop: function (note) { openShop(note); },
     demoPurchase: demoPurchase,

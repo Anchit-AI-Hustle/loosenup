@@ -1,0 +1,81 @@
+/* LoosenUp 2.2 screens: sleep, journal, support a friend, seasonal packs, Trace the square, comfort settings. */
+.sleep-list, .pack-list, .journal-list { display: grid; gap: 12px; }
+.sleep-card {
+  display: grid; gap: 4px; width: 100%; padding: 18px; text-align: left; font: inherit; color: #EEF2FA; cursor: pointer;
+  border-radius: 24px; border: 1px solid rgba(255, 255, 255, .12); box-shadow: var(--shadow);
+  background: linear-gradient(160deg, #24305A 0%, #3B3463 100%);
+}
+.sleep-card strong { font-family: var(--display); font-size: 20px; font-weight: 650; }
+.sleep-kind { font-size: 12px; font-weight: 800; letter-spacing: .04em; color: #FFD98A; }
+.sleep-desc { font-size: 14px; color: #C9D2E6; }
+.sleep-player { display: grid; gap: 10px; text-align: center; background: linear-gradient(180deg, #1B2546, #2C2A52); color: #EEF2FA; border-color: rgba(255, 255, 255, .1); }
+.sleep-player .eyebrow { color: #FFD98A; }
+.sleep-player .fine, .sleep-player .field-label { color: #C9D2E6; }
+.sp-line { font: 600 21px/1.45 var(--display); min-height: 4.4em; margin: 6px 0; }
+.sp-bar { height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .12); overflow: hidden; }
+.sp-bar i { display: block; height: 100%; width: 0; background: #FFD98A; transition: width 1s linear; }
+.sleep-player .btn-soft, .sleep-player .chip { background: rgba(255, 255, 255, .1); color: #EEF2FA; border-color: rgba(255, 255, 255, .2); }
+.sleep-player .chip[aria-pressed="true"] { background: #FFD98A; color: #2B1E05; }
+.sleep-player .btn-ghost { color: #EEF2FA; }
+html.sleep-dim body { background: #0B1020; }
+html.sleep-dim .sky, html.sleep-dim .topbar { opacity: .35; }
+
+.length-row { display: grid; gap: 6px; }
+.goal-line { font: 700 18px/1.3 var(--display); margin: 0; }
+.goal-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin: 4px 0 8px; }
+.gday { display: grid; place-items: center; height: 38px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--ink-2); background: var(--glass); border: 1px solid var(--line); }
+.gday.on { background: var(--leaf-2); color: #fff; border-color: transparent; }
+.reflect-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+
+.journal-prompt { font: 600 19px/1.35 var(--display); margin: 0; }
+.journal-entry { padding: 14px; border-radius: 18px; background: var(--glass); border: 1px solid var(--line); display: grid; gap: 6px; }
+.journal-body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.friend-step h2 { margin-top: 0; }
+.friend-actions { display: grid; gap: 10px; }
+
+.pack-card.now { border: 2px solid var(--sun-2); }
+.pack-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pack-ic { font-size: 28px; line-height: 1; }
+.pack-item { text-align: left; justify-content: flex-start; }
+.season-card { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 18px; text-align: left; font: inherit; color: var(--ink); cursor: pointer; }
+.season-text { display: grid; gap: 2px; }
+.season-text strong { font-size: 16px; }
+.season-text span { font-size: 13px; color: var(--ink-2); }
+
+.trace-wrap { display: grid; place-items: center; }
+.trace-svg { width: min(300px, 82vw); aspect-ratio: 1; touch-action: none; user-select: none; -webkit-user-select: none; }
+.trace-path { fill: none; stroke: rgba(79, 166, 124, .45); stroke-width: 6; stroke-dasharray: 2 10; stroke-linecap: round; }
+.trace-dot { fill: var(--sun); stroke: #fff; stroke-width: 4; filter: drop-shadow(0 4px 10px rgba(242, 167, 43, .8)); }
+.trace-finger { fill: rgba(79, 166, 124, .35); stroke: var(--leaf-2); stroke-width: 2; }
+.gt-trace { background: linear-gradient(160deg, #DDF3E8, #FFFFFF 75%); }
+.game-row:has(.gt-trace) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* Larger text: scales the whole interface so layouts stay intact. */
+html.text-large .app, html.text-large .tabbar, html.text-large .sheet { zoom: 1.1; }
+html.text-larger .app, html.text-larger .tabbar, html.text-larger .sheet { zoom: 1.2; }
+
+/* Hindi: no uppercase or wide letter-spacing, which pull Devanagari apart. */
+html[lang="hi"] .eyebrow, html[lang="hi"] .tag, html[lang="hi"] .panel-head, html[lang="hi"] .stat-k { letter-spacing: 0; text-transform: none; }
+
+html[data-theme="dark"] .gday { color: #C9D4DE; }
+html[data-theme="dark"] .gt-trace { background: linear-gradient(160deg, #1F3D2E, #1A2436 75%); }
+html[data-theme="dark"] .trace-path { stroke: rgba(158, 224, 190, .5); }
+@media (prefers-reduced-motion: reduce) { .sp-bar i { transition: none; } }
+
+/* For you right now: one suggestion with a one-tap Start. */
+.for-you { display: grid; gap: 6px; background: linear-gradient(150deg, #FFF4DA, #FFFFFF 70%); box-shadow: inset 0 0 0 2px rgba(255, 200, 87, .55); }
+.for-you .subtitle { margin: 0; }
+.for-you .muted { margin: 0 0 6px; }
+.for-you .btn { justify-self: start; min-width: 120px; }
+.more-help .fold { padding: 4px 4px 0; }
+.more-help .fold > summary { padding-inline: 4px; }
+.prep-list { margin: 0 0 6px; }
+.match-chips { margin-bottom: 4px; }
+html[data-theme="dark"] .for-you { background: linear-gradient(150deg, #3A3220, #1A2436 70%); box-shadow: inset 0 0 0 2px rgba(255, 200, 87, .4); }
+
+/* Sleep, journal and more tiles on Today. */
+.tool-more .tool-ic { background: #E6F5EC; color: var(--leaf-2); }
+.more-row .season-card { margin-bottom: 4px; }
+html[data-theme="dark"] .gday.on { color: #fff; }
+html[data-theme="dark"] .tool-more .tool-ic { background: #CFEBDD; color: #1E5A40; }

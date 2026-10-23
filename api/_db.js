@@ -1,6 +1,6 @@
 // Tiny Neon client over its HTTPS SQL endpoint (the same protocol @neondatabase/serverless uses),
 // so the functions need no npm packages. DATABASE_URL is set by the Vercel Neon integration.
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
 export async function sql(query, params = []) {
   const url = process.env.DATABASE_URL;
@@ -41,11 +41,31 @@ export function ensureSchema() {
       PRIMARY KEY (org_id, week, member_hash))`);
     // A week only counts people on different networks, so one person cannot fake a group.
     await sql('ALTER TABLE lu_pulses ADD COLUMN IF NOT EXISTS ip_hash text');
+    // Joins per network per day, to stop one person minting many members.
+    await sql(`CREATE TABLE IF NOT EXISTS lu_joins (
+      org_id bigint NOT NULL REFERENCES lu_orgs(id) ON DELETE CASCADE,
+      ip_hash text NOT NULL,
+      day date NOT NULL DEFAULT current_date,
+      n integer NOT NULL DEFAULT 0,
+      PRIMARY KEY (org_id, ip_hash, day))`);
   })().catch((e) => { ready = null; throw e; });
   return ready;
 }
 
 export const sha256 = (s) => createHash('sha256').update(String(s)).digest('hex');
+// Server-only secret for member passes. ORG_SECRET if set, otherwise derived from the database URL,
+// which only the server can see.
+const secret = () => process.env.ORG_SECRET || sha256('lu-org-secret:' + (process.env.DATABASE_URL || ''));
+export const sign = (data) => createHmac('sha256', secret()).update(String(data)).digest('base64url');
+export const verify = (data, sig) => {
+  const a = Buffer.from(sign(data)), b = Buffer.from(String(sig || ''));
+  return a.length === b.length && timingSafeEqual(a, b);
+};
+// A small, stable nudge (seeded by the server secret) so exact individual answers cannot be worked back out.
+export const noise = (seed, size) => {
+  const h = parseInt(sha256(secret() + ':' + seed).slice(0, 8), 16) / 0xffffffff;
+  return (h * 2 - 1) * size;
+};
 export const token = (bytes = 24) => randomBytes(bytes).toString('base64url');
 const ALPHA = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 export const joinCode = () => 'LU' + [...randomBytes(6)].map((b) => ALPHA[b % ALPHA.length]).join('');

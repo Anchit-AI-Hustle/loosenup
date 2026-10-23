@@ -18,18 +18,18 @@ test('AT34 every kind of emotion can be logged, with an intensity of 1 to 3', ()
   assert.equal(app.$('[data-emotion="angry"]').getAttribute('data-level'), '0', 'a fourth tap clears it');
 });
 
-test('AT34 the strongest difficult emotion suggests a matching exercise in one tap', () => {
+test('AT34 the strongest difficult emotion becomes the For you card, and one tap starts it', () => {
   const app = ready();
+  const before = app.$('#for-you-btn').getAttribute('data-now');
   app.click('[data-emotion="happy"]');
-  assert.equal(app.visible('#emo-suggest'), false, 'positive emotions need no fix');
+  assert.equal(app.$('#for-you-btn').getAttribute('data-now'), before, 'positive emotions need no fix');
   app.click('[data-emotion="worried"]');
   app.click('[data-emotion="angry"]'); app.click('[data-emotion="angry"]');
-  assert.equal(app.visible('#emo-suggest'), true);
-  assert.equal(app.$('#emo-suggest-btn').textContent, 'Try Cool down');
-  app.click('#emo-suggest-btn');
-  assert.equal(app.B.currentScreen(), 'checkin');
-  app.click('#checkin-next');
-  assert.equal(app.$('#pick-name').textContent, 'Cool down');
+  assert.match(app.$('#for-you-name').textContent, /^Cool down, 2 min$/);
+  assert.equal(app.$('#for-you-why').textContent, 'Long breaths out help anger cool.');
+  app.click('#for-you-btn');
+  assert.equal(app.B.currentScreen(), 'session', 'no check-in and no Pick screen');
+  assert.equal(app.B.run().id, 'cooldown');
 });
 
 test('AT34 Progress shows each emotion over the week, with a trend against the week before', () => {

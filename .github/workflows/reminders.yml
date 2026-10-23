@@ -1,0 +1,19 @@
+# Sends the website's daily reminders: every 15 minutes, /api/push notifies people whose chosen time has just passed.
+name: Daily reminders
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+permissions: {}
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Send due reminders
+        env:
+          CRON_SECRET: ${{ secrets.LOOSENUP_CRON_SECRET }}
+        run: |
+          curl -fsS -X POST https://loosenup.anchit-tandon.com/api/push \
+            -H "Authorization: Bearer $CRON_SECRET" -H "Content-Type: application/json" \
+            -d '{"action":"send"}'

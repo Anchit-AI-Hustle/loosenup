@@ -6,8 +6,10 @@
 //   no text, no device ids. The member id is a random string the app makes, stored only as a hash.
 // - The dashboard shows a week only when at least MIN_GROUP people, on MIN_GROUP different networks,
 //   shared that week, so an admin cannot unlock a small group by posting made-up pulses.
+// - Every pulse needs a member pass signed by this server at join. Joins are limited per network per
+//   day, members per network per week, and weekly averages carry a small stable nudge.
 // - Nothing about SOS or crisis support is ever sent.
-import { sql, ensureSchema, sha256, token, joinCode } from './_db.js';
+import { sql, ensureSchema, sha256, token, joinCode, sign, verify, noise } from './_db.js';
 
 export const MIN_GROUP = 5;
 const KINDS = ['college', 'school', 'company', 'ngo', 'other'];
@@ -46,26 +48,41 @@ async function orgByCode(code) {
   return rows[0];
 }
 
-async function join(body) {
+const MAX_JOINS_PER_NETWORK_DAY = 3;
+const MAX_MEMBERS_PER_NETWORK_WEEK = 4;
+
+async function join(body, ip) {
   const o = await orgByCode(body.code);
-  return { name: o.name, kind: o.kind, joinCode: o.join_code, supportName: o.support_name, supportPhone: o.support_phone };
+  const ipHash = sha256('lu-ip:' + o.id + ':' + ip);
+  const rows = await sql(`INSERT INTO lu_joins (org_id, ip_hash) VALUES ($1, $2)
+    ON CONFLICT (org_id, ip_hash, day) DO UPDATE SET n = lu_joins.n + 1 RETURNING n`, [o.id, ipHash]);
+  if ((rows[0] && rows[0].n) >= MAX_JOINS_PER_NETWORK_DAY) throw problem(429, 'Too many joins from this network today. Please try again tomorrow.');
+  // The member id is made here, and the pass proves it came from this server.
+  const memberId = token(18);
+  return { name: o.name, kind: o.kind, joinCode: o.join_code, supportName: o.support_name, supportPhone: o.support_phone,
+    memberId, memberPass: sign(o.id + ':' + memberId) };
 }
 
 async function pulse(body, ip) {
   const o = await orgByCode(body.code);
   const member = clean(body.member, 64);
   if (member.length < 16) throw problem(400, 'Missing member id.');
+  if (!verify(o.id + ':' + member, body.pass)) throw problem(403, 'Please join the organisation again in Me.');
   const week = clean(body.week, 8);
   if (!/^\d{4}-W\d{2}$/.test(week)) throw problem(400, 'Week must look like 2026-W42.');
   const mood = body.mood == null ? null : num(body.mood, 1, 5);
   const calmGain = body.calmGain == null ? null : num(body.calmGain, -9, 9);
   const breaks = Math.round(num(body.breaks, 0, 500) || 0);
   const contexts = (Array.isArray(body.contexts) ? body.contexts : []).filter((c) => CONTEXTS.includes(c)).slice(0, 3);
+  const ipHash = sha256('lu-ip:' + o.id + ':' + ip);
+  const others = await sql(`SELECT count(*)::int AS n FROM lu_pulses WHERE org_id = $1 AND week = $2 AND ip_hash = $3 AND member_hash <> $4`,
+    [o.id, week, ipHash, sha256(o.id + ':' + member)]);
+  if ((others[0] && others[0].n) >= MAX_MEMBERS_PER_NETWORK_WEEK) throw problem(429, 'Too many members from this network this week.');
   await sql(`INSERT INTO lu_pulses (org_id, week, member_hash, mood, calm_gain, breaks, contexts, ip_hash)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     ON CONFLICT (org_id, week, member_hash) DO UPDATE SET mood = EXCLUDED.mood, calm_gain = EXCLUDED.calm_gain,
       breaks = EXCLUDED.breaks, contexts = EXCLUDED.contexts, ip_hash = EXCLUDED.ip_hash, created_at = now()`,
-  [o.id, week, sha256(o.id + ':' + member), mood, calmGain, breaks, contexts, sha256('lu-ip:' + o.id + ':' + ip)]);
+  [o.id, week, sha256(o.id + ':' + member), mood, calmGain, breaks, contexts, ipHash]);
   return { ok: true };
 }
 
@@ -88,7 +105,10 @@ async function dashboard(key) {
     const enough = w.members >= MIN_GROUP && (w.networks == null || w.networks >= MIN_GROUP);
     const top = ctx.filter((c) => c.week === w.week).sort((a, b) => b.n - a.n).slice(0, 3).map((c) => c.context);
     return enough
-      ? { week: w.week, members: w.members, mood: w.mood, calmGain: w.calm_gain, breaks: w.breaks, topFeelings: top }
+      ? { week: w.week, members: w.members,
+        mood: w.mood == null ? null : Math.min(5, Math.max(1, Math.round((w.mood + noise(o.id + w.week + 'm', 0.15)) * 10) / 10)),
+        calmGain: w.calm_gain == null ? null : Math.round((w.calm_gain + noise(o.id + w.week + 'g', 0.25)) * 10) / 10,
+        breaks: Math.max(0, Math.round(w.breaks + noise(o.id + w.week + 'b', 1.5))), topFeelings: top }
       : { week: w.week, members: null, hidden: true };
   });
   return {
@@ -118,7 +138,7 @@ export default async function handler(req, res) {
     let out;
     if (req.method === 'GET' && action === 'dashboard') out = await dashboard(adminKey);
     else if (req.method === 'POST' && action === 'create') out = await create(body, ip);
-    else if (req.method === 'POST' && action === 'join') out = await join(body);
+    else if (req.method === 'POST' && action === 'join') out = await join(body, ip);
     else if (req.method === 'POST' && action === 'pulse') out = await pulse(body, ip);
     else if (req.method === 'POST' && action === 'delete') out = await remove(adminKey);
     else throw problem(400, 'Unknown action.');

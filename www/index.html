@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>LoosenUp</title>
   <meta name="description" content="Two calm minutes to loosen up and feel lighter. Gentle breaks for work, relationships and heavy days, with SOS support one tap away.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="LoosenUp">
+  <meta property="og:title" content="LoosenUp: two calm minutes, whenever you need them">
+  <meta property="og:description" content="Guided breathing that breathes with you, sleep sessions, calm games and SOS support one tap away. Free, private, in English and Hindi. A wellbeing companion, not medical care.">
+  <meta property="og:url" content="https://loosenup.anchit-tandon.com/">
+  <meta property="og:image" content="https://loosenup.anchit-tandon.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="LoosenUp: two calm minutes, whenever you need them.">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://loosenup.anchit-tandon.com/">
   <meta name="theme-color" content="#EDF7FF">
   <meta name="color-scheme" content="light">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,6 +29,7 @@
   <link rel="preload" href="/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/more.css">
   <script>
     /* Apply the theme before first paint so there is no flash at night. */
     (function () { try { var t = localStorage.getItem('loosenup.theme') || 'auto';
@@ -25,9 +37,11 @@
       document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light'); } catch (e) {} })();
   </script>
   <script src="/i18n.js" defer></script>
+  <script src="/sleep.js" defer></script>
   <script src="/helplines.js" defer></script>
   <script src="/partners.js" defer></script>
   <script src="/app.js" defer></script>
+  <script src="/more.js" defer></script>
 </head>
 <body>
   <!-- Brand mark: a sun whose rays are petals -->
@@ -303,6 +317,12 @@
           </div>
         </div>
 
+        <article id="for-you" class="card for-you">
+          <p class="eyebrow">For you right now</p>
+          <h2 id="for-you-name" class="subtitle"></h2>
+          <p id="for-you-why" class="muted"></p>
+          <button id="for-you-btn" class="btn btn-sun btn-small" type="button" data-now="sigh">Start</button>
+        </article>
         <section class="block" aria-labelledby="games-title">
           <div class="block-head"><h2 class="subtitle" id="games-title">Play a calm game</h2><span class="tag">1 tap</span></div>
           <div class="game-row">
@@ -311,18 +331,6 @@
             <button class="game-tile gt-ring" type="button" data-game="bloom"><span class="gt-ic" aria-hidden="true">🫧</span><strong>Breathing Ring</strong><span>Hold to breathe</span></button>
           </div>
         </section>
-        <article id="support-card" class="card support-card" hidden>
-          <p class="eyebrow">We are here with you</p>
-          <h2 class="subtitle">It has been a heavy few days. You do not have to carry it alone.</h2>
-          <p class="muted">Talking to someone you trust, or a free helpline, can make a real difference.</p>
-          <button id="support-card-sos" class="btn btn-sos" type="button">Talk to someone now</button>
-          <button id="support-card-step" class="btn btn-ghost" type="button">Try one Small step</button>
-        </article>
-        <div id="golden-banner" class="banner" hidden>
-          <span class="banner-sun" aria-hidden="true"></span>
-          <p><strong>Your daily reminder.</strong> Two calm minutes, whenever you like.</p>
-        </div>
-
         <article id="mood-card" class="card mood-card">
           <div class="block-head"><h2 class="subtitle">How is your mood today?</h2><span class="tag">Daily check-in</span></div>
           <div class="moods" role="group" aria-label="Mood today">
@@ -340,79 +348,88 @@
           <div class="mood-scale-ends" aria-hidden="true"><span>Crying</span><span>Happy</span></div>
           <div class="emo-head"><h3 class="emo-title">What else are you feeling?</h3><span class="fine">Tap again for more</span></div>
           <div id="emotions" class="emotions" role="group" aria-label="Emotions"></div>
-          <div id="emo-suggest" class="emo-suggest" hidden>
-            <p id="emo-suggest-text"></p>
-            <button id="emo-suggest-btn" class="btn btn-sun btn-small" type="button"></button>
-          </div>
           <p id="mood-done" class="fine" aria-live="polite"></p>
           <p id="jar-memory" class="jar-memory" hidden></p>
         </article>
-
-        <section class="block" aria-labelledby="spaces-title">
-          <div class="block-head"><h2 class="subtitle" id="spaces-title">What are you carrying?</h2><span class="fine">Swipe</span></div>
-          <div class="spaces carousel">
-            <button class="space-card space-work" type="button" data-space="work">
-              <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8.5 7V5.5A1.5 1.5 0 0 1 10 4h4a1.5 1.5 0 0 1 1.5 1.5V7M3 12.5h18"/></svg>
-              <strong>Work</strong><span>Meetings, pile-ups, tough calls</span></button>
-            <button class="space-card space-rel" type="button" data-space="relationships">
-              <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
-              <strong>Relationships</strong><span>When things feel tense</span></button>
-            <button class="space-card space-low" type="button" data-space="lowdays">
-              <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 2.5v1.2M2.5 8h1.2M4.1 4.1l.9.9M7 19h10.5a3.5 3.5 0 0 0 .4-7 5 5 0 0 0-9.6 1.3A3 3 0 0 0 7 19z"/></svg>
-              <strong>Low days</strong><span>Gentle lifts for heavy days</span></button>
-            <button class="space-card space-sleep" type="button" data-space="sleep">
-              <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"/><path d="M16 4l.5 1.5L18 6l-1.5.5L16 8l-.5-1.5L14 6l1.5-.5z"/></svg>
-              <strong>Sleep</strong><span>Wind down, quiet a racing mind</span></button>
-          </div>
-        </section>
-
-        <article class="card lifts">
-          <div class="block-head"><h2 class="subtitle">Little lifts</h2><span class="tag">Free</span></div>
-          <div id="steps-card" class="lift-row">
-            <span class="lift-ic lift-step" aria-hidden="true"></span>
-            <div class="lift-body">
-              <p class="tag">Small step</p>
-              <p id="step-idea" class="step-idea" aria-live="polite"></p>
-              <p id="steps-note" class="fine"></p>
-              <div class="row lift-actions">
-                <button id="step-done" class="btn btn-sun btn-small" type="button">I did it</button>
-                <button id="step-another" class="btn btn-ghost btn-small" type="button">Another idea</button>
+        <article id="support-card" class="card support-card" hidden>
+          <p class="eyebrow">We are here with you</p>
+          <h2 class="subtitle">It has been a heavy few days. You do not have to carry it alone.</h2>
+          <p class="muted">Talking to someone you trust, or a free helpline, can make a real difference.</p>
+          <button id="support-card-sos" class="btn btn-sos" type="button">Talk to someone now</button>
+          <button id="support-card-step" class="btn btn-ghost" type="button">Try one Small step</button>
+        </article>
+        <div id="golden-banner" class="banner" hidden>
+          <span class="banner-sun" aria-hidden="true"></span>
+          <p><strong>Your daily reminder.</strong> Two calm minutes, whenever you like.</p>
+        </div>
+        <section class="more-help" aria-label="More help">
+          <details id="more-help" class="fold">
+            <summary><h2 class="subtitle">More help</h2></summary>
+            <div class="fold-body">
+            <article id="check-due" class="card check-due" hidden>
+              <p class="tag">Two-week wellbeing check</p>
+              <p class="muted">Five quick questions, once every two weeks.</p>
+              <button class="btn btn-soft btn-small" type="button" data-tool="wellbeing">Take the check</button>
+            </article>
+            <button id="program-today" class="card program-today" type="button" hidden>
+              <span class="eyebrow">Your programme</span>
+              <strong id="program-today-name"></strong>
+              <span id="program-today-day" class="muted"></span>
+            </button>
+            <section class="block" aria-labelledby="spaces-title">
+              <div class="block-head"><h2 class="subtitle" id="spaces-title">What are you carrying?</h2><span class="fine">Swipe</span></div>
+              <div class="spaces carousel">
+                <button class="space-card space-work" type="button" data-space="work">
+                  <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8.5 7V5.5A1.5 1.5 0 0 1 10 4h4a1.5 1.5 0 0 1 1.5 1.5V7M3 12.5h18"/></svg>
+                  <strong>Work</strong><span>Meetings, pile-ups, tough calls</span></button>
+                <button class="space-card space-rel" type="button" data-space="relationships">
+                  <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+                  <strong>Relationships</strong><span>When things feel tense</span></button>
+                <button class="space-card space-low" type="button" data-space="lowdays">
+                  <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 2.5v1.2M2.5 8h1.2M4.1 4.1l.9.9M7 19h10.5a3.5 3.5 0 0 0 .4-7 5 5 0 0 0-9.6 1.3A3 3 0 0 0 7 19z"/></svg>
+                  <strong>Low days</strong><span>Gentle lifts for heavy days</span></button>
+                <button class="space-card space-sleep" type="button" data-space="sleep">
+                  <svg class="space-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"/><path d="M16 4l.5 1.5L18 6l-1.5.5L16 8l-.5-1.5L14 6l1.5-.5z"/></svg>
+                  <strong>Sleep</strong><span>Wind down, quiet a racing mind</span></button>
               </div>
+            </section>
+            <article class="card lifts">
+              <div class="block-head"><h2 class="subtitle">Little lifts</h2><span class="tag">Free</span></div>
+              <div id="steps-card" class="lift-row">
+                <span class="lift-ic lift-step" aria-hidden="true"></span>
+                <div class="lift-body">
+                  <p class="tag">Small step</p>
+                  <p id="step-idea" class="step-idea" aria-live="polite"></p>
+                  <p id="steps-note" class="fine"></p>
+                  <div class="row lift-actions">
+                    <button id="step-done" class="btn btn-sun btn-small" type="button">I did it</button>
+                    <button id="step-another" class="btn btn-ghost btn-small" type="button">Another idea</button>
+                  </div>
+                </div>
+              </div>
+              <div id="jar-card" class="lift-row">
+                <span class="lift-ic lift-jar" aria-hidden="true"></span>
+                <div class="lift-body">
+                  <p class="tag">Good things jar</p>
+                  <p id="jar-count" class="muted"></p>
+                  <div class="row lift-actions"><button id="jar-add" class="btn btn-soft btn-small" type="button">Add a good thing</button></div>
+                </div>
+              </div>
+            </article>
+            <section class="block" aria-labelledby="toolkit-title">
+              <div class="block-head"><h2 class="subtitle" id="toolkit-title">Your toolkit</h2><span class="tag">Free</span></div>
+              <div class="toolkit">
+                <button class="tool tool-support" type="button" data-tool="support"><span class="tool-ic" aria-hidden="true">&#9742;</span><strong>Find support</strong><span>Therapists, psychiatrists, helplines</span></button>
+                <button class="tool tool-safety" type="button" data-tool="safety"><span class="tool-ic" aria-hidden="true">&#9729;</span><strong>Safety plan</strong><span>Your steps for hard moments</span></button>
+                <button class="tool tool-reframe" type="button" data-tool="reframe"><span class="tool-ic" aria-hidden="true">&#10227;</span><strong>Reframe a thought</strong><span>Find a kinder, truer view</span></button>
+                <button class="tool tool-learn" type="button" data-tool="learn"><span class="tool-ic" aria-hidden="true">&#10070;</span><strong>Learn</strong><span>One-minute lessons</span></button>
+              </div>
+            </section>
+            <h2 class="subtitle">Recent breaks</h2>
+            <ul id="today-recent" class="recent"></ul>
             </div>
-          </div>
-          <div id="jar-card" class="lift-row">
-            <span class="lift-ic lift-jar" aria-hidden="true"></span>
-            <div class="lift-body">
-              <p class="tag">Good things jar</p>
-              <p id="jar-count" class="muted"></p>
-              <div class="row lift-actions"><button id="jar-add" class="btn btn-soft btn-small" type="button">Add a good thing</button></div>
-            </div>
-          </div>
-        </article>
-
-        <article id="check-due" class="card check-due" hidden>
-          <p class="tag">Two-week wellbeing check</p>
-          <p class="muted">Five quick questions, once every two weeks.</p>
-          <button class="btn btn-soft btn-small" type="button" data-tool="wellbeing">Take the check</button>
-        </article>
-
-        <button id="program-today" class="card program-today" type="button" hidden>
-          <span class="eyebrow">Your programme</span>
-          <strong id="program-today-name"></strong>
-          <span id="program-today-day" class="muted"></span>
-        </button>
-        <section class="block" aria-labelledby="toolkit-title">
-          <div class="block-head"><h2 class="subtitle" id="toolkit-title">Your toolkit</h2><span class="tag">Free</span></div>
-          <div class="toolkit">
-            <button class="tool tool-support" type="button" data-tool="support"><span class="tool-ic" aria-hidden="true">&#9742;</span><strong>Find support</strong><span>Therapists, psychiatrists, helplines</span></button>
-            <button class="tool tool-safety" type="button" data-tool="safety"><span class="tool-ic" aria-hidden="true">&#9729;</span><strong>Safety plan</strong><span>Your steps for hard moments</span></button>
-            <button class="tool tool-reframe" type="button" data-tool="reframe"><span class="tool-ic" aria-hidden="true">&#10227;</span><strong>Reframe a thought</strong><span>Find a kinder, truer view</span></button>
-            <button class="tool tool-learn" type="button" data-tool="learn"><span class="tool-ic" aria-hidden="true">&#10070;</span><strong>Learn</strong><span>One-minute lessons</span></button>
-          </div>
+          </details>
         </section>
-
-        <h2 class="subtitle">Recent breaks</h2>
-        <ul id="today-recent" class="recent"></ul>
       </section>
 
       <!-- Find support -->
@@ -443,8 +460,42 @@
           <p class="fine">Outside India: <a href="https://findahelpline.com" data-hl="elsewhere" target="_blank" rel="noopener">findahelpline.com</a></p>
         </article>
 
+        <article class="card fold-card" id="match-card">
+          <details id="match-fold" class="fold">
+            <summary><h2 class="subtitle">Talk to someone: find a match</h2></summary>
+            <div class="fold-body">
+              <p class="fine">Three quick taps. We show the three best fits from real services.</p>
+              <p class="field-label" id="mq-when">When?</p>
+              <div class="chips match-chips" role="group" aria-labelledby="mq-when">
+                <button class="chip" type="button" data-match="when:now" aria-pressed="true">Right now</button>
+                <button class="chip" type="button" data-match="when:week" aria-pressed="false">This week</button>
+              </div>
+              <p class="field-label" id="mq-how">How would you like to talk?</p>
+              <div class="chips match-chips" role="group" aria-labelledby="mq-how">
+                <button class="chip" type="button" data-match="how:phone" aria-pressed="true">Phone</button>
+                <button class="chip" type="button" data-match="how:chat" aria-pressed="false">Chat</button>
+                <button class="chip" type="button" data-match="how:video" aria-pressed="false">Video</button>
+              </div>
+              <p class="field-label" id="mq-fit">Language and budget</p>
+              <div class="chips match-chips" role="group" aria-labelledby="mq-fit">
+                <button class="chip" type="button" data-match="lang:any" aria-pressed="true">Any language</button>
+                <button class="chip" type="button" data-match="lang:hindi" aria-pressed="false">Hindi</button>
+              </div>
+              <div class="chips match-chips" role="group" aria-labelledby="mq-fit">
+                <button class="chip" type="button" data-match="budget:free" aria-pressed="true">Free</button>
+                <button class="chip" type="button" data-match="budget:low" aria-pressed="false">Up to ₹1,000</button>
+                <button class="chip" type="button" data-match="budget:any" aria-pressed="false">Any price</button>
+              </div>
+              <h3 class="subtitle" id="match-title">Your top matches</h3>
+              <p id="match-note" class="fine" aria-live="polite"></p>
+              <div id="match-list" class="partner-list" aria-labelledby="match-title"></div>
+              <button id="match-prepare" class="btn btn-ghost" type="button">Prepare for my first session</button>
+              <button id="match-all" class="btn btn-ghost" type="button">See every service</button>
+            </div>
+          </details>
+        </article>
         <article class="card fold-card" id="book-card">
-          <details class="fold">
+          <details id="book-fold" class="fold">
             <summary><h2 class="subtitle">Book a session online</h2></summary>
             <div class="fold-body">
               <p class="muted">Real services you can book today, by video, phone or chat. Prices are as listed on their sites.</p>
@@ -492,10 +543,16 @@
             </div>
           </details>
         </article>
-        <article class="card fold-card">
-          <details class="fold">
-            <summary><h2 class="subtitle">Your first call</h2></summary>
+        <article class="card fold-card" id="prepare-card">
+          <details id="prepare-fold" class="fold">
+            <summary><h2 class="subtitle">Prepare for my first session</h2></summary>
             <div class="fold-body">
+              <ul class="ask-list prep-list">
+                <li>Write one or two lines on what you would like help with.</li>
+                <li>Keep a quiet place, water and a pen close by.</li>
+                <li>It is fine to say you feel nervous. Counsellors hear it every day.</li>
+              </ul>
+              <p class="field-label">Your first call</p>
               <p class="script" id="first-call-script">Hi, I would like to book a first appointment. I have been feeling low and tense for a few weeks and it is affecting my sleep and work. Do you have time this week, do you offer online sessions, and what is the fee?</p>
               <button id="copy-script" class="btn btn-soft btn-small" type="button">Copy this script</button>
               <details class="explain"><summary>Good questions to ask</summary><ul class="ask-list"><li>Are you registered with the RCI (psychologists) or the NMC (psychiatrists)?</li><li>What kind of therapy do you use, and how many sessions is usual?</li><li>What is the fee, and is there a reduced fee option?</li><li>Do you offer online or phone sessions?</li><li>How do you keep what I share private?</li></ul></details>
@@ -691,7 +748,7 @@
             <label class="field-label" for="sound-volume">Volume</label>
             <input id="sound-volume" class="range" type="range" min="0" max="100" value="60" aria-label="Volume">
             <p class="field-label">Sleep timer</p>
-            <div class="chips" role="group" aria-label="Sleep timer"><button class="chip" type="button" data-timer="0" aria-pressed="true">Off</button><button class="chip" type="button" data-timer="15" aria-pressed="false">15 min</button><button class="chip" type="button" data-timer="30" aria-pressed="false">30 min</button><button class="chip" type="button" data-timer="60" aria-pressed="false">60 min</button></div>
+            <div class="chips timer-chips" role="group" aria-label="Sleep timer"><button class="chip" type="button" data-timer="0" aria-pressed="true">Off</button><button class="chip" type="button" data-timer="15" aria-pressed="false">15 min</button><button class="chip" type="button" data-timer="30" aria-pressed="false">30 min</button><button class="chip" type="button" data-timer="60" aria-pressed="false">60 min</button></div>
             <p id="sound-status" class="fine" aria-live="polite">Tap a sound to begin. Keep LoosenUp open while it plays.</p>
             <button id="sound-stop" class="btn btn-soft" type="button">Stop</button>
           </div>
@@ -731,10 +788,6 @@
         </article>
         <h2 class="subtitle">The last 7 days</h2>
         <div class="card"><svg id="week-chart" viewBox="0 0 340 190" role="img" aria-label="Calm gain for the last 7 days"></svg></div>
-        <div class="stat-grid">
-          <div class="stat"><span class="stat-k">Breaks</span><span id="week-count" class="stat-v"></span></div>
-          <div class="stat"><span class="stat-k">Avg Calm gain</span><span id="week-avg" class="stat-v"></span></div>
-        </div>
         <article class="card insight">
           <h2 class="subtitle">What helps you most</h2>
           <p id="insight-tech"></p>
@@ -947,6 +1000,7 @@
     <p class="subtitle">Are you having thoughts of ending your life or hurting yourself?</p>
     <button id="safety-yes" class="btn btn-sos" type="button">Yes, or I am not sure</button>
     <button id="safety-no" class="btn btn-soft" type="button">No, not right now</button>
+    <button id="safety-moment" class="btn btn-ghost" type="button">I just need a moment</button>
   </section>
 
   <section id="jar-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="jar-title" hidden>

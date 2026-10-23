@@ -57,7 +57,7 @@ test('AT4 full loop: every break is free, Calm gain is correct, streak 1, plain 
   const s = app.B.state();
   assert.equal(s.streak.count, 1);
   assert.equal(s.sessions.length, 1);
-  assert.match(app.$('#result-streak').textContent, /1 day in a row/);
+  assert.match(app.$('#result-streak').textContent, /1 of 3 days/);
   assert.match(app.$('#result-week').textContent, /1 break this week/);
   assert.match(app.$('#result-avg').textContent, /\+5 average Calm gain/);
   assert.doesNotMatch(app.$('#screen-result').textContent, /Seed|XP|flower|garden/i);

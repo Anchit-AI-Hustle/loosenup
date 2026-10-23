@@ -34,6 +34,10 @@ const noHScroll = (page) => page.evaluate(() => ({
   bw: document.body.scrollWidth,
 }));
 
+
+// Today keeps the less-used tools inside a More help fold; open it the way a person would.
+const openMore = (page) => page.evaluate(() => { const d = document.getElementById('more-help'); if (d) d.open = true; });
+
 async function walkScreens(page, width, label) {
   const shots = [];
   const check = async (name) => {
@@ -81,14 +85,17 @@ async function walkScreens(page, width, label) {
   await page.click('[data-tab="today"]');
   await page.click('[data-mood="4"]');
   await check('today-mood');
+  await openMore(page);
   await page.click('[data-space="work"]');
   await check('space-work');
   await page.click('#checkin-back');
+  await openMore(page);
   await page.click('#jar-add');
   await check('jar');
   await page.click('#good-close');
   await page.click('[data-tab="today"]');
   for (const tool of ['support', 'safety', 'reframe', 'learn']) {
+    await openMore(page);
     await page.click(`#screen-today .toolkit [data-tool="${tool}"]`);
     await check('tool-' + tool);
     await page.click(`#screen-${tool} [data-back]`);
@@ -170,11 +177,12 @@ test('AT13 every visible button and tab is at least 48px tall and wide', async (
   await page.click('[data-tab="today"]');
   for (const seg of ['breathe', 'games', 'sounds']) { await page.click('[data-tab="play"]'); await page.click(`[data-seg="${seg}"]`); await measure('calm-' + seg); }
   await page.click('[data-tab="today"]');
-  for (const tool of ['support', 'safety', 'reframe', 'learn']) { await page.click(`#screen-today .toolkit [data-tool="${tool}"]`); await measure('tool-' + tool); await page.click(`#screen-${tool} [data-back]`); }
+  for (const tool of ['support', 'safety', 'reframe', 'learn']) { await openMore(page); await page.click(`#screen-today .toolkit [data-tool="${tool}"]`); await measure('tool-' + tool); await page.click(`#screen-${tool} [data-back]`); }
   await page.click('[data-tab="progress"]'); await page.click('#screen-progress [data-tool="wellbeing"]'); await measure('tool-wellbeing'); await page.click('#screen-wellbeing [data-back]'); await page.click('[data-tab="today"]');
   await page.click('#sos-btn'); await measure('sos'); await page.click('#support-close');
+  await openMore(page); await measure('today-more');
   await page.click('#jar-add'); await measure('jar'); await page.click('#good-close');
-  await page.click('[data-space="relationships"]'); await measure('space-relationships'); await page.click('#checkin-back');
+  await openMore(page); await page.click('[data-space="relationships"]'); await measure('space-relationships'); await page.click('#checkin-back');
   await page.evaluate(() => window.LoosenUp.openShop()); await measure('shop');
   assert.deepEqual(small, []);
   await ctx.close();
@@ -291,7 +299,7 @@ test('AT32 every screen fits small phones (320, 360, 390 px): no sideways scroll
         if (tab && !tab.hidden) {
           window.scrollTo(0, document.scrollingElement.scrollHeight);
           const scr = [...document.querySelectorAll('.screen')].find((s) => !s.hidden);
-          const last = scr && [...scr.querySelectorAll('*')].filter((e) => e.getBoundingClientRect().height > 0 && !e.closest('[hidden]')).pop();
+          const last = scr && [...scr.querySelectorAll('*')].filter((e) => e.getBoundingClientRect().height > 0 && !e.closest('[hidden]') && !(e.closest('details:not([open])') && !e.closest('summary'))).pop();
           if (last && last.getBoundingClientRect().bottom > tab.getBoundingClientRect().top + 2) out.push('last item under the tab bar');
           window.scrollTo(0, 0);
         }

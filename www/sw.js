@@ -1,13 +1,16 @@
 /* LoosenUp service worker: precache the shell, cache-first for same-origin GET. */
-var CACHE = 'loosenup-v2.2.0';
+var CACHE = 'loosenup-v2.3.0';
 var SHELL = [
   '/',
   '/index.html',
   '/styles.css',
+  '/more.css',
   '/i18n.js',
+  '/sleep.js',
   '/helplines.js',
   '/partners.js',
   '/app.js',
+  '/more.js',
   '/manifest.json',
   '/fonts/nunito-latin.woff2',
   '/fonts/fraunces-latin.woff2',
@@ -72,4 +75,22 @@ self.addEventListener('fetch', function (event) {
       });
     })
   );
+});
+
+// Daily reminders on the website and mobile website (Web Push from /api/push).
+self.addEventListener('push', function (event) {
+  var d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = {}; }
+  event.waitUntil(self.registration.showNotification(d.title || 'LoosenUp', {
+    body: d.body || 'Two calm minutes are here for you whenever you like.',
+    icon: '/icons/icon-192.png', badge: '/icons/icon-192.png', tag: 'loosenup-daily', data: { url: d.url || '/' }
+  }));
+});
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  var url = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+    for (var i = 0; i < list.length; i++) if ('focus' in list[i]) return list[i].focus();
+    return self.clients.openWindow ? self.clients.openWindow(url) : null;
+  }));
 });

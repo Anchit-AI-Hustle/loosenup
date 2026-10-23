@@ -60,7 +60,7 @@ for (const scheme of ['light', 'dark']) {
     const support = await wordsAboveFold(page, '#screen-support');
     assert.ok(support > 15 && support < 60, `Find support shows ${support} words on its first screen`);
     const closed = await page.evaluate(() => [...document.querySelectorAll('#screen-support details.fold')].filter((d) => !d.open).length);
-    assert.equal(closed, 5, 'the five long guides are folded');
+    assert.equal(closed, 6, 'the six longer guides, including Talk to someone, are folded');
     await page.click('#book-card summary');
     assert.ok(await page.isVisible('#partner-list .partner, #partner-list > *'), 'a folded guide opens on tap');
     assert.deepEqual(errors, []);

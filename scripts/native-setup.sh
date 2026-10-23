@@ -26,6 +26,9 @@ PLIST=ios/App/App/Info.plist
 if [ -f "$PLIST" ]; then
   /usr/libexec/PlistBuddy -c "Delete :NSFaceIDUsageDescription" "$PLIST" 2>/dev/null || true
   /usr/libexec/PlistBuddy -c "Add :NSFaceIDUsageDescription string 'LoosenUp uses Face ID to unlock the app and keep your notes private.'" "$PLIST"
+  # Sleep sessions keep their background sound playing with the screen locked.
+  /usr/libexec/PlistBuddy -c "Delete :UIBackgroundModes" "$PLIST" 2>/dev/null || true
+  /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" -c "Add :UIBackgroundModes:0 string audio" "$PLIST"
 fi
 
 PY=.venv/bin/python

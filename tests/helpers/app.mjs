@@ -35,10 +35,14 @@ export function makeApp({ state, now, rng, ua } = {}) {
   if (ua) Object.defineProperty(window.navigator, 'userAgent', { value: ua, configurable: true });
   if (state) window.localStorage.setItem('loosenup.v1', JSON.stringify(state));
   window.__LOOSENUP_TEST__ = { now: now || null, rng: rng || null };
+  // Like Chrome on Android: vibration is available (tests can replace it to record pulses).
+  if (typeof window.navigator.vibrate !== 'function') window.navigator.vibrate = () => true;
   window.eval(read('www/i18n.js'));
+  window.eval(read('www/sleep.js'));
   window.eval(read('www/helplines.js'));
   window.eval(read('www/partners.js'));
   window.eval(appJs());
+  window.eval(read('www/more.js'));
   const B = window.LoosenUp;
   if (!B) throw new Error('window.LoosenUp API missing');
   const $ = (sel) => window.document.querySelector(sel);

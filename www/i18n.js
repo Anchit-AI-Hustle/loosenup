@@ -7,6 +7,49 @@
   'use strict';
 
   var HI = {
+    /* 2.3 */
+    'For you right now': 'अभी आपके लिए',
+    'More help': 'और मदद',
+    'Talk to someone: find a match': 'किसी से बात करें: सही मेल खोजें',
+    'Three quick taps. We show the three best fits from real services.': 'तीन छोटे टैप। हम असली सेवाओं में से तीन सबसे सही विकल्प दिखाते हैं।',
+    'When?': 'कब?',
+    'Right now': 'अभी',
+    'How would you like to talk?': 'आप कैसे बात करना चाहेंगे?',
+    'Language and budget': 'भाषा और बजट',
+    'Any language': 'कोई भी भाषा',
+    'Up to ₹1,000': '₹1,000 तक',
+    'Any price': 'कोई भी कीमत',
+    'Your top matches': 'आपके सबसे सही विकल्प',
+    'Prepare for my first session': 'मेरे पहले सेशन की तैयारी',
+    'See every service': 'सारी सेवाएँ देखें',
+    'Write one or two lines on what you would like help with.': 'एक दो पंक्तियों में लिखें कि आपको किस बात में मदद चाहिए।',
+    'Keep a quiet place, water and a pen close by.': 'एक शांत जगह, पानी और एक पेन पास रखें।',
+    'It is fine to say you feel nervous. Counsellors hear it every day.': 'घबराहट की बात कहना बिल्कुल ठीक है। काउंसलर यह हर दिन सुनते हैं।',
+    'I just need a moment': 'मुझे बस एक पल चाहिए',
+    'Help is one tap away in SOS, any time.': 'मदद हमेशा SOS में एक टैप दूर है।',
+    'Slow, even breathing to start the day steady.': 'दिन को स्थिर शुरुआत देने के लिए धीमी, एक जैसी साँसें।',
+    'Let the morning go from your shoulders without leaving your chair.': 'कुर्सी छोड़े बिना सुबह का बोझ कंधों से उतारें।',
+    'Long breaths out help the day settle.': 'लंबी साँस छोड़ने से दिन शांत होता है।',
+    'Long breaths out tell your body it is time to rest.': 'लंबी साँस छोड़ना शरीर को बताता है कि अब आराम का समय है।',
+    'A gentle self-compassion break for a heavy day.': 'भारी दिन के लिए खुद के प्रति दया का एक कोमल ब्रेक।',
+    'Days this week': 'इस हफ़्ते के दिन',
+    'Goal met this week': 'इस हफ़्ते लक्ष्य पूरा',
+    'Weekly goal met. Lovely.': 'हफ़्ते का लक्ष्य पूरा। बहुत बढ़िया।',
+    '3 calm days': '3 शांत दिन',
+    '7 calm days': '7 शांत दिन',
+    '21 calm days': '21 शांत दिन',
+    '30 calm days': '30 शांत दिन',
+    'Three days with a calm break': 'तीन दिन शांत ब्रेक के साथ',
+    'Seven days with a calm break': 'सात दिन शांत ब्रेक के साथ',
+    'Twenty one days: a real habit': 'इक्कीस दिन: एक सच्ची आदत',
+    'Thirty days with a calm break': 'तीस दिन शांत ब्रेक के साथ',
+    'Weekly goal': 'हफ़्ते का लक्ष्य',
+    'Met your weekly goal': 'हफ़्ते का लक्ष्य पूरा किया',
+    'Open now, or open 24x7.': 'अभी खुली, या 24x7 खुली।',
+    'Bookable this week.': 'इस हफ़्ते बुक हो सकती है।',
+    'Some of these talk in a different way than you picked.': 'इनमें से कुछ आपके चुने तरीके से अलग तरह से बात करती हैं।',
+    'Nothing fits all of that yet. Try Any price, or call Tele-MANAS on 14416, free and open 24x7.': 'अभी कोई सेवा इन सब पर पूरी नहीं उतरती। कोई भी कीमत चुनें, या Tele-MANAS को 14416 पर कॉल करें, मुफ़्त और 24x7 खुली।',
+    'Sleep, journal and more': 'नींद, डायरी और भी',
     /* ---- Core words ---- */
     'Back': 'वापस', 'Next': 'आगे', 'Close': 'बंद करें', 'Save': 'सेव करें', 'Edit': 'बदलें', 'Begin': 'शुरू करें',
     'Pause': 'रुकें', 'Resume': 'फिर शुरू करें', 'Stop': 'रोकें', 'Done': 'पूरा हुआ', 'Finish': 'पूरा करें', 'Unlock': 'खोलें',
@@ -686,8 +729,8 @@
     'Golden hour time': 'Golden hour का समय', 'Golden hour is here.': 'Golden hour आ गया है।', 'Turn off Golden hour': 'Golden hour बंद करें',
     'Pick a daily time for a gentle reminder.': 'कोमल रिमाइंडर के लिए रोज़ का एक समय चुनें।',
     'Pick a daily time for one gentle reminder.': 'एक कोमल रिमाइंडर के लिए रोज़ का एक समय चुनें।',
-    'Pick a daily time and a gentle note will appear in the app. The phone apps can send one daily reminder.':
-      'रोज़ का एक समय चुनें, उस समय ऐप में एक कोमल संदेश दिखेगा। फ़ोन ऐप रोज़ एक रिमाइंडर भेज सकते हैं।',
+    'Pick a daily time and a gentle note will appear in the app. On iPhone, add LoosenUp to your home screen to get a daily notification.':
+      'रोज़ का एक समय चुनें, उस समय ऐप में एक कोमल संदेश दिखेगा। iPhone पर रोज़ नोटिफ़िकेशन पाने के लिए LoosenUp को होम स्क्रीन पर जोड़ें।',
     'One gentle reminder arrives each day.': 'हर दिन एक कोमल रिमाइंडर आता है।',
     'A gentle note appears in the app from that time.': 'उस समय से ऐप में एक कोमल संदेश दिखता है।',
     'Reminders are off in your settings. The in-app note still works.': 'आपकी सेटिंग में रिमाइंडर बंद हैं। ऐप के अंदर का संदेश अब भी काम करता है।',
@@ -768,6 +811,9 @@
   function t(s) { var r = trCore(s); return r === null ? s : r; }
 
   var PATTERNS = [
+    [/^(\d+) of (\d+) days this week · (\d+) breaks?$/, function (m) { return 'इस हफ़्ते ' + m[2] + ' में से ' + m[1] + ' दिन · ' + m[3] + ' ब्रेक'; }],
+    [/^(\d+) of (\d+) days$/, function (m) { return m[2] + ' में से ' + m[1] + ' दिन'; }],
+    [/^(.+), (\d+) min$/, function (m) { return t(m[1]) + ', ' + m[2] + ' मिनट'; }],
     [/^Picked from your own breaks: (.+) averages ([+\-]?[\d.]+) Calm gain for "(.+)"\.$/, function (m) { return 'आपके अपने ब्रेक से चुना गया: "' + t(m[3]) + '" के लिए ' + m[1] + ' का औसत Calm gain ' + m[2] + ' है।'; }],
     [/^Picked for (.+), and it suits (.+) best\.$/, function (m) { return list(m[1]) + ' के लिए चुना गया, और यह ' + list(m[2]) + ' के लिए सबसे अच्छा है।'; }],
     [/^Picked for ([^.!?]+)\.$/, function (m) { return list(m[1]) + ' के लिए चुना गया।'; }],
@@ -938,5 +984,5 @@
     /\bapni\s+jaan\s+(le|de)/i, /\b(zindagi|jindagi)\s+(khatam|khatm)\b/i, /\bjaan\s+de\s+du+n?g?[aie]?\b/i
   ];
 
-  window.LoosenUpI18n = { hi: HI, tr: tr, crisis: CRISIS_HI, languages: { en: 'English', hi: 'हिन्दी' } };
+  window.LoosenUpI18n = { hi: HI, tr: tr, crisis: CRISIS_HI, patterns: PATTERNS, languages: { en: 'English', hi: 'हिन्दी' } };
 })();
