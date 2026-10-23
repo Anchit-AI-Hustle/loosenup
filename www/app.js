@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.3.1';
+  var VERSION = '2.3.2';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -1240,6 +1240,7 @@
     save();
     renderMood();
     renderSupportCard();
+    renderForYou();
     renderSeedPill();
     // Ask the gentle safety question at most once a day, so the lowest face never feels like a trap.
     if (n === 1 && state.safetyAskedDay !== dk) { state.safetyAskedDay = dk; save(); openSheet('safety-sheet'); }
@@ -2487,6 +2488,8 @@
     var bm = { el: b, x: 10 + rng() * 80, y: prefersReducedMotion() ? 15 + rng() * 70 : -8, v: 9 + rng() * 7, w: 0.6 + rng(), caught: false };
     b.style.left = bm.x + '%';
     b.style.top = bm.y + '%';
+    // Caught on touch, so a drifting beam is not missed between finger down and up.
+    b.addEventListener('pointerdown', function () { catchBeam(bm); });
     b.addEventListener('click', function () { catchBeam(bm); });
     field.appendChild(b);
     game.beams.push(bm);
