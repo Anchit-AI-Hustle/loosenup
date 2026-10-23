@@ -62,14 +62,22 @@ test('AT30 live: organisations work end to end on Neon, and small or single-netw
   assert.equal(made.status, 200, JSON.stringify(made.json));
   const { joinCode, adminKey } = made.json;
   try {
-    const joined = await post({ action: 'join', code: joinCode });
-    assert.equal(joined.json.name, 'LoosenUp live test');
     const dash = async () => (await (await fetch(api + '?action=dashboard', { headers: { 'X-Admin-Key': adminKey } })).json());
-    for (let i = 0; i < 4; i++) assert.equal((await post({ action: 'pulse', code: joinCode, member: 'live-member-' + i + '-xxxxxxxxxxxx', week: '2026-W01', mood: 3, calmGain: 2, breaks: 2, contexts: ['Busy mind'] })).status, 200);
-    assert.equal((await dash()).weeks[0].hidden, true, '4 people: still private');
-    await post({ action: 'pulse', code: joinCode, member: 'live-member-4-xxxxxxxxxxxx', week: '2026-W01', mood: 5, calmGain: 4, breaks: 3, contexts: ['Feeling low'] });
-    // Five pulses, but all from this one network: still private, so nobody can fake a group.
-    assert.equal((await dash()).weeks[0].hidden, true, 'one network cannot unlock the five-person view');
+    const pulse = (m, extra = {}) => post({ action: 'pulse', code: joinCode, member: m.memberId, pass: m.memberPass, week: '2026-W01', mood: 3, calmGain: 2, breaks: 2, contexts: ['Busy mind'], ...extra });
+    // Each join gets a server-signed member pass; at most 3 joins a day from one network.
+    const members = [];
+    for (let i = 0; i < 3; i++) {
+      const j = await post({ action: 'join', code: joinCode });
+      assert.equal(j.status, 200, JSON.stringify(j.json));
+      assert.equal(j.json.name, 'LoosenUp live test');
+      assert.ok(j.json.memberId && j.json.memberPass, 'member id and pass from the server');
+      members.push(j.json);
+    }
+    assert.equal((await post({ action: 'join', code: joinCode })).status, 429, 'a fourth join from one network today is refused');
+    for (const m of members) assert.equal((await pulse(m)).status, 200);
+    assert.equal((await pulse({ memberId: 'made-up-member-xxxxxxxxxx', memberPass: 'forged' })).status, 403, 'a made-up member cannot post');
+    assert.equal((await pulse({ memberId: members[0].memberId, memberPass: members[1].memberPass })).status, 403, 'a pass only works for its own member');
+    assert.equal((await dash()).weeks[0].hidden, true, 'three people on one network stay private');
   } finally {
     assert.equal((await post({ action: 'delete' }, { 'X-Admin-Key': adminKey })).status, 200, 'test organisation removed');
   }
