@@ -44,6 +44,8 @@
   var sleepRun = null;
   function lineSecs(text) { return Math.max(3, Math.round(text.split(/\s+/).length * 0.45 + 1)); }
   function sessionSecs(s) { return s.lines.reduce(function (a, l) { return a + lineSecs(l[0]) + l[1]; }, 0); }
+  // Minutes from the script itself, so the label always matches the timer.
+  function mins(s) { return Math.max(1, Math.round(sessionSecs(s) / 60)); }
   function fmt(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
   function buildSleep() {
     var sc = screen('sleep', 'Wind down', 'Sleep', 'Guided sessions to help you drift off. Put the phone face down and let the voice guide you.');
@@ -52,7 +54,7 @@
       var b = mk('button', 'sleep-card');
       b.type = 'button';
       b.setAttribute('data-sleep', s.id);
-      b.appendChild(mk('span', 'sleep-kind', s.kind + ' · ' + s.mins + ' min'));
+      b.appendChild(mk('span', 'sleep-kind', s.kind + ' · ' + mins(s) + ' min'));
       b.appendChild(mk('strong', null, s.title[0]));
       b.appendChild(mk('span', 'sleep-desc', s.desc[0]));
       list.appendChild(b);
@@ -86,8 +88,9 @@
     core.go('sleep');
     $('sleep-list').hidden = true;
     $('sleep-player').hidden = false;
-    core.setText('sp-kind', s.kind + ' · ' + s.mins + ' min');
+    core.setText('sp-kind', s.kind + ' · ' + mins(s) + ' min');
     core.setText('sp-title', s.title[0]);
+    $('sp-title').hidden = s.title[0] === s.kind;
     document.documentElement.classList.add('sleep-dim');
     core.playSound(s.sound, 0.22);
     sleepRun.timer = setInterval(sleepTick, 1000);
@@ -516,18 +519,19 @@
     if (trace.raf) (window.cancelAnimationFrame || clearTimeout)(trace.raf);
     trace = null;
   }
+  var TRACE_ICON = '<svg class="trace-icon" viewBox="0 0 36 36"><rect x="5" y="5" width="26" height="26" rx="6" fill="none" stroke="#4FA67C" stroke-width="3"/><circle cx="5" cy="31" r="4.5" fill="#FFC857" stroke="#E0A030" stroke-width="1.5"/></svg>';
   function buildTraceTiles() {
     var row = document.querySelector('#screen-today .game-row');
     if (row) {
       var t = mk('button', 'game-tile gt-trace'); t.type = 'button'; t.setAttribute('data-more', 'trace');
-      var ic = mk('span', 'gt-ic', '🟦'); ic.setAttribute('aria-hidden', 'true'); t.appendChild(ic);
+      var ic = mk('span', 'gt-ic'); ic.setAttribute('aria-hidden', 'true'); ic.innerHTML = TRACE_ICON; t.appendChild(ic);
       t.appendChild(mk('strong', null, 'Trace the square')); t.appendChild(mk('span', null, 'Follow the dot'));
       row.appendChild(t);
     }
     var games = document.querySelector('#panel-games .games');
     if (games) {
       var c = mk('button', 'game-card'); c.type = 'button'; c.setAttribute('data-more', 'trace');
-      var art = mk('span', 'game-art', '🟦'); art.setAttribute('aria-hidden', 'true'); c.appendChild(art);
+      var art = mk('span', 'game-art'); art.setAttribute('aria-hidden', 'true'); art.innerHTML = TRACE_ICON; c.appendChild(art);
       var tx = mk('span'); tx.appendChild(mk('strong', null, 'Trace the square')); tx.appendChild(mk('span', null, 'Follow the dot round the square as you breathe.'));
       c.appendChild(tx);
       games.appendChild(c);
@@ -536,9 +540,8 @@
 
   /* ---------- Entry points and events ---------- */
   function buildTiles() {
-    // A visible row on Today, right under the games, so sleep and the journal are one tap away.
-    var games = document.querySelector('#screen-today .game-row');
-    var block = games && games.closest('section');
+    // A visible row on Today, right after the mood check-in, so sleep and the journal are one tap away.
+    var block = $('mood-card');
     if (block) {
       var sec = mk('section', 'block more-row');
       sec.setAttribute('aria-labelledby', 'more-row-title');

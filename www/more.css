@@ -79,3 +79,12 @@ html[data-theme="dark"] .for-you { background: linear-gradient(150deg, #3A3220, 
 .more-row .season-card { margin-bottom: 4px; }
 html[data-theme="dark"] .gday.on { color: #fff; }
 html[data-theme="dark"] .tool-more .tool-ic { background: #CFEBDD; color: #1E5A40; }
+
+.trace-icon { width: 34px; height: 34px; display: block; margin-inline: auto; }
+.game-art .trace-icon { width: 52px; height: 52px; }
+#screen-today .season-card { flex-direction: row; justify-content: flex-start; text-align: left; min-height: 0; padding: 12px 16px; }
+#screen-today .season-card .pack-ic { font-size: 26px; }
+#screen-today .season-text strong { font-size: 16px; }
+
+/* Emotion names never break mid-word ("Overwhelmed" shrinks a little instead). */
+.emo-name { overflow-wrap: normal; word-break: normal; font-size: min(12px, 3.1vw); letter-spacing: -.1px; }

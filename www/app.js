@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.3.0';
+  var VERSION = '2.3.1';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
