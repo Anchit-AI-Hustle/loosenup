@@ -1,5 +1,5 @@
 /* LoosenUp service worker: precache the shell, cache-first for same-origin GET. */
-var CACHE = 'loosenup-v2.5.2';
+var CACHE = 'loosenup-v2.5.3';
 var SHELL = [
   '/',
   '/index.html',
@@ -44,6 +44,8 @@ self.addEventListener('fetch', function (event) {
   if (url.origin !== self.location.origin) return;
   // Server answers (Plus status, prices, reminder keys) are always live, never cached.
   if (url.pathname.indexOf('/api/') === 0) return;
+  // The iPhone install profile goes straight to iOS Settings, never through the cache.
+  if (/\.mobileconfig$/.test(url.pathname)) return;
 
   if (request.mode === 'navigate') {
     var isAppShell = url.pathname === '/' || url.pathname === '/index.html';

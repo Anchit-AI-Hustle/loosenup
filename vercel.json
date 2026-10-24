@@ -11,6 +11,23 @@
   },
   "headers": [
     {
+      "source": "/loosenup.mobileconfig",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/x-apple-aspen-config"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"LoosenUp.mobileconfig\""
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
       "source": "/updates/(.*)",
       "headers": [
         {

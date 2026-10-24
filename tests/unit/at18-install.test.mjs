@@ -10,7 +10,7 @@ test('AT18 install page offers a direct Android download and iPhone home screen 
   assert.match(html, /<a id="apk-download"[^>]*href="\/download\/loosenup-android\.apk"/);
   assert.match(html, /Install unknown apps/);
   assert.match(html, /Add to Home Screen/);
-  assert.match(html, /Open LoosenUp in Safari/);
+  assert.match(html, /Install on iPhone/);
   assert.match(html, /href="tel:14416"/);
   assert.match(html, /A wellbeing companion, not medical care\./);
 });
@@ -42,9 +42,9 @@ test('AT27 iPhone on /get adds LoosenUp to the home screen and never tries a web
   // already on the phone. So /get offers only the home screen app on iPhone.
   const html = read('www/install.html');
   assert.doesNotMatch(html, /itms-services/);
-  assert.match(html, /<a id="iphone-open"[^>]*href="https:\/\/loosenup\.anchit-tandon\.com\/"/);
-  assert.match(html, /Add to Home Screen, then Add/);
-  assert.match(html, /<button id="iphone-install"[^>]*>Install LoosenUp<\/button>/, 'a real Install button');
+  assert.match(html, /<a id="ios-profile"[^>]*href="\/loosenup\.mobileconfig"/);
+  assert.match(html, /Profile Downloaded near the top, then Install/);
+  assert.match(html, /<button id="iphone-install"[^>]*>Or use Safari's Share menu<\/button>/, 'the Share menu way stays as a second option');
   assert.match(html, /class="sheet" role="dialog" aria-modal="true" aria-labelledby="a2hs-title"/, 'Install opens a three-step guide in the app sheet');
   for (const page of ['install', 'plus', 'terms', 'privacy', 'refunds', 'teams', 'org']) {
     assert.match(read(`www/${page}.html`), /<script src="\/theme\.js"><\/script>/, `${page} follows the app theme`);
@@ -56,4 +56,19 @@ test('AT27 iPhone on /get adds LoosenUp to the home screen and never tries a web
   const vercel = JSON.parse(read('vercel.json'));
   assert.doesNotMatch(vercel.buildCommand, /\.ipa/, 'no iPhone app file is published');
   assert.ok(!vercel.headers.some((h) => /plist|ipa/.test(h.source)));
+});
+
+test('AT27 the iPhone install profile adds one full-screen LoosenUp icon, served so iOS installs it', () => {
+  const xml = read('www/loosenup.mobileconfig');
+  assert.match(xml, /<key>PayloadType<\/key><string>com\.apple\.webClip\.managed<\/string>/);
+  assert.match(xml, /<key>URL<\/key><string>https:\/\/loosenup\.anchit-tandon\.com\/\?app=webclip<\/string>/);
+  assert.match(xml, /<key>FullScreen<\/key><true\/>/);
+  assert.match(xml, /<key>IsRemovable<\/key><true\/>/);
+  const icon = xml.match(/<key>Icon<\/key><data>([^<]+)<\/data>/)[1];
+  assert.equal(icon, readFileSync(path.join(ROOT, 'www/icons/icon-512.png')).toString('base64'), 'the current app icon');
+  assert.match(xml, /CD3F0B59-B307-4A16-84EE-381B9DFA2879/, 'a fixed id, so installing again replaces it');
+  const v = JSON.parse(read('vercel.json'));
+  const rule = v.headers.find((h) => h.source === '/loosenup.mobileconfig');
+  assert.equal(rule.headers.find((h) => h.key === 'Content-Type').value, 'application/x-apple-aspen-config');
+  assert.match(read('www/sw.js'), /\.mobileconfig\$\/\.test/);
 });

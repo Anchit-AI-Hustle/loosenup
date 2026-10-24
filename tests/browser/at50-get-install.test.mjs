@@ -21,7 +21,7 @@ async function open(dev) {
 test('AT50 on iPhone, the iPhone card comes first and Install opens the Share guide with an arrow', async () => {
   const { ctx, p, errors } = await open(devices['iPhone 13']);
   assert.equal(await p.evaluate(() => document.querySelector('main .card').id), 'iphone');
-  assert.equal(await p.textContent('#iphone-install'), 'Install LoosenUp');
+  assert.equal(await p.textContent('#iphone-install'), "Or use Safari's Share menu");
   assert.equal(await p.isVisible('#a2hs .sheet'), false);
   await p.click('#iphone-install');
   assert.equal(await p.isVisible('#a2hs .sheet'), true, 'the app bottom sheet opens');
@@ -67,31 +67,19 @@ test('AT50 on Android, the APK comes first and the iPhone guide explains where t
   await ctx.close();
 });
 
-test('AT50 with the private link, an iPhone gets Install the native app and sees the Mac install it', async () => {
-  const ctx = await browser.newContext(devices['iPhone 13']);
-  const p = await ctx.newPage();
-  const seen = [];
-  let polls = 0;
-  await p.route('**/api/iphone', async (r) => {
-    const b = JSON.parse(r.request().postData());
-    seen.push(b.action + ':' + b.key);
-    const json = b.action === 'request' ? { id: 7, status: 'queued', macOnline: true }
-      : { id: 7, status: ++polls < 2 ? 'installing' : 'installed', macOnline: true };
-    await r.fulfill({ contentType: 'application/json', body: JSON.stringify(json) });
-  });
-  await p.goto(server.url + '/install.html#iphone=abc123');
-  assert.equal(await p.evaluate(() => location.hash), '', 'the key leaves the address bar');
-  assert.ok(await p.isVisible('#native-install'));
-  await p.click('#native-install');
-  await p.waitForFunction(() => /Installed/.test(document.querySelector('#native-status').textContent), null, { timeout: 15000 });
-  assert.equal(seen[0], 'request:abc123');
-  await p.goto(server.url + '/install.html');
-  assert.ok(await p.isVisible('#native-install'), 'the phone remembers the private link');
+test('AT50 Install on iPhone downloads the LoosenUp install profile in Safari, and opens the guide elsewhere', async () => {
+  const { ctx, p, errors } = await open(devices['iPhone 13']);
+  assert.equal(await p.textContent('#ios-profile'), 'Install on iPhone');
+  assert.equal(await p.getAttribute('#ios-profile', 'href'), '/loosenup.mobileconfig');
+  const r = await p.request.get(server.url + '/loosenup.mobileconfig');
+  assert.equal(r.status(), 200);
+  assert.match(await r.text(), /com\.apple\.webClip\.managed/);
   await ctx.close();
-});
-
-test('AT50 without the private link, nobody sees the native button', async () => {
-  const { ctx, p } = await open(devices['iPhone 13']);
-  assert.equal(await p.isVisible('#native-install'), false);
-  await ctx.close();
+  const d = devices['iPhone 13'];
+  const chrome = await open({ ...d, userAgent: d.userAgent.replace('Safari', 'CriOS/140.0 Safari') });
+  await chrome.p.click('#ios-profile');
+  assert.ok(await chrome.p.isVisible('#a2hs .sheet'), 'outside Safari, the guide explains instead of a download');
+  assert.match(await chrome.p.textContent('#a2hs-note'), /works in Safari/);
+  await chrome.ctx.close();
+  assert.deepEqual(errors, []);
 });

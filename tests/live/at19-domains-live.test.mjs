@@ -48,7 +48,11 @@ test('AT27 live: no iPhone web install is offered, so a refused install can neve
   assert.equal((await fetch(IOS + '/download/loosenup-ios.ipa', { method: 'HEAD' })).status, 404);
   const page = await (await fetch(IOS + '/install.html')).text();
   assert.doesNotMatch(page, /itms-services/);
-  assert.match(page, /Open LoosenUp in Safari/);
+  assert.match(page, /Install on iPhone/);
+  const prof = await fetch(IOS + '/loosenup.mobileconfig');
+  assert.equal(prof.status, 200);
+  assert.equal(prof.headers.get('content-type'), 'application/x-apple-aspen-config');
+  assert.match(await prof.text(), /com\.apple\.webClip\.managed/);
 });
 
 test('AT30 live: organisations work end to end on Neon, and small or single-network groups stay private', { skip }, async () => {

@@ -21,7 +21,7 @@ The brand mark is a petal sun that opens on every in-breath, unfurls on the resu
 | iPhone | https://loosenup.anchit-tandon.com | `loosenup-ios-qr.png` |
 
 - **Android (direct install):** open the Android link on the phone and tap **Download for Android**, open `LoosenUp.apk`, allow your browser to install apps if asked (Settings, then Install unknown apps), then tap Install. Direct file: https://loosenup.anchit-tandon.com/download/loosenup-android.apk. The full web app is at https://loosenup.anchit-tandon.com.
-- **iPhone and iPad:** open the iPhone link in Safari, tap **Share**, then **Add to Home Screen**. It opens full screen, works offline and has every feature. `/get` shows these steps first on an iPhone. There is no web install of the native app: apps signed with a free Apple ID can only be installed from a Mac, and a refused web install removes the copy already on the phone. A native install for anyone needs TestFlight, which needs an Apple Developer account (see Native apps below).
+- **iPhone and iPad:** open https://loosenup.anchit-tandon.com/get in Safari and tap **Install on iPhone**, then **Allow**; open Settings, tap **Profile Downloaded**, then **Install**. LoosenUp appears on the home screen as a full-screen app (an Apple Web Clip profile, `www/loosenup.mobileconfig`, built by `node scripts/make-webclip.mjs`; the same way The Third Eye installs). No Mac, App Store or developer account is involved. Safari's **Share**, then **Add to Home Screen**, also works. It opens full screen, works offline and has every feature. `/get` shows these steps first on an iPhone. There is no web install of the native app: apps signed with a free Apple ID can only be installed from a Mac, and a refused web install removes the copy already on the phone. A native install for anyone needs TestFlight, which needs an Apple Developer account (see Native apps below).
 
 Both domains (and https://loosenup.vercel.app) serve the same Vercel project. `anchit-tandon.com` uses Vercel DNS, so HTTPS is automatic.
 
@@ -181,7 +181,6 @@ cp scripts/com.loosenup.renew-iphone.plist ~/Library/LaunchAgents/ && launchctl 
 
 The log is `~/Library/Logs/loosenup-renew-iphone.log`. The iPhone app file is not kept in git.
 
-**Install the native app from /get.** Because only a Mac can install a free-signed build, `/get` asks this Mac to do it: on a registered iPhone that has opened the private link once (`/get#iphone=KEY`), an **Install the native app** button queues a request (`api/iphone.js`), and `scripts/iphone-agent.sh`, run every minute by launchd, installs the latest signed build on the iPhone over Wi-Fi and reports back, re-signing first if needed. The Mac must be on and on the same Wi-Fi as the iPhone. Set it up once with `bash scripts/iphone-agent-setup.sh`, which makes the private key (saved in Vercel as `IPHONE_INSTALL_KEY` and in `~/.config/loosenup`, never printed), switches on the job and opens the private link on the connected iPhone. Log: `~/Library/Logs/loosenup-iphone-agent.log`.
 
 ### Daily reminders
 
