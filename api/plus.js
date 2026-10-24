@@ -175,9 +175,16 @@ async function checkout(body) {
     }
     return { provider: 'razorpay', keyId: env('RAZORPAY_KEY_ID'), subscriptionId: sub, plan: row.plan };
   }
+  // The transaction is made here with the checkout page named explicitly, so the price and the key
+  // are fixed on the server and Paddle does not depend on a default payment link being set.
+  const priceId = env(row.plan === 'yearly' ? 'PADDLE_PRICE_YEARLY' : 'PADDLE_PRICE_MONTHLY');
+  const txn = await paddle('/transactions', {
+    items: [{ price_id: priceId, quantity: 1 }], custom_data: { kh: row.key_hash },
+    checkout: { url: (env('PUBLIC_SITE') || 'https://loosenup.anchit-tandon.com') + '/plus.html' }
+  });
   return {
     provider: 'paddle', token: env('PADDLE_CLIENT_TOKEN'), env: env('PADDLE_ENV') === 'production' ? 'production' : 'sandbox',
-    priceId: env(row.plan === 'yearly' ? 'PADDLE_PRICE_YEARLY' : 'PADDLE_PRICE_MONTHLY'), customData: { kh: row.key_hash }, plan: row.plan
+    transactionId: txn.id, priceId, customData: { kh: row.key_hash }, plan: row.plan
   };
 }
 

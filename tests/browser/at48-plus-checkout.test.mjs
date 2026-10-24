@@ -35,7 +35,7 @@ async function page({ provider = 'razorpay', mode = 'pay', activeAfter = 1, orde
     if (/action=config/.test(req.url())) json = { enabled: true, renews: !orders, provider, currency: provider === 'razorpay' ? 'INR' : 'USD', prices: provider === 'razorpay' ? { monthly: '₹149', yearly: '₹799' } : { monthly: 'US$4.99', yearly: 'US$34.99' } };
     else if (body.action === 'start') json = { key: KEY, provider, plan: body.plan };
     else if (body.action === 'checkout' && orders) json = { provider, keyId: 'rzp_test_abc', orderId: 'order_1', amount: 79900, currency: 'INR', plan: 'yearly' };
-    else if (body.action === 'checkout') json = provider === 'razorpay' ? { provider, keyId: 'rzp_test_abc', subscriptionId: 'sub_123', plan: 'yearly' } : { provider, token: 'test_tok', env: 'sandbox', priceId: 'pri_y', customData: { kh: 'h' }, plan: 'yearly' };
+    else if (body.action === 'checkout') json = provider === 'razorpay' ? { provider, keyId: 'rzp_test_abc', subscriptionId: 'sub_123', plan: 'yearly' } : { provider, token: 'test_tok', env: 'sandbox', transactionId: 'txn_1', priceId: 'pri_y', customData: { kh: 'h' }, plan: 'yearly' };
     else if (body.action === 'verify' && orders) json = body.razorpay_order_id === 'order_1' && body.razorpay_payment_id === 'pay_1' ? { active: true, until: '2027-10-24T00:00:00.000Z', plan: 'yearly', provider, cancelAtEnd: true } : { error: 'no' };
     else if (body.action === 'verify') json = body.razorpay_subscription_id === 'sub_123' ? { active: true, until: '2027-10-24T00:00:00.000Z', plan: 'yearly', provider } : { error: 'no' };
     else if (body.action === 'status') { statusChecks++; json = { active: statusChecks >= activeAfter, until: '2027-10-24T00:00:00.000Z', plan: 'yearly', provider }; }
@@ -75,8 +75,8 @@ test('AT48 outside India: Paddle opens in sandbox with the price, and Plus shows
   const { ctx, p, errors } = await page({ provider: 'paddle', activeAfter: 2 });
   await p.goto(server.url + '/plus.html#k=' + KEY + '&plan=yearly');
   await p.waitForSelector('#plus-done:not([hidden])', { timeout: 10000 });
-  const o = await p.evaluate(() => ({ env: window.__env, token: window.__init.token, price: window.__open.items[0].priceId, kh: window.__open.customData.kh }));
-  assert.deepEqual(o, { env: 'sandbox', token: 'test_tok', price: 'pri_y', kh: 'h' });
+  const o = await p.evaluate(() => ({ env: window.__env, token: window.__init.token, txn: window.__open.transactionId, items: window.__open.items || null }));
+  assert.deepEqual(o, { env: 'sandbox', token: 'test_tok', txn: 'txn_1', items: null }, 'opens the server-made transaction');
   assert.deepEqual(errors, []);
   await ctx.close();
 });

@@ -43,6 +43,7 @@ function world() {
     if (url === 'https://api.razorpay.com/v1/subscriptions') return { ok: true, json: async () => ({ id: 'sub_123', status: 'created' }) };
     if (url === 'https://api.razorpay.com/v1/subscriptions/sub_123') return { ok: true, json: async () => ({ id: 'sub_123', status: 'active', current_end: 1830000000 }) };
     if (/razorpay\.com\/v1\/subscriptions\/sub_123\/cancel$/.test(url)) return { ok: true, json: async () => ({ id: 'sub_123', status: 'active' }) };
+    if (url === 'https://sandbox-api.paddle.com/transactions') return { ok: true, json: async () => ({ data: { id: 'txn_1', status: 'ready' } }) };
     if (/sandbox-api\.paddle\.com\/subscriptions\/sub_pdl\/cancel$/.test(url)) return { ok: true, json: async () => ({ data: { id: 'sub_pdl' } }) };
     return { ok: false, json: async () => ({ error: { description: 'not found' } }) };
   };
@@ -129,11 +130,15 @@ test('AT46 Razorpay webhooks: renewals extend Plus, a halted mandate ends it, an
 });
 
 test('AT46 Paddle: checkout opens with the right price, and signed webhooks turn Plus on, schedule a cancel, and end it', async () => {
-  const { call, rows } = await api();
+  const { call, rows, calls } = await api();
   const s = await call('POST', { body: { action: 'start', plan: 'monthly' }, headers: { 'x-vercel-ip-country': 'GB' } });
   assert.equal(s.json.provider, 'paddle');
   const c = await call('POST', { body: { action: 'checkout', key: s.json.key } });
   assert.deepEqual([c.json.provider, c.json.priceId, c.json.token, c.json.env, c.json.customData.kh], ['paddle', 'pri_m', 'test_tok', 'sandbox', rows[0].key_hash]);
+  assert.equal(c.json.transactionId, 'txn_1', 'the server makes the transaction');
+  const tx = calls.find((x) => x.url.endsWith('/transactions'));
+  assert.deepEqual([tx.body.items[0].price_id, tx.body.custom_data.kh, tx.body.checkout.url], ['pri_m', rows[0].key_hash, 'https://loosenup.anchit-tandon.com/plus.html']);
+  assert.equal(tx.auth, 'Bearer pdl_key');
   const send = (event_type, data, opts = {}) => {
     const raw = JSON.stringify({ event_type, data: { id: 'sub_pdl', customer_id: 'ctm_1', custom_data: { kh: rows[0].key_hash }, ...data } });
     const ts = opts.ts || Math.floor(Date.now() / 1000);

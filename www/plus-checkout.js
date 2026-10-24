@@ -103,7 +103,9 @@
         if (e.name === 'checkout.closed' && $('plus-done').hidden) stop('Checkout was closed before paying. Nothing was charged.');
         if (e.name === 'checkout.error') stop('The payment page could not open. Nothing was charged. Please try again in a moment.');
       } });
-      P.Checkout.open({ items: [{ priceId: c.priceId, quantity: 1 }], customData: c.customData, settings: { displayMode: 'overlay', theme: 'light' } });
+      var settings = { displayMode: 'overlay', theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light' };
+      P.Checkout.open(c.transactionId ? { transactionId: c.transactionId, settings: settings }
+        : { items: [{ priceId: c.priceId, quantity: 1 }], customData: c.customData, settings: settings });
     });
   }
 
