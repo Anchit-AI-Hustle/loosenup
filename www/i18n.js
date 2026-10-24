@@ -228,6 +228,9 @@
     'Choose one small step that helps, and when you will take it.': 'एक छोटा कदम चुनें जो मदद करे, और यह कि कब उठाएँगे।',
     'Picture the good part once more, and smile at it.': 'अच्छे हिस्से की एक बार फिर कल्पना करें, और उस पर मुस्कुराएँ।',
     /* LoosenUp Plus */
+    'One payment for a month or a year of Plus. It does not renew; buy again any time.': 'Plus के एक महीने या एक साल के लिए एक ही भुगतान। यह अपने आप रिन्यू नहीं होता; जब चाहें फिर से खरीदें।',
+    'Secure payment with UPI, cards or netbanking. One payment, no renewal.': 'UPI, कार्ड या नेटबैंकिंग से सुरक्षित भुगतान। एक ही भुगतान, अपने आप रिन्यू नहीं।',
+    'One year of Plus': 'Plus का एक साल', 'One month of Plus': 'Plus का एक महीना',
     'Support LoosenUp': 'LoosenUp का साथ दें',
     'Every day of every guided programme: Better sleep, Exam calm, Recovering from burnout': 'हर गाइडेड प्रोग्राम का हर दिन: बेहतर नींद, परीक्षा में शांति, थकान से उबरना',
     'Every sleep session: body scan, yoga nidra and sleep stories': 'हर नींद सेशन: बॉडी स्कैन, योग निद्रा और नींद की कहानियाँ',
@@ -1091,6 +1094,7 @@
   var PATTERNS = [
     [/^LoosenUp Plus: on, renews (.+)\.$/, function (m) { return 'LoosenUp Plus: चालू, ' + m[1] + ' को रिन्यू होगा।'; }],
     [/^LoosenUp Plus: on until (.+), then it ends\.$/, function (m) { return 'LoosenUp Plus: ' + m[1] + ' तक चालू, फिर बंद हो जाएगा।'; }],
+    [/^Active until (.+)\. Buy again any time to add more\.$/, function (m) { return m[1] + ' तक चालू। और समय जोड़ने के लिए कभी भी फिर से खरीदें।'; }],
     [/^Active until (.+)\. It renews automatically unless you cancel\.$/, function (m) { return m[1] + ' तक चालू। जब तक आप रद्द न करें, यह अपने आप रिन्यू होगा।'; }],
     [/^(\d+) of (\d+) days this week · (\d+) breaks?$/, function (m) { return 'इस हफ़्ते ' + m[2] + ' में से ' + m[1] + ' दिन · ' + m[3] + ' ब्रेक'; }],
     [/^(\d+) of (\d+) days$/, function (m) { return m[2] + ' में से ' + m[1] + ' दिन'; }],

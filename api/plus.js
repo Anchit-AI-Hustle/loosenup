@@ -5,7 +5,7 @@
 //   GET  /api/plus?action=config                      -> which provider and prices this visitor sees
 //   POST /api/plus { action: 'start', plan }           -> a new Plus key (shown once; the app keeps it)
 //   POST /api/plus { action: 'checkout', key }         -> what the checkout page needs to open the provider
-//   POST /api/plus { action: 'verify', key, razorpay_payment_id, razorpay_subscription_id, razorpay_signature }
+//   POST /api/plus { action: 'verify', key, razorpay_payment_id, razorpay_subscription_id | razorpay_order_id, razorpay_signature }
 //   POST /api/plus { action: 'status', key }           -> { active, plan, until, cancelAtEnd, provider }
 //   POST /api/plus { action: 'cancel', key }           -> cancels at the end of the paid period
 //   POST /api/plus?hook=razorpay | ?hook=paddle        -> provider webhooks, signature checked on the raw body
@@ -27,7 +27,11 @@ const GRACE_MS = 3 * 86400000;
 const problem = (status, message) => Object.assign(new Error(message), { status });
 const env = (k) => process.env[k] || '';
 
-export function razorpayReady() { return !!(env('RAZORPAY_KEY_ID') && env('RAZORPAY_KEY_SECRET') && env('RAZORPAY_PLAN_MONTHLY') && env('RAZORPAY_PLAN_YEARLY')); }
+// Razorpay runs as subscriptions (UPI Autopay, renews) when its plans are set, and otherwise as Standard
+// Checkout orders: one payment buys a month or a year of Plus, with no renewal.
+export const AMOUNT_PAISE = { monthly: 14900, yearly: 79900 };
+export function razorpayMode() { return env('RAZORPAY_PLAN_MONTHLY') && env('RAZORPAY_PLAN_YEARLY') ? 'subscriptions' : 'orders'; }
+export function razorpayReady() { return !!(env('RAZORPAY_KEY_ID') && env('RAZORPAY_KEY_SECRET')); }
 export function paddleReady() { return !!(env('PADDLE_CLIENT_TOKEN') && env('PADDLE_API_KEY') && env('PADDLE_PRICE_MONTHLY') && env('PADDLE_PRICE_YEARLY')); }
 const paddleApi = () => (env('PADDLE_ENV') === 'production' ? 'https://api.paddle.com' : 'https://sandbox-api.paddle.com');
 
@@ -113,6 +117,7 @@ function config(country) {
   const currency = provider === 'razorpay' || (!provider && india) ? 'INR' : 'USD';
   return {
     enabled: !!provider, provider, country: String(country || '').toUpperCase() || null, currency,
+    renews: provider === 'paddle' || (provider === 'razorpay' && razorpayMode() === 'subscriptions'),
     prices: PRICES[currency],
     paddle: provider === 'paddle' ? { token: env('PADDLE_CLIENT_TOKEN'), env: env('PADDLE_ENV') === 'production' ? 'production' : 'sandbox' } : null
   };
@@ -134,6 +139,18 @@ async function start(body, country, ip) {
 async function checkout(body) {
   const row = await rowFor(body.key);
   if (entitlement(row).active) return { provider: row.provider, alreadyActive: true };
+  if (row.provider === 'razorpay' && razorpayMode() === 'orders') {
+    // Standard Checkout: one order per key, reused if the checkout is opened again.
+    let order = row.sub_id && row.sub_id.indexOf('order_') === 0 ? row.sub_id : null;
+    if (!order) {
+      const o = await razorpay('/orders', {
+        amount: AMOUNT_PAISE[row.plan], currency: 'INR', receipt: 'lu_' + row.key_hash.slice(0, 32), notes: { kh: row.key_hash, plan: row.plan }
+      });
+      order = o.id;
+      await sql(`UPDATE lu_plus SET sub_id = $2, status = 'created', updated_at = now() WHERE key_hash = $1`, [row.key_hash, order]);
+    }
+    return { provider: 'razorpay', keyId: env('RAZORPAY_KEY_ID'), orderId: order, amount: AMOUNT_PAISE[row.plan], currency: 'INR', plan: row.plan };
+  }
   if (row.provider === 'razorpay') {
     let sub = row.sub_id;
     if (!sub) {
@@ -152,10 +169,27 @@ async function checkout(body) {
   };
 }
 
+// One payment for a month or a year: the order is marked paid only when the signature matches and
+// Razorpay confirms the payment captured the right amount for this order.
+export function paidUntil(plan, from = new Date()) { const d = new Date(from); d.setMonth(d.getMonth() + PLANS[plan].months); return d.toISOString(); }
+async function verifyOrder(row, body) {
+  const pay = String(body.razorpay_payment_id || ''), order = String(body.razorpay_order_id || '');
+  if (!pay || !order || !body.razorpay_signature) throw problem(400, 'The payment details are incomplete.');
+  if (order !== row.sub_id) throw problem(400, 'That payment is for a different order.');
+  if (!same(hmac(env('RAZORPAY_KEY_SECRET'), order + '|' + pay), body.razorpay_signature)) throw problem(400, 'The payment could not be confirmed.');
+  const p = await razorpay('/payments/' + encodeURIComponent(pay), null, 'GET');
+  if (p.order_id !== order || Number(p.amount) !== AMOUNT_PAISE[row.plan] || !['captured', 'authorized'].includes(p.status)) throw problem(400, 'The payment could not be confirmed.');
+  if (row.status === 'active' && row.current_end) return entitlement(row);
+  const end = paidUntil(row.plan);
+  await sql(`UPDATE lu_plus SET status = 'active', current_end = $2, cancel_at_end = true, updated_at = now() WHERE key_hash = $1`, [row.key_hash, end]);
+  return entitlement({ ...row, status: 'active', current_end: end, cancel_at_end: true });
+}
+
 // Razorpay's checkout returns a signature over payment id and subscription id, made with our secret.
 async function verify(body) {
   const row = await rowFor(body.key);
   if (row.provider !== 'razorpay') throw problem(400, 'This key uses a different checkout.');
+  if (body.razorpay_order_id || (row.sub_id && row.sub_id.indexOf('order_') === 0)) return verifyOrder(row, body);
   const pay = String(body.razorpay_payment_id || ''), sub = String(body.razorpay_subscription_id || '');
   if (!row.sub_id || sub !== row.sub_id) throw problem(400, 'That payment is for a different subscription.');
   if (!same(hmac(env('RAZORPAY_KEY_SECRET'), pay + '|' + sub), body.razorpay_signature)) throw problem(400, 'The payment could not be confirmed.');
@@ -171,6 +205,7 @@ async function status(body) { return entitlement(await rowFor(body.key)); }
 async function cancel(body) {
   const row = await rowFor(body.key);
   if (!row.sub_id) throw problem(400, 'There is no subscription to cancel.');
+  if (row.sub_id.indexOf('order_') === 0) return entitlement({ ...row, cancel_at_end: true }); // one payment, nothing renews
   if (row.provider === 'razorpay') await razorpay('/subscriptions/' + row.sub_id + '/cancel', { cancel_at_cycle_end: 1 });
   else await paddle('/subscriptions/' + row.sub_id + '/cancel', { effective_from: 'next_billing_period' });
   await sql('UPDATE lu_plus SET cancel_at_end = true, updated_at = now() WHERE key_hash = $1', [row.key_hash]);
@@ -182,6 +217,14 @@ export async function razorpayHook(raw, headers) {
   const secret = env('RAZORPAY_WEBHOOK_SECRET');
   if (!secret || !same(hmac(secret, raw), headers['x-razorpay-signature'])) throw problem(400, 'Signature did not match.');
   const ev = JSON.parse(raw);
+  // Standard Checkout: order.paid turns Plus on even if the page closed before it could confirm.
+  const o = ev.event === 'order.paid' && ev.payload && ev.payload.order && ev.payload.order.entity;
+  if (o) {
+    const plan = o.notes && PLANS[o.notes.plan] ? o.notes.plan : 'monthly';
+    const rows = await sql(`UPDATE lu_plus SET status = 'active', current_end = COALESCE(current_end, $3), cancel_at_end = true, updated_at = now()
+      WHERE sub_id = $1 AND (key_hash = $2 OR $2 = '') AND status <> 'active' RETURNING key_hash`, [o.id, (o.notes && o.notes.kh) || '', paidUntil(plan)]);
+    return { ok: true, updated: rows.length };
+  }
   const s = ev.payload && ev.payload.subscription && ev.payload.subscription.entity;
   if (!s) return { ok: true, ignored: ev.event };
   const kh = s.notes && s.notes.kh;

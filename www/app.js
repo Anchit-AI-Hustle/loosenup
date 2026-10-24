@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.5.3';
+  var VERSION = '2.5.4';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -584,7 +584,7 @@
     // Plan buttons show only when Plus can actually be bought.
     for (var i = 0; i < b.length; i++) b[i].hidden = !on || isPlus();
     setText('shop-status', isPlus() ? 'Plus is on. Manage it in Me.'
-      : on ? (c.provider === 'razorpay' ? 'Secure payment with UPI, cards or netbanking. Renews automatically; cancel any time in Me.' : 'Secure payment by card, Apple Pay, Google Pay or PayPal. Renews automatically; cancel any time in Me.')
+      : on ? (c.provider === 'razorpay' && c.renews === false ? 'Secure payment with UPI, cards or netbanking. One payment, no renewal.' : c.provider === 'razorpay' ? 'Secure payment with UPI, cards or netbanking. Renews automatically; cancel any time in Me.' : 'Secure payment by card, Apple Pay, Google Pay or PayPal. Renews automatically; cancel any time in Me.')
       : 'LoosenUp Plus opens soon. Until then, everything in LoosenUp is free.');
   }
   function openShop(note) {

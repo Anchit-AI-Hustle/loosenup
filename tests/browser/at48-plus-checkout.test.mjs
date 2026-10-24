@@ -14,12 +14,12 @@ const KEY = 'LU' + 'q'.repeat(32);
 const FAKE_RZP = (mode) => `window.Razorpay = function (o) { this.o = o; };
   window.Razorpay.prototype.on = function () {};
   window.Razorpay.prototype.open = function () { window.__rzp = this.o; var o = this.o;
-    setTimeout(function () { ${mode === 'close' ? 'o.modal.ondismiss();' : "o.handler({ razorpay_payment_id: 'pay_1', razorpay_subscription_id: o.subscription_id, razorpay_signature: 'sig' });"} }, 50); };`;
+    setTimeout(function () { ${mode === 'close' ? 'o.modal.ondismiss();' : "o.handler(o.order_id ? { razorpay_payment_id: 'pay_1', razorpay_order_id: o.order_id, razorpay_signature: 'sig' } : { razorpay_payment_id: 'pay_1', razorpay_subscription_id: o.subscription_id, razorpay_signature: 'sig' });"} }, 50); };`;
 const FAKE_PADDLE = `window.Paddle = { Environment: { set: function (e) { window.__env = e; } },
   Initialize: function (o) { window.__init = o; },
   Checkout: { open: function (o) { window.__open = o; setTimeout(function () { window.__init.eventCallback({ name: 'checkout.completed' }); }, 50); } } };`;
 
-async function page({ provider = 'razorpay', mode = 'pay', activeAfter = 1 } = {}) {
+async function page({ provider = 'razorpay', mode = 'pay', activeAfter = 1, orders = false } = {}) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const p = await ctx.newPage();
   const errors = [], calls = [];
@@ -32,9 +32,11 @@ async function page({ provider = 'razorpay', mode = 'pay', activeAfter = 1 } = {
     const body = req.postData() ? JSON.parse(req.postData()) : {};
     calls.push(body.action || 'config');
     let json;
-    if (/action=config/.test(req.url())) json = { enabled: true, provider, currency: provider === 'razorpay' ? 'INR' : 'USD', prices: provider === 'razorpay' ? { monthly: '₹149', yearly: '₹799' } : { monthly: 'US$4.99', yearly: 'US$34.99' } };
+    if (/action=config/.test(req.url())) json = { enabled: true, renews: !orders, provider, currency: provider === 'razorpay' ? 'INR' : 'USD', prices: provider === 'razorpay' ? { monthly: '₹149', yearly: '₹799' } : { monthly: 'US$4.99', yearly: 'US$34.99' } };
     else if (body.action === 'start') json = { key: KEY, provider, plan: body.plan };
+    else if (body.action === 'checkout' && orders) json = { provider, keyId: 'rzp_test_abc', orderId: 'order_1', amount: 79900, currency: 'INR', plan: 'yearly' };
     else if (body.action === 'checkout') json = provider === 'razorpay' ? { provider, keyId: 'rzp_test_abc', subscriptionId: 'sub_123', plan: 'yearly' } : { provider, token: 'test_tok', env: 'sandbox', priceId: 'pri_y', customData: { kh: 'h' }, plan: 'yearly' };
+    else if (body.action === 'verify' && orders) json = body.razorpay_order_id === 'order_1' && body.razorpay_payment_id === 'pay_1' ? { active: true, until: '2027-10-24T00:00:00.000Z', plan: 'yearly', provider, cancelAtEnd: true } : { error: 'no' };
     else if (body.action === 'verify') json = body.razorpay_subscription_id === 'sub_123' ? { active: true, until: '2027-10-24T00:00:00.000Z', plan: 'yearly', provider } : { error: 'no' };
     else if (body.action === 'status') { statusChecks++; json = { active: statusChecks >= activeAfter, until: '2027-10-24T00:00:00.000Z', plan: 'yearly', provider }; }
     await r.fulfill({ status: json.error ? 400 : 200, contentType: 'application/json', body: JSON.stringify(json) });
@@ -100,5 +102,17 @@ test('AT48 from the app: choosing a plan opens the checkout page with a fresh ke
   await p.waitForFunction(() => window.LoosenUp && window.LoosenUp.isPlus());
   await p.evaluate(() => window.LoosenUp.go('me'));
   assert.match(await p.textContent('#me-plan'), /LoosenUp Plus/);
+  await ctx.close();
+});
+
+test('AT48 Razorpay Standard Checkout: one order, the order id goes back for verification, and it says it does not renew', async () => {
+  const { ctx, p, errors, calls } = await page({ orders: true });
+  await p.goto(server.url + '/plus.html#k=' + KEY + '&plan=yearly');
+  await p.waitForSelector('#plus-done:not([hidden])');
+  const o = await p.evaluate(() => ({ order: window.__rzp.order_id, amount: window.__rzp.amount, currency: window.__rzp.currency, sub: window.__rzp.subscription_id || null }));
+  assert.deepEqual(o, { order: 'order_1', amount: 79900, currency: 'INR', sub: null });
+  assert.deepEqual(calls, ['config', 'checkout', 'verify']);
+  assert.match(await p.textContent('#plus-until'), /Active until 24 October 2027\. Buy again any time to add more\./);
+  assert.deepEqual(errors, []);
   await ctx.close();
 });

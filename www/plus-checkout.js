@@ -11,6 +11,7 @@
   var plan = hash.plan === 'monthly' ? 'monthly' : 'yearly';
   var I = window.LoosenUpI18n;
   var hindi = hash.lang === 'hi';
+  var renews = true;
 
   function tr(s) { return hindi && I ? I.tr(s) : s; }
   function text(id, s) { $(id).textContent = tr(s); }
@@ -46,7 +47,8 @@
   function done(st) {
     show('plus-done');
     $('plus-key').textContent = key;
-    if (st && st.until) text('plus-until', 'Active until ' + new Date(st.until).toLocaleDateString(hindi ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) + '. It renews automatically unless you cancel.');
+    var date = st && st.until ? new Date(st.until).toLocaleDateString(hindi ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
+    if (date) text('plus-until', 'Active until ' + date + (st.cancelAtEnd && !renews ? '. Buy again any time to add more.' : '. It renews automatically unless you cancel.'));
     try { history.replaceState(null, '', location.pathname + '#done'); } catch (e) { /* older browsers */ }
   }
   // After Paddle's checkout, the webhook turns Plus on; check until it has.
@@ -60,16 +62,21 @@
 
   function razorpay(c) {
     return load('https://checkout.razorpay.com/v1/checkout.js').then(function () {
-      var rzp = new window.Razorpay({
-        key: c.keyId, subscription_id: c.subscriptionId, name: 'LoosenUp Plus',
-        description: c.plan === 'yearly' ? 'Yearly plan' : 'Monthly plan', theme: { color: '#276E4F' },
+      // One payment (Standard Checkout order) or a subscription, whichever the server set up.
+      var opts = {
+        key: c.keyId, name: 'LoosenUp Plus',
+        description: c.orderId ? (c.plan === 'yearly' ? 'One year of Plus' : 'One month of Plus') : (c.plan === 'yearly' ? 'Yearly plan' : 'Monthly plan'),
+        theme: { color: '#276E4F' },
         handler: function (r) {
           text('plus-wait-title', 'Confirming your payment...');
-          call('verify', { key: key, razorpay_payment_id: r.razorpay_payment_id, razorpay_subscription_id: r.razorpay_subscription_id, razorpay_signature: r.razorpay_signature })
-            .then(done).catch(function (e) { stop(e.message); });
+          var proof = { key: key, razorpay_payment_id: r.razorpay_payment_id, razorpay_signature: r.razorpay_signature };
+          if (c.orderId) proof.razorpay_order_id = r.razorpay_order_id; else proof.razorpay_subscription_id = r.razorpay_subscription_id;
+          call('verify', proof).then(done).catch(function (e) { stop(e.message); });
         },
         modal: { ondismiss: function () { stop('Checkout was closed before paying. Nothing was charged.'); } }
-      });
+      };
+      if (c.orderId) { opts.order_id = c.orderId; opts.amount = c.amount; opts.currency = c.currency; } else opts.subscription_id = c.subscriptionId;
+      var rzp = new window.Razorpay(opts);
       rzp.on && rzp.on('payment.failed', function () { stop('That payment did not go through. Nothing was charged. Try again or use another method.'); });
       rzp.open();
     });
@@ -110,6 +117,8 @@
   selectPlan(plan);
   call('config').then(function (c) {
     if (c.prices) { $('price-monthly').textContent = c.prices.monthly; $('price-yearly').textContent = c.prices.yearly; }
+    renews = c.renews !== false;
+    if (c.enabled && !renews) text('plus-pay-note', 'One payment for a month or a year of Plus. It does not renew; buy again any time.');
     if (!c.enabled) { $('plus-buy').disabled = true; text('plus-pay-note', 'LoosenUp Plus opens soon. Until then, everything in LoosenUp is free.'); return; }
     if (key) checkout();
   }).catch(function () { text('plus-error', 'Connect to the internet to continue.'); });
