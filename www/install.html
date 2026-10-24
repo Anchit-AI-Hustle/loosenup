@@ -34,6 +34,8 @@
     @keyframes a2hs-bob { 50% { transform: translateY(6px); } }
     @media (prefers-reduced-motion: reduce) { .a2hs-arrow { animation: none; } }
     #iphone .btn + .steps, #iphone .steps + .btn { margin-top: 12px; }
+    .native { display: flex; flex-direction: column; gap: 8px; }
+    .native .fine { margin: 0; }
     html[data-theme="dark"] .a2hs-ic { background: rgba(122, 196, 152, .14); color: #8FD3AE; }
     html[data-theme="dark"] .a2hs-arrow { color: #8FD3AE; }
   </style>
@@ -92,6 +94,10 @@
       <article class="card" id="iphone">
         <p class="eyebrow platform">iPhone and iPad</p>
         <h2 class="subtitle">Install LoosenUp on iPhone</h2>
+        <div id="native" class="native" hidden>
+          <button id="native-install" class="btn btn-sun" type="button">Install the native app</button>
+          <p id="native-status" class="fine" aria-live="polite">Your Mac installs the signed LoosenUp app on this iPhone over Wi-Fi.</p>
+        </div>
         <button id="iphone-install" class="btn btn-sun" type="button">Install LoosenUp</button>
         <ol class="steps">
           <li>Tap Install LoosenUp above, in Safari on your iPhone.</li>
@@ -164,7 +170,47 @@
       $('a2hs-close').addEventListener('click', close);
       $('a2hs-scrim').addEventListener('click', close);
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('a2hs').hidden) close(); });
-      window.LoosenUpGet = { open: open, close: close };
+      // The native app, for iPhones registered to the developer account. The private link
+      // (/get#iphone=KEY) is opened once on the phone; the key stays in this browser only.
+      var NKEY = 'loosenup.iphoneKey', nkey = null;
+      try {
+        var m = location.hash.match(/iphone=([A-Za-z0-9]+)/);
+        if (m) { localStorage.setItem(NKEY, m[1]); history.replaceState(null, '', location.pathname); }
+        nkey = localStorage.getItem(NKEY);
+      } catch (e) { /* private mode */ }
+      function nstatus(t) { $('native-status').textContent = t; }
+      function ncall(body) {
+        body.key = nkey;
+        return fetch('/api/iphone', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Please try again.'); return j; }); });
+      }
+      var WORDS = {
+        queued: function (j) { return j.macOnline ? 'Your Mac has the request. Installing in a moment...' : 'Waiting for your Mac. Keep it on and on the same Wi-Fi as this iPhone.'; },
+        installing: function () { return 'Installing on this iPhone. Keep it unlocked...'; },
+        installed: function () { return 'Installed. Open LoosenUp from your home screen.'; },
+        stopped: function (j) { return 'Your Mac could not install it' + (j.message ? ': ' + j.message : '.') + ' Tap Install the native app to try again.'; },
+        dropped: function () { return 'Your Mac did not pick this up. Make sure it is on, then try again.'; }
+      };
+      function npoll(id, tries) {
+        return ncall({ action: 'status', id: id }).then(function (j) {
+          nstatus((WORDS[j.status] || WORDS.queued)(j));
+          if (j.status === 'installed' || j.status === 'stopped' || j.status === 'dropped') { $('native-install').disabled = false; return j; }
+          if (tries <= 0) { $('native-install').disabled = false; nstatus('Still waiting for your Mac. It installs as soon as the Mac is on and on the same Wi-Fi.'); return j; }
+          return new Promise(function (r) { setTimeout(r, 3000); }).then(function () { return npoll(id, tries - 1); });
+        });
+      }
+      function nativeInstall() {
+        $('native-install').disabled = true;
+        nstatus('Asking your Mac...');
+        return ncall({ action: 'request' }).then(function (j) { nstatus(WORDS.queued(j)); return npoll(j.id, 80); })
+          .catch(function (e) { $('native-install').disabled = false; nstatus(e.message); });
+      }
+      if (nkey && ios) {
+        $('native').hidden = false;
+        $('iphone-install').className = 'btn btn-soft';
+        $('native-install').addEventListener('click', nativeInstall);
+      }
+      window.LoosenUpGet = { open: open, close: close, nativeInstall: nativeInstall };
     })();
     /* Helpline links come from the same source as the app (www/helplines.js). */
     (function () { var H = window.LoosenUpHelplines; if (!H) return;

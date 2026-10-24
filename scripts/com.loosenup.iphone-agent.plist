@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Checks every minute for "Install the native app" taps on /get and installs LoosenUp on the iPhone.
+     Set up with scripts/iphone-agent-setup.sh. Remove: launchctl bootout gui/$(id -u)/com.loosenup.iphone-agent -->
+<plist version="1.0">
+<dict>
+	<key>Label</key><string>com.loosenup.iphone-agent</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/bash</string>
+		<string>/Users/anchittandon/Brightside/scripts/iphone-agent.sh</string>
+	</array>
+	<key>StartInterval</key><integer>60</integer>
+	<key>RunAtLoad</key><true/>
+	<key>LimitLoadToSessionType</key><string>Aqua</string>
+	<key>StandardOutPath</key><string>/Users/anchittandon/Library/Logs/loosenup-iphone-agent.log</string>
+	<key>StandardErrorPath</key><string>/Users/anchittandon/Library/Logs/loosenup-iphone-agent.log</string>
+</dict>
+</plist>

@@ -181,6 +181,8 @@ cp scripts/com.loosenup.renew-iphone.plist ~/Library/LaunchAgents/ && launchctl 
 
 The log is `~/Library/Logs/loosenup-renew-iphone.log`. The iPhone app file is not kept in git.
 
+**Install the native app from /get.** Because only a Mac can install a free-signed build, `/get` asks this Mac to do it: on a registered iPhone that has opened the private link once (`/get#iphone=KEY`), an **Install the native app** button queues a request (`api/iphone.js`), and `scripts/iphone-agent.sh`, run every minute by launchd, installs the latest signed build on the iPhone over Wi-Fi and reports back, re-signing first if needed. The Mac must be on and on the same Wi-Fi as the iPhone. Set it up once with `bash scripts/iphone-agent-setup.sh`, which makes the private key (saved in Vercel as `IPHONE_INSTALL_KEY` and in `~/.config/loosenup`, never printed), switches on the job and opens the private link on the connected iPhone. Log: `~/Library/Logs/loosenup-iphone-agent.log`.
+
 ### Daily reminders
 
 `@capacitor/local-notifications` schedules a single repeating notification (id 1) at the chosen time, so there is never more than one reminder a day. Android 13 and newer ask for notification permission the first time you save a the daily reminder.
