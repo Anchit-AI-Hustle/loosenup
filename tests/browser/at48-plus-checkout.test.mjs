@@ -116,3 +116,30 @@ test('AT48 Razorpay Standard Checkout: one order, the order id goes back for ver
   assert.deepEqual(errors, []);
   await ctx.close();
 });
+
+test('AT48 back from Razorpay redirect mode: #paid shows Plus on with the key kept in the tab, #unpaid offers Try again', async () => {
+  const { ctx, p, errors } = await page({ orders: true });
+  await p.goto(server.url + '/plus.html');
+  await p.evaluate((k) => sessionStorage.setItem('lu.plusKey', k), KEY);
+  await p.goto('about:blank');
+  await p.goto(server.url + '/plus.html#paid');
+  await p.waitForSelector('#plus-done:not([hidden])');
+  assert.equal(await p.textContent('#plus-key'), KEY);
+  await p.goto('about:blank');
+  await p.goto(server.url + '/plus.html#unpaid');
+  await p.waitForSelector('#plus-retry:not([hidden])');
+  assert.match(await p.textContent('#plus-error'), /Nothing was charged/);
+  const opts = await p.evaluate(() => window.__rzp || null);
+  assert.equal(opts, null, 'no checkout opens by itself after an unpaid return');
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
+test('AT48 Standard Checkout asks Razorpay for redirect mode with our callback, so bank checks never need a popup', async () => {
+  const { ctx, p } = await page({ orders: true });
+  await p.goto(server.url + '/plus.html#k=' + KEY + '&plan=yearly');
+  await p.waitForSelector('#plus-done:not([hidden])');
+  const o = await p.evaluate(() => ({ redirect: window.__rzp.redirect, cb: window.__rzp.callback_url }));
+  assert.deepEqual(o, { redirect: true, cb: server.url + '/api/plus?action=callback' });
+  await ctx.close();
+});

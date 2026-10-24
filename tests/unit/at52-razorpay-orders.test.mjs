@@ -20,6 +20,7 @@ function world(payments) {
       else if (/count\(\*\)/.test(q)) out = [{ n: 0 }];
       else if (/^INSERT INTO lu_plus/.test(q)) rows.push({ key_hash: p[0], provider: p[1], plan: p[2], status: 'pending_payment', sub_id: null, current_end: null, cancel_at_end: false });
       else if (/^SELECT \* FROM lu_plus WHERE key_hash/.test(q)) out = rows.filter((r) => r.key_hash === p[0]);
+      else if (/^SELECT \* FROM lu_plus WHERE sub_id/.test(q)) out = rows.filter((r) => r.sub_id === p[0]);
       else if (/SET sub_id = \$2, status = 'created'/.test(q)) Object.assign(rows.find((x) => x.key_hash === p[0]), { sub_id: p[1], status: 'created' });
       else if (/SET status = 'active', current_end = \$2, cancel_at_end = true/.test(q)) Object.assign(rows.find((x) => x.key_hash === p[0]), { status: 'active', current_end: p[1], cancel_at_end: true });
       else if (/WHERE sub_id = \$1 AND \(key_hash = \$2 OR \$2 = ''\) AND status <> 'active'/.test(q)) {
@@ -129,4 +130,22 @@ test('AT52 with subscription plans set, Razorpay keeps using subscriptions', asy
   assert.equal(a.mod.razorpayMode(), 'subscriptions');
   const { json } = await a.call('GET', { query: { action: 'config' }, headers: IN });
   assert.equal(json.renews, true);
+});
+
+test('AT52 redirect mode: Razorpay posts the result to the callback, which verifies and sends the page back paid or unpaid', async () => {
+  const a = await api({ pay_ok: { id: 'pay_ok', order_id: 'order_1', amount: 14900, status: 'captured' } });
+  const { key } = await bought(a);
+  const form = { razorpay_order_id: 'order_1', razorpay_payment_id: 'pay_ok', razorpay_signature: hmac('wrong', 'order_1|pay_ok') };
+  const loc = async (body) => {
+    let status = 0, location = null;
+    const res = { setHeader(k, v) { if (k === 'Location') location = v; }, status(s) { status = s; return res; }, json() { return res; }, end() { return res; } };
+    await a.mod.default({ method: 'POST', query: { action: 'callback' }, body, headers: {} }, res);
+    return [status, location];
+  };
+  assert.deepEqual(await loc(form), [303, '/plus.html#unpaid'], 'a wrong signature never turns Plus on');
+  assert.deepEqual(await loc({ error: { code: 'BAD_REQUEST_ERROR' } }), [303, '/plus.html#unpaid'], 'a declined payment');
+  assert.deepEqual(await loc({ ...form, razorpay_order_id: 'order_404', razorpay_signature: hmac('rzp_secret', 'order_404|pay_ok') }), [303, '/plus.html#unpaid']);
+  assert.equal((await a.call('POST', { body: { action: 'status', key } })).json.active, false);
+  assert.deepEqual(await loc({ ...form, razorpay_signature: hmac('rzp_secret', 'order_1|pay_ok') }), [303, '/plus.html#paid']);
+  assert.equal((await a.call('POST', { body: { action: 'status', key } })).json.active, true);
 });

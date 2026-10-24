@@ -8,6 +8,7 @@
 //   POST /api/plus { action: 'verify', key, razorpay_payment_id, razorpay_subscription_id | razorpay_order_id, razorpay_signature }
 //   POST /api/plus { action: 'status', key }           -> { active, plan, until, cancelAtEnd, provider }
 //   POST /api/plus { action: 'cancel', key }           -> cancels at the end of the paid period
+//   POST /api/plus?action=callback                     -> Razorpay redirect mode: verifies, then sends the page back to /plus.html
 //   POST /api/plus?hook=razorpay | ?hook=paddle        -> provider webhooks, signature checked on the raw body
 //
 // No names, emails or card details are stored here. A Plus key is stored only as a hash, so the key
@@ -185,6 +186,18 @@ async function verifyOrder(row, body) {
   return entitlement({ ...row, status: 'active', current_end: end, cancel_at_end: true });
 }
 
+// Razorpay redirect mode: when a bank check cannot open as a popup (phones, in-app browsers), Razorpay
+// sends the whole page through the bank and then posts the result here as a form. The order id finds
+// the key; the same checks as verify apply, then the page goes back to /plus.html to show the result.
+const urlForm = (raw) => Object.fromEntries(new URLSearchParams(String(raw || '')));
+export async function callback(body) {
+  const order = String(body.razorpay_order_id || '');
+  if (!/^order_[A-Za-z0-9]+$/.test(order)) return '/plus.html#unpaid';
+  const rows = await sql('SELECT * FROM lu_plus WHERE sub_id = $1', [order]);
+  if (!rows.length) return '/plus.html#unpaid';
+  try { await verifyOrder(rows[0], body); return '/plus.html#paid'; } catch (e) { return '/plus.html#unpaid'; }
+}
+
 // Razorpay's checkout returns a signature over payment id and subscription id, made with our secret.
 async function verify(body) {
   const row = await rowFor(body.key);
@@ -285,6 +298,11 @@ export default async function handler(req, res) {
     const action = (req.query && req.query.action) || (req.body && req.body.action);
     if (req.method === 'GET' && action === 'config') return res.status(200).json(config(country));
     await schema();
+    if (req.method === 'POST' && action === 'callback') {
+      const form = req.body && typeof req.body === 'object' && Object.keys(req.body).length ? req.body : urlForm(await rawBody(req));
+      res.setHeader('Location', await callback(form));
+      return res.status(303).end();
+    }
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
     let out;

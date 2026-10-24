@@ -7,6 +7,9 @@
   var $ = function (id) { return document.getElementById(id); };
   var hash = {};
   location.hash.replace(/^#/, '').split('&').forEach(function (p) { var kv = p.split('='); if (kv[0]) hash[kv[0]] = decodeURIComponent(kv[1] || ''); });
+  // Back from Razorpay's redirect mode (#paid or #unpaid): the key waited in this tab's session.
+  var back = 'paid' in hash ? 'paid' : 'unpaid' in hash ? 'unpaid' : null;
+  if (back) { try { hash.k = sessionStorage.getItem('lu.plusKey') || ''; hash.lang = sessionStorage.getItem('lu.plusLang') || ''; } catch (e) { /* private mode */ } }
   var key = hash.k || null;
   var plan = hash.plan === 'monthly' ? 'monthly' : 'yearly';
   var I = window.LoosenUpI18n;
@@ -75,7 +78,13 @@
         },
         modal: { ondismiss: function () { stop('Checkout was closed before paying. Nothing was charged.'); } }
       };
-      if (c.orderId) { opts.order_id = c.orderId; opts.amount = c.amount; opts.currency = c.currency; } else opts.subscription_id = c.subscriptionId;
+      if (c.orderId) {
+        opts.order_id = c.orderId; opts.amount = c.amount; opts.currency = c.currency;
+        // Bank checks go through the page itself, not a popup that phones and in-app browsers block.
+        opts.redirect = true;
+        opts.callback_url = location.origin + '/api/plus?action=callback';
+        try { sessionStorage.setItem('lu.plusKey', key); sessionStorage.setItem('lu.plusLang', hindi ? 'hi' : ''); } catch (e) { /* private mode */ }
+      } else opts.subscription_id = c.subscriptionId;
       var rzp = new window.Razorpay(opts);
       rzp.on && rzp.on('payment.failed', function () { stop('That payment did not go through. Nothing was charged. Try again or use another method.'); });
       rzp.open();
@@ -120,7 +129,9 @@
     renews = c.renews !== false;
     if (c.enabled && !renews) text('plus-pay-note', 'One payment for a month or a year of Plus. It does not renew; buy again any time.');
     if (!c.enabled) { $('plus-buy').disabled = true; text('plus-pay-note', 'LoosenUp Plus opens soon. Until then, everything in LoosenUp is free.'); return; }
-    if (key) checkout();
+    if (back === 'paid' && key) { show('plus-wait'); text('plus-wait-title', 'Confirming your payment...'); waitForActive(10).catch(function (x) { stop(x.message); }); }
+    else if (back === 'unpaid' && key) { show('plus-wait'); stop('That payment did not go through. Nothing was charged. Try again or use another method.'); $('plus-retry').hidden = false; }
+    else if (key) checkout();
   }).catch(function () { text('plus-error', 'Connect to the internet to continue.'); });
 
   window.LoosenUpPlusPage = { checkout: checkout, key: function () { return key; } };
