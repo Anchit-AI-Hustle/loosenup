@@ -1,5 +1,5 @@
 /* LoosenUp service worker: precache the shell, cache-first for same-origin GET. */
-var CACHE = 'loosenup-v2.5.1';
+var CACHE = 'loosenup-v2.5.2';
 var SHELL = [
   '/',
   '/index.html',
@@ -10,6 +10,7 @@ var SHELL = [
   '/helplines.js',
   '/partners.js',
   '/feelings.js',
+  '/theme.js',
   '/app.js',
   '/more.js',
   '/manifest.json',

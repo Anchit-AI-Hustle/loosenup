@@ -45,7 +45,11 @@ test('AT27 iPhone on /get adds LoosenUp to the home screen and never tries a web
   assert.match(html, /<a id="iphone-open"[^>]*href="https:\/\/loosenup\.anchit-tandon\.com\/"/);
   assert.match(html, /Add to Home Screen, then Add/);
   assert.match(html, /<button id="iphone-install"[^>]*>Install LoosenUp<\/button>/, 'a real Install button');
-  assert.match(html, /id="a2hs"[^>]*role="dialog"/, 'Install opens a three-step guide');
+  assert.match(html, /class="sheet" role="dialog" aria-modal="true" aria-labelledby="a2hs-title"/, 'Install opens a three-step guide in the app sheet');
+  for (const page of ['install', 'plus', 'terms', 'privacy', 'refunds', 'teams', 'org']) {
+    assert.match(read(`www/${page}.html`), /<script src="\/theme\.js"><\/script>/, `${page} follows the app theme`);
+  }
+  assert.match(read('www/theme.js'), /loosenup\.theme/);
   assert.match(html, /beforeinstallprompt/, 'browsers with an install prompt get it directly');
   assert.match(html, /iPhones and iPads see their card first/);
   assert.equal(existsSync(path.join(ROOT, 'www', 'loosenup-ios.plist')), false, 'no install manifest is served');
