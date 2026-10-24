@@ -72,6 +72,7 @@ test('AT46 India sees Razorpay in rupees, everyone else sees Paddle in dollars, 
   assert.ok(!JSON.stringify(us.json).includes('rzp_secret') && !JSON.stringify(us.json).includes('pdl_key'), 'no secret leaves the server');
   const none = await (await api({ DATABASE_URL: ENV.DATABASE_URL })).call('GET', { query: { action: 'config' }, headers: { 'x-vercel-ip-country': 'IN' } });
   assert.equal(none.json.enabled, false);
+  assert.equal(none.json.prices.monthly, '₹149', 'India sees rupee prices even before Plus opens');
   const only = await (await api({ ...ENV, PADDLE_API_KEY: '' })).call('GET', { query: { action: 'config' }, headers: { 'x-vercel-ip-country': 'DE' } });
   assert.equal(only.json.provider, 'razorpay', 'with only Razorpay set up, it serves everyone');
 });

@@ -109,7 +109,8 @@ async function paddle(path, body, method = 'POST') {
 
 function config(country) {
   const provider = providerFor(country);
-  const currency = provider === 'razorpay' ? 'INR' : 'USD';
+  const india = String(country || '').toUpperCase() === 'IN';
+  const currency = provider === 'razorpay' || (!provider && india) ? 'INR' : 'USD';
   return {
     enabled: !!provider, provider, country: String(country || '').toUpperCase() || null, currency,
     prices: PRICES[currency],
