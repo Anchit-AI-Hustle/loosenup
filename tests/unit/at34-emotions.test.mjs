@@ -7,7 +7,7 @@ const ready = (d = day(3)) => { const app = makeApp({ now: d, rng: () => 0.99 })
 test('AT34 every kind of emotion can be logged, with an intensity of 1 to 3', () => {
   const app = ready();
   const names = [...app.document.querySelectorAll('#emotions .emo-name')].map((e) => e.textContent);
-  for (const n of ['Angry', 'Worried', 'Sad', 'Tired', 'Lonely', 'Overwhelmed', 'Frustrated', 'Restless', 'Calm', 'Happy', 'Grateful', 'Hopeful', 'Loved', 'Energetic']) assert.ok(names.includes(n), n);
+  for (const n of ['Angry', 'Worried', 'Sad', 'Tired', 'Lonely', 'Overwhelmed', 'Frustrated', 'Restless', 'Hard on myself', 'Flat', 'Mind racing', 'Calm', 'Happy', 'Grateful', 'Hopeful', 'Loved', 'Energetic']) assert.ok(names.includes(n), n);
   app.click('[data-emotion="angry"]');
   app.click('[data-emotion="angry"]');
   const b = app.$('[data-emotion="angry"]');
@@ -20,13 +20,12 @@ test('AT34 every kind of emotion can be logged, with an intensity of 1 to 3', ()
 
 test('AT34 the strongest difficult emotion becomes the For you card, and one tap starts it', () => {
   const app = ready();
-  const before = app.$('#for-you-btn').getAttribute('data-now');
   app.click('[data-emotion="happy"]');
-  assert.equal(app.$('#for-you-btn').getAttribute('data-now'), before, 'positive emotions need no fix');
+  assert.equal(app.$('#for-you-btn').getAttribute('data-now'), 'savour', 'a good feeling is savoured, not fixed');
   app.click('[data-emotion="worried"]');
   app.click('[data-emotion="angry"]'); app.click('[data-emotion="angry"]');
   assert.match(app.$('#for-you-name').textContent, /^Cool down, 2 min$/);
-  assert.equal(app.$('#for-you-why').textContent, 'Long breaths out help anger cool.');
+  assert.equal(app.$('#for-you-why').textContent, 'Long breaths out slow your heart and take the heat down first.');
   app.click('#for-you-btn');
   assert.equal(app.B.currentScreen(), 'session', 'no check-in and no Pick screen');
   assert.equal(app.B.run().id, 'cooldown');

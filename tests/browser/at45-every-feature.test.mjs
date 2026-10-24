@@ -116,7 +116,7 @@ test('Choose a calm break: pick feelings, get a recommendation, change it, then 
 test('Every exercise starts and guides: breathing cues, step-by-step steps, tap dots, and Let it out', async () => {
   const { ctx, page, errors } = await phone();
   const tech = await page.evaluate(() => Object.keys(window.LoosenUp.techniques));
-  assert.equal(tech.length, 12);
+  assert.equal(tech.length, 22, 'every exercise, including the ten feeling-led ones');
   for (const id of tech) {
     await go(page, 'today');
     const kind = await page.evaluate((t) => { const r = window.LoosenUp.startNow(t); return [r, window.LoosenUp.techniques[t].kind]; }, id);
@@ -205,11 +205,13 @@ test('For you right now: suggests by time, then by mood, then by feeling, and St
   assert.match(await text(page, '#for-you-name'), /, \d+ min$/);
   await page.click('[data-mood="2"]');
   assert.match(await text(page, '#for-you-name'), /^Kind words/);
+  await page.evaluate(() => window.LoosenUp.setNow('2026-10-20T11:00:00'));
   await page.click('[data-emotion="worried"]');
-  assert.match(await text(page, '#for-you-name'), /^Steady square/);
+  assert.match(await text(page, '#for-you-name'), /^Sigh of relief/, 'worry starts with long breaths out, no breath holds');
+  assert.equal(await page.locator('#for-you-plan li').count(), 3);
   await page.click('#for-you-btn');
   assert.equal(await screen(page), 'session');
-  assert.equal((await page.evaluate(() => window.LoosenUp.run())).id, 'square');
+  assert.equal((await page.evaluate(() => window.LoosenUp.run())).id, 'sigh');
   await done(ctx, errors);
 });
 
@@ -247,9 +249,9 @@ test('Lowest mood asks the safety question once a day, with Yes, No and I just n
   await done(ctx, errors);
 });
 
-test('Emotion meter: 14 feelings, three levels each, a fourth tap clears, and Progress shows the week', async () => {
+test('Emotion meter: 17 feelings, three levels each, a fourth tap clears, and Progress shows the week', async () => {
   const { ctx, page, errors } = await phone();
-  assert.equal(await page.locator('[data-emotion]').count(), 14);
+  assert.equal(await page.locator('[data-emotion]').count(), 17);
   for (let i = 0; i < 3; i++) await page.click('[data-emotion="angry"]');
   assert.equal(await page.getAttribute('[data-emotion="angry"]', 'data-level'), '3');
   await page.click('[data-emotion="angry"]');
@@ -263,7 +265,8 @@ test('Emotion meter: 14 feelings, three levels each, a fourth tap clears, and Pr
 
 test('Today layout: games, Sleep journal and more, season card, and the More help fold with every tool', async () => {
   const { ctx, page, errors } = await phone();
-  assert.deepEqual(await page.locator('#screen-today .game-row .game-tile strong').allInnerTexts(), ['Calm Pairs', 'Sunbeam Catch', 'Breathing Ring', 'Trace the square']);
+  assert.deepEqual((await page.locator('#screen-today .game-row .game-tile strong').allInnerTexts()).sort(), ['Breathing Ring', 'Bubble Pop', 'Calm Pairs', 'Sunbeam Catch', 'Trace the square']);
+  assert.equal(await page.locator('#screen-today .game-row .game-tile:visible').count(), 3, 'three games that suit the moment');
   assert.deepEqual(await page.locator('#more-row-kit .tool strong').allInnerTexts(), ['Sleep', 'Journal', 'Support a friend', 'Seasonal packs']);
   assert.ok(await page.isVisible('#screen-today .season-card'), 'October is festival season');
   assert.equal(await page.isVisible('#steps-card'), false, 'More help starts folded');
@@ -509,7 +512,7 @@ test('Calm Pairs: cards flip, and finishing shows the done card with Play again 
 
 test('Sunbeam Catch: beams appear and can be caught for points', async () => {
   const { ctx, page, errors } = await phone();
-  await page.click('#screen-today [data-game="catch"]');
+  await page.evaluate(() => window.LoosenUp.openGame('catch'));
   await page.evaluate(() => window.LoosenUp.spawnBeam());
   await page.locator('.beam').first().dispatchEvent('pointerdown');
   await page.waitForTimeout(200);
@@ -521,7 +524,7 @@ test('Sunbeam Catch: beams appear and can be caught for points', async () => {
 
 test('Breathing Ring: holding grows the ring and counts breaths', async () => {
   const { ctx, page, errors } = await phone();
-  await page.click('#screen-today [data-game="bloom"]');
+  await page.evaluate(() => window.LoosenUp.openGame('bloom'));
   await page.locator('#bloom-hold').dispatchEvent('pointerdown');
   await page.waitForTimeout(1500);
   await page.locator('#bloom-hold').dispatchEvent('pointerup');
@@ -532,7 +535,7 @@ test('Breathing Ring: holding grows the ring and counts breaths', async () => {
 
 test('Trace the square: the dot travels the square and a finger on it is scored', async () => {
   const { ctx, page, errors } = await phone();
-  await page.click('#screen-today [data-more="trace"]');
+  await page.evaluate(() => document.querySelector('#panel-games [data-more="trace"]').click());
   assert.equal(await screen(page), 'trace');
   await page.click('#trace-start');
   const box = await page.locator('#trace-svg').boundingBox();

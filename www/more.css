@@ -49,7 +49,23 @@ html.sleep-dim .sky, html.sleep-dim .topbar { opacity: .35; }
 .trace-dot { fill: var(--sun); stroke: #fff; stroke-width: 4; filter: drop-shadow(0 4px 10px rgba(242, 167, 43, .8)); }
 .trace-finger { fill: rgba(79, 166, 124, .35); stroke: var(--leaf-2); stroke-width: 2; }
 .gt-trace { background: linear-gradient(160deg, #DDF3E8, #FFFFFF 75%); }
-.game-row:has(.gt-trace) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gt-pop { background: linear-gradient(160deg, #DCEFFF, #FFFFFF 75%); }
+html[data-theme="dark"] .gt-pop { background: linear-gradient(160deg, #1E3A55, #1A2436 75%); }
+.game-tile[hidden] { display: none; }
+/* For you: a caring first line, then a short plan of steps. */
+.for-you-hear { font-size: 16px; line-height: 1.35; font-weight: 800; color: var(--ink); margin: 2px 0 8px; }
+/* The plan chips already name the current step, so its heading is for screen readers only. */
+.for-you-plan:not([hidden]) + #for-you-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: -1px; }
+.for-you #for-you-why { font-size: 14px; line-height: 1.4; margin: 0 0 10px; }
+.for-you-plan { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; counter-reset: fy; }
+.for-you-plan li { counter-increment: fy; font-size: 12px; font-weight: 800; padding: 4px 9px 4px 7px; border-radius: 999px; background: rgba(39, 110, 79, .08); color: var(--ink-2); }
+.for-you-plan li::before { content: counter(fy) ". "; }
+.for-you-plan li.now { background: var(--leaf-2, #276E4F); color: #fff; }
+.for-you-plan li.done { text-decoration: line-through; opacity: .7; }
+.for-you-plan li.done::before { content: "\2713  "; }
+.for-you-actions { gap: 8px; flex-wrap: wrap; }
+html[data-theme="dark"] .for-you-plan li { background: rgba(255, 255, 255, .08); }
+html[data-theme="dark"] .for-you-plan li.now { background: #4FA67C; color: #10231A; }
 
 /* Larger text: scales the whole interface so layouts stay intact. */
 html.text-large .app, html.text-large .tabbar, html.text-large .sheet { zoom: 1.1; }

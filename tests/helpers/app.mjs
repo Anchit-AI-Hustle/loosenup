@@ -41,6 +41,7 @@ export function makeApp({ state, now, rng, ua } = {}) {
   window.eval(read('www/sleep.js'));
   window.eval(read('www/helplines.js'));
   window.eval(read('www/partners.js'));
+  window.eval(read('www/feelings.js'));
   window.eval(appJs());
   window.eval(read('www/more.js'));
   const B = window.LoosenUp;

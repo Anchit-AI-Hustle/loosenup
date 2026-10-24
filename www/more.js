@@ -140,6 +140,7 @@
     if (r.after) r.fadeTimer = setTimeout(function () { core.fadeSound(30); }, r.after * 60000);
     else core.fadeSound(30);
     r.done = true;
+    core.planDone('more:sleep');
   }
   function sleepStop(quiet) {
     if (!sleepRun) return;
@@ -477,7 +478,8 @@
     var ph = mk('p', 'cue'); ph.id = 'trace-phase'; sc.appendChild(ph);
     var sc2 = mk('p', 'round-count'); sc2.id = 'trace-score'; sc.appendChild(sc2);
     sc.appendChild(btn('Start', 'btn btn-sun', { id: 'trace-start' }));
-    core.register('trace', function () { if (!trace) { core.setText('trace-phase', 'Place your finger on the dot, then tap Start.'); core.setText('trace-score', ''); } });
+    var nx = btn('Next', 'btn btn-soft', { id: 'trace-plan-next' }); nx.hidden = true; sc.appendChild(nx);
+    core.register('trace', function () { if (!trace) { core.setText('trace-phase', 'Place your finger on the dot, then tap Start.'); core.setText('trace-score', ''); $('trace-plan-next').hidden = true; } });
     var svg = $('trace-svg');
     var move = function (e) {
       if (!trace) return;
@@ -526,6 +528,8 @@
     core.setText('trace-phase', 'Three calm squares done.');
     core.setText('trace-score', 'You stayed with the dot ' + pct + '% of the time. Every breath counted.');
     core.addBadge('playful');
+    var close = core.renderPlanNext('trace-plan-next', core.planDone('more:trace'));
+    if (close) core.setText('trace-score', close);
     return pct;
   }
   function traceStop() {

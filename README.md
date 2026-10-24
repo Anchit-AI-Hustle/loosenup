@@ -99,6 +99,23 @@ Both domains (and https://loosenup.vercel.app) serve the same Vercel project. `a
 4. Add these to Vercel (Production): `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `RAZORPAY_PLAN_MONTHLY`, `RAZORPAY_PLAN_YEARLY`, `PADDLE_CLIENT_TOKEN`, `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_PRICE_MONTHLY`, `PADDLE_PRICE_YEARLY` and `PADDLE_ENV` (`sandbox`, then `production`). Then redeploy.
 5. Go live: finish Razorpay KYC and Paddle's seller verification, swap in the live keys, run step 3 again with live keys, and set `PADDLE_ENV=production`.
 
+## Feelings
+
+The For you card on Today starts from what someone feels (the mood faces and the feeling chips, each with a strength of a little, quite or very) and builds a short plan in `www/feelings.js`. Every plan has the same shape: a caring line first, then settle the body (or lift it gently when energy is low), then shift attention or meaning, then a small win and a closing line. Something else swaps to a second plan, the Today games show only the ones that suit the feeling, and each finished step offers the next one.
+
+Crying leads, then the strongest heavier feeling (high-energy ones first when strengths tie), then the mood, then good feelings, which are savoured rather than fixed. At night a worried, overwhelmed or restless mind gets the racing-mind plan, and no fast games are offered.
+
+The choices follow the research, which mostly tested repeated practice, so the app only says things like "can help you feel calmer":
+
+- Long breaths out (cyclic sighing) lifted mood more than box breathing in Balban et al. 2023 (Cell Reports Medicine), and breath holds can make a panicky body feel worse, so worry starts with Sigh of relief, never Steady square.
+- Anger cools with activities that lower arousal (slow breathing, muscle release, a pause), not with venting or fast games (Kjaervik and Bushman 2024, 154 studies; Bushman 2002).
+- Naming a feeling lowers the brain's alarm response (Lieberman 2007), so feeling chips and Name it come early.
+- Self-compassion helps self-criticism and brooding (Ferrari 2019 meta-analysis); big positive affirmations can backfire for people who feel low (Wood 2009).
+- Writing a worry down with a next step or a time quiets unfinished thoughts (Masicampo and Baumeister 2011); a to-do list for tomorrow helped people fall asleep faster (Scullin 2018).
+- Low energy and a flat mood are lifted with movement, daylight and one small valued action (behavioural activation), not calmed further.
+- Good feelings last longer when savoured and shared (Bryant's savouring work; Gable 2004).
+- Simple visuospatial games give a looping mind something else to hold (Holmes and Iyadurai). Bubble Pop and Calm Pairs end with something finished, and none of the calming games keeps score against you.
+
 ## Project layout
 
 ```

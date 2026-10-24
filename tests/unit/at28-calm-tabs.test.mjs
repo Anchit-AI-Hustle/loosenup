@@ -17,7 +17,7 @@ test('AT28 Calm holds breathing exercises, games and sounds as tabs in one scree
   assert.equal(app.visible('#panel-breathe'), false);
   assert.equal(app.$('#seg-games').getAttribute('aria-selected'), 'true');
   assert.equal(app.$('#screen-play .seg').getAttribute('data-active'), 'games');
-  assert.equal(app.document.querySelectorAll('#panel-games [data-game]').length, 3);
+  assert.equal(app.document.querySelectorAll('#panel-games [data-game]').length, 4);
   app.click('[data-seg="sounds"]');
   assert.equal(app.visible('#panel-sounds'), true);
   assert.equal(app.document.querySelectorAll('#panel-sounds [data-sound]').length, 4);

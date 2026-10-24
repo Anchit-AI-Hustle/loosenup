@@ -40,6 +40,7 @@
   <script src="/sleep.js" defer></script>
   <script src="/helplines.js" defer></script>
   <script src="/partners.js" defer></script>
+  <script src="/feelings.js" defer></script>
   <script src="/app.js" defer></script>
   <script src="/more.js" defer></script>
 </head>
@@ -293,6 +294,7 @@
         </div>
         <ul id="result-rewards" class="rewards"></ul>
         <p id="result-note" class="kind-note"></p>
+        <button id="plan-next" class="btn btn-sun" type="button" hidden>Next for you</button>
         <button id="result-done" class="btn btn-sun" type="button">Back to Today</button>
       </section>
 
@@ -319,9 +321,14 @@
 
         <article id="for-you" class="card for-you">
           <p class="eyebrow">For you right now</p>
+          <p id="for-you-hear" class="for-you-hear"></p>
+          <ol id="for-you-plan" class="for-you-plan" aria-label="Your plan"></ol>
           <h2 id="for-you-name" class="subtitle"></h2>
           <p id="for-you-why" class="muted"></p>
-          <button id="for-you-btn" class="btn btn-sun btn-small" type="button" data-now="sigh">Start</button>
+          <div class="row for-you-actions">
+            <button id="for-you-btn" class="btn btn-sun btn-small" type="button" data-now="sigh">Start</button>
+            <button id="for-you-alt" class="btn btn-ghost btn-small" type="button" hidden>Something else</button>
+          </div>
         </article>
         <section class="block" aria-labelledby="games-title">
           <div class="block-head"><h2 class="subtitle" id="games-title">Play a calm game</h2><span class="tag">1 tap</span></div>
@@ -329,6 +336,7 @@
             <button class="game-tile gt-pairs" type="button" data-game="pairs"><span class="gt-ic" aria-hidden="true">🃏</span><strong>Calm Pairs</strong><span>Match the pairs</span></button>
             <button class="game-tile gt-catch" type="button" data-game="catch"><span class="gt-ic" aria-hidden="true">☀️</span><strong>Sunbeam Catch</strong><span>Tap the light</span></button>
             <button class="game-tile gt-ring" type="button" data-game="bloom"><span class="gt-ic" aria-hidden="true">🫧</span><strong>Breathing Ring</strong><span>Hold to breathe</span></button>
+            <button class="game-tile gt-pop" type="button" data-game="pop"><span class="gt-ic" aria-hidden="true">🔵</span><strong>Bubble Pop</strong><span>Pop them all</span></button>
           </div>
         </section>
         <article id="mood-card" class="card mood-card">
@@ -732,6 +740,10 @@
               <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><use href="#petal-sun" x="7" y="7" width="40" height="40"/></svg></span>
               <span><strong>Breathing Ring</strong><span>Hold to breathe in, let go to breathe out.</span></span>
             </button>
+            <button id="game-pop-open" class="game-card" type="button" data-game="pop">
+              <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><circle cx="16" cy="18" r="9" fill="#7CC0EE"/><circle cx="37" cy="18" r="9" fill="#BFE3FF"/><circle cx="16" cy="38" r="9" fill="#BFE3FF"/><circle cx="37" cy="38" r="6" fill="#7CC0EE" opacity=".35"/><circle cx="13" cy="15" r="2.5" fill="#fff"/><circle cx="34" cy="15" r="2.5" fill="#fff"/></svg></span>
+              <span><strong>Bubble Pop</strong><span>Pop a sheet of bubbles, one by one.</span></span>
+            </button>
           </div>
           <p id="play-note" class="fine center"></p>
         </div>
@@ -766,6 +778,7 @@
         <div id="game-done" class="card game-done" hidden>
           <p id="game-done-title" class="title"></p>
           <p id="game-done-text" class="muted"></p>
+          <button id="game-plan-next" class="btn btn-sun" type="button" hidden>Next for you</button>
           <button id="game-again" class="btn btn-sun" type="button">Play again</button>
         </div>
         <button id="game-back" class="btn btn-ghost" type="button">Back</button>

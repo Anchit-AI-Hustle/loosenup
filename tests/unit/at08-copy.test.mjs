@@ -23,7 +23,7 @@ function walk(dir, out = []) {
 }
 
 const COPY_FILES = [
-  'www/index.html', 'www/install.html', 'www/teams.html', 'www/org.html', 'api/org.js', 'api/push.js', 'api/plus.js', 'www/app.js', 'www/more.js', 'www/sleep.js', 'www/more.css', 'www/plus.html', 'www/plus-checkout.js', 'www/terms.html', 'www/privacy.html', 'www/refunds.html', 'www/i18n.js', 'www/styles.css', 'www/sw.js', 'www/manifest.json',
+  'www/index.html', 'www/install.html', 'www/teams.html', 'www/org.html', 'api/org.js', 'api/push.js', 'api/plus.js', 'www/app.js', 'www/more.js', 'www/feelings.js', 'www/sleep.js', 'www/more.css', 'www/plus.html', 'www/plus-checkout.js', 'www/terms.html', 'www/privacy.html', 'www/refunds.html', 'www/i18n.js', 'www/styles.css', 'www/sw.js', 'www/manifest.json',
   'README.md', 'capacitor.config.json', 'android/app/src/main/res/values/strings.xml',
 ].filter((f) => existsSync(path.join(ROOT, f)));
 

@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.4.0';
+  var VERSION = '2.5.0';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -101,6 +101,73 @@
       desc: 'Send kind wishes to someone you love, someone you feel tense with, and yourself.',
       steps: ['Picture someone you care about and smile at them in your mind.', 'Wish them: may you feel safe and at ease.',
         'Now picture the person you feel tense with.', 'Wish them: may you find some ease too.', 'Wish yourself the same: may I feel at ease.']
+    },
+    // Feeling-led exercises (see www/feelings.js): each one fits a step in a feeling's plan.
+    wave: {
+      id: 'wave', name: 'Gentle wave', seconds: 120, unlockAt: 0, color: '#B8C7DA', kind: 'breath',
+      desc: 'Very slow breaths with a hand on your heart. It is okay to cry.',
+      pattern: [['Breathe in', 4, 1], ['Slow breath out', 8, 0.6]]
+    },
+    name: {
+      id: 'name', name: 'Name it', seconds: 120, unlockAt: 0, color: '#9DB4D6', kind: 'steps',
+      desc: 'Put the feeling into a word or two, and notice where it sits in your body.',
+      steps: ['Say the feeling in a word or two, softly, like: this is worry.', 'Notice where you feel it: chest, throat, stomach or shoulders.',
+        'Give it a size from 1 to 10. No need to change it.', 'Tell yourself: it makes sense that I feel this way.', 'Take one long breath out and let the words rest.']
+    },
+    park: {
+      id: 'park', name: 'Park the worry', seconds: 120, unlockAt: 0, color: '#6FB3E0', kind: 'steps',
+      desc: 'Write the worry down, choose one next step or a time to come back to it, and let it wait.',
+      steps: ['Write the worry in a few words, on paper or in your notes.', 'Ask: is there something I can do about it today?',
+        'If yes, choose one small first step and when you will do it.', 'If not today, pick a time to think about it, like 6 pm, and let it wait there.',
+        'Breathe out slowly. It is written down, so your mind can put it down too.']
+    },
+    tomorrow: {
+      id: 'tomorrow', name: 'Tomorrow list', seconds: 120, unlockAt: 0, color: '#8CA9F0', kind: 'steps', space: 'sleep',
+      desc: 'Write down what tomorrow needs, so your mind can rest tonight.',
+      steps: ['Write down what tomorrow needs, one short line each.', 'Put a star by the one thing to start with.',
+        'Tell yourself: it is written down, and it can wait until morning.', 'Dim your screen and let your breathing slow down.',
+        'With each breath out, let your face, jaw and shoulders go soft.']
+    },
+    shake: {
+      id: 'shake', name: 'Shake it out', seconds: 120, unlockAt: 0, color: '#FFB088', kind: 'steps',
+      desc: 'Give restless energy somewhere to go, then let your body settle.',
+      steps: ['Shake out your hands loosely for ten seconds.', 'Roll your shoulders, big and slow, five times.',
+        'Press your palms together firmly for five seconds, then let go.', 'Let your arms hang heavy by your sides.',
+        'Now three long breaths out, each one slower than the last.']
+    },
+    friend: {
+      id: 'friend', name: 'Kind friend voice', seconds: 120, unlockAt: 0, color: '#F28FA0', kind: 'steps', space: 'lowdays',
+      desc: 'Look at the facts, then talk to yourself the way a good friend would.',
+      steps: ['Notice the harsh words, and start them with: I notice I am telling myself.', 'Ask: what exactly happened? Name only the facts.',
+        'Say your own name, then: this was hard, and you are doing your best.', 'Ask what a good friend would say to you right now, and say it to yourself.',
+        'Put a hand on your heart and breathe out slowly.']
+    },
+    reach: {
+      id: 'reach', name: 'Reach out', seconds: 120, unlockAt: 0, color: '#F7C59F', kind: 'steps', space: 'relationships',
+      desc: 'Think of one person who is kind to you, and send them a small hello.',
+      steps: ['Think of one person who was kind to you this month.', 'Picture their face for a breath.',
+        'Send something small, like: saw this and thought of you. Or just hello.', 'If no one comes to mind, remember: many people feel this way right now.',
+        'Breathe out. You took a step toward someone.']
+    },
+    lift: {
+      id: 'lift', name: 'Gentle lift', seconds: 120, unlockAt: 0, color: '#FFC857', kind: 'steps',
+      desc: 'A little movement, daylight and water to wake the body gently.',
+      steps: ['Stand up slowly, or sit tall.', 'Go to a window or step outside for some daylight.',
+        'Stretch your arms up high as you breathe in, and let them float down.', 'Walk a few steps, or march gently on the spot for twenty seconds.',
+        'Have a few sips of water.']
+    },
+    savour: {
+      id: 'savour', name: 'Savour it', seconds: 120, unlockAt: 0, color: '#FFD27A', kind: 'steps',
+      desc: 'Stay with a good feeling a little longer, so it is easier to find again.',
+      steps: ['Say what feels good right now, in one sentence.', 'Notice where you feel it: a warm chest, easy shoulders, a smile.',
+        'Look around and take a picture of this moment in your mind.', 'Ask: what helped me get here? Remember it for another day.',
+        'Think of someone who would be glad for you.']
+    },
+    hope: {
+      id: 'hope', name: 'Hope and a first step', seconds: 120, unlockAt: 0, color: '#8CC8F0', kind: 'steps',
+      desc: 'Picture it going well, plan for one bump, and choose one small first step.',
+      steps: ['Picture it going well. What do you see?', 'Name the best part of that picture.', 'Name one thing that might get in the way.',
+        'Choose one small step that helps, and when you will take it.', 'Picture the good part once more, and smile at it.']
     },
     quick: {
       id: 'quick', name: 'Quick breeze', seconds: 60, unlockAt: 0, color: '#CFE8FF', kind: 'breath', free: true,
@@ -1187,7 +1254,10 @@
     var after = clampScore($('calm-after').value);
     var r = completeSession({ technique: flow.technique || 'quick', context: flow.context || 'Just a quick lift', contexts: flow.contexts, before: before, after: after });
     completeProgramDay(r);
+    var advanced = planDone('tech:' + (flow.technique || 'quick'));
     renderResult(r);
+    var close = renderPlanNext('plan-next', advanced);
+    if (close) setText('result-note', close);
     go('result');
     haptic('success');
   }
@@ -1369,6 +1439,7 @@
     renderSeedPill();
     haptic('success');
     toast('Lovely. That small step counts.');
+    planDone('step');
   }
   function renderJar() {
     var n = state.goodThings.length;
@@ -1399,6 +1470,7 @@
     renderJar();
     renderSeedPill();
     toast('Saved in your jar.');
+    planDone('jar');
   }
 
   /* ---------- SOS ---------- */
@@ -1718,7 +1790,8 @@
   var GAMES = {
     pairs: { name: 'Calm Pairs', help: 'Turn two cards at a time. Matching pairs stay open. Take all the time you like.' },
     catch: { name: 'Sunbeam Catch', help: 'Tap the sunbeams and petals as they drift by. Every catch fills your jar.' },
-    bloom: { name: 'Breathing Ring', help: 'Press and hold while the ring grows to breathe in. Let go as it shrinks to breathe out. Six slow breaths.' }
+    bloom: { name: 'Breathing Ring', help: 'Press and hold while the ring grows to breathe in. Let go as it shrinks to breathe out. Six slow breaths.' },
+    pop: { name: 'Bubble Pop', help: 'Pop every bubble, one at a time, at your own pace. There is no timer.' }
   };
   var FLOWERS = [['Bright sun', '#FFC857'], ['Moon', '#B9A3F0'], ['Cloud', '#8CC8F0'], ['Wave', '#4FA9C8'], ['Star', '#FFB088'], ['Heart', '#F28FA0']];
   var game = null;
@@ -2168,6 +2241,9 @@
     ['overwhelmed', 'Overwhelmed', '😵‍💫', 'here', 'Here and now brings you back to one thing at a time.'],
     ['frustrated', 'Frustrated', '😤', 'pause', 'Pause before replying helps frustration pass.'],
     ['restless', 'Restless', '😬', 'release', 'Soft release lets tense muscles go.'],
+    ['harsh', 'Hard on myself', '😞', 'kind', 'Kind words help when your inner voice is harsh.'],
+    ['flat', 'Flat', '😑', 'lift', 'A gentle lift wakes the body a little.'],
+    ['racing', 'Mind racing', '🌀', 'tomorrow', 'Writing tomorrow down helps a busy mind rest.'],
     ['calm', 'Calm', '😌', null], ['happy', 'Happy', '😄', null], ['grateful', 'Grateful', '🙏', null],
     ['hopeful', 'Hopeful', '🌤️', null], ['loved', 'Loved', '🥰', null], ['energetic', 'Energetic', '⚡', null]
   ];
@@ -2213,34 +2289,160 @@
     });
     renderForYou();
   }
-  // The strongest difficult emotion picked today, if any.
-  function strongestHard() {
-    var t = todayEmotions(), best = null;
-    EMOTIONS.forEach(function (em) { var lv = t.e[em[0]] || 0; if (em[3] && lv && (!best || lv > best.lv)) best = { em: em, lv: lv }; });
-    return best;
+  /* ---------- For you: a short plan built around what you feel (www/feelings.js) ---------- */
+  // Acknowledge first, settle the body (or lift it gently when energy is low), shift attention or
+  // meaning, then end on a small win. Progress is kept for the day, so each step leads to the next.
+  var FEEL = window.LoosenUpFeelings || { feelings: {}, byTime: {}, order: [], nightAsRacing: [] };
+  var GAME_MIN = { pairs: 2, catch: 1, bloom: 1, pop: 1 };
+  var EMO_BY_KEY = {};
+  EMOTIONS.forEach(function (em) { EMO_BY_KEY[em[0]] = em; });
+  function isNight() { return bucketOf(now().getTime()) === 'Quiet nights'; }
+  function strongestIn(t, hard) {
+    var best = null;
+    FEEL.order.forEach(function (k) {
+      var em = EMO_BY_KEY[k];
+      if (!em || !!em[3] !== hard) return;
+      var lv = t[k] || 0;
+      if (lv && (!best || lv > best.lv)) best = { k: k, lv: lv };
+    });
+    return best && best.k;
   }
-  // One exercise picked for right now: today's strongest hard feeling, then mood, then the time of day.
-  var TIME_PICK = {
-    Mornings: ['breeze', 'Slow, even breathing to start the day steady.'],
-    Afternoons: ['desk', 'Let the morning go from your shoulders without leaving your chair.'],
-    Evenings: ['cooldown', 'Long breaths out help the day settle.'],
-    'Quiet nights': ['sigh', 'Long breaths out tell your body it is time to rest.']
-  };
-  function forYou() {
-    var hard = strongestHard();
-    if (hard) return { id: hard.em[3], why: hard.em[4] };
+  // Crying leads, then the strongest heavy feeling, then the mood, then good feelings to savour.
+  function leadFeeling() {
     var m = todayMood();
-    if (m && m <= 2) return { id: 'kind', why: 'A gentle self-compassion break for a heavy day.' };
-    var p = TIME_PICK[bucketOf(now().getTime())];
-    return { id: p[0], why: p[1] };
+    if (m === 1) return 'crying';
+    var t = todayEmotions().e;
+    var hard = strongestIn(t, true);
+    if (hard) return isNight() && FEEL.nightAsRacing.indexOf(hard) !== -1 ? 'racing' : hard;
+    if (m === 2) return 'sad';
+    var good = strongestIn(t, false);
+    if (good) return good;
+    if (m === 5) return 'happy';
+    if (m === 4) return 'calm';
+    return m === 3 ? 'okay' : 'unknown';
+  }
+  function feelPlan() {
+    var key = leadFeeling();
+    var f = FEEL.feelings[key] || FEEL.feelings.unknown || { hear: [''], close: '', games: [], never: [] };
+    var dk = dayKey(now());
+    var st = state.feelPlan;
+    if (!st || st.day !== dk || st.key !== key) st = state.feelPlan = { day: dk, key: key, alt: false, done: [] };
+    var steps = (f.plan ? (st.alt && f.alt ? f.alt : f.plan) : FEEL.byTime[bucketOf(now().getTime())]) || [];
+    // Nothing bright or fast at night.
+    if (isNight()) steps = steps.map(function (x) { return x[0] === 'game:catch' ? ['game:bloom', 'Six slow breaths with the ring.'] : x; });
+    var next = -1;
+    for (var i = 0; i < steps.length; i++) if (st.done.indexOf(steps[i][0]) === -1) { next = i; break; }
+    return { key: key, f: f, steps: steps, next: next, alt: st.alt, hasAlt: !!(f.plan && f.alt), hear: f.hear[dayNum(dk) % f.hear.length] };
+  }
+  function stepInfo(ref) {
+    var p = ref.split(':'), id = p[1];
+    if (p[0] === 'tech' && TECH[id]) return { name: TECH[id].name, min: id === 'quick' ? 1 : (state.lengthMin || 2), attr: ['data-now', id], go: 'Start' };
+    if (p[0] === 'game' && GAMES[id]) return { name: GAMES[id].name, min: GAME_MIN[id] || 1, attr: ['data-game', id], go: 'Play' };
+    if (ref === 'more:trace') return { name: 'Trace the square', min: 1, attr: ['data-more', 'trace'], go: 'Play' };
+    if (ref === 'more:sleep') return { name: 'Guided sleep', min: 10, attr: ['data-more', 'sleep'], go: 'Start' };
+    if (ref === 'step') return { name: 'Small step', min: 1, attr: ['data-feel', 'step'], go: 'I did it' };
+    if (ref === 'jar') return { name: 'Good things jar', min: 1, attr: ['data-feel', 'jar'], go: 'Add a good thing' };
+    if (ref === 'sos') return { name: 'Talk to someone', min: 1, attr: ['data-feel', 'sos'], go: 'Open support' };
+    return null;
+  }
+  var ACT_ATTRS = ['data-now', 'data-game', 'data-more', 'data-feel'];
+  function setAction(btn, info) {
+    ACT_ATTRS.forEach(function (a) { btn.removeAttribute(a); });
+    if (info) btn.setAttribute(info.attr[0], info.attr[1]);
+  }
+  function forYou() {
+    var p = feelPlan();
+    var s = p.next === -1 ? null : p.steps[p.next];
+    return { key: p.key, id: s && s[0].indexOf('tech:') === 0 ? s[0].slice(5) : null, step: s && s[0], why: s ? s[1] : p.f.close, hear: p.hear, done: p.next === -1 };
   }
   function renderForYou() {
     if (!$('for-you')) return;
-    var f = forYou();
-    setText('for-you-name', TECH[f.id].name + ', ' + Math.round(((f.id === 'quick' ? TECH.quick.seconds : (state.lengthMin || 2) * 60)) / 60) + ' min');
-    setText('for-you-why', f.why);
-    setText('for-you-btn', 'Start');
-    $('for-you-btn').setAttribute('data-now', f.id);
+    var p = feelPlan();
+    var list = $('for-you-plan');
+    list.textContent = '';
+    p.steps.forEach(function (x, i) {
+      var info = stepInfo(x[0]);
+      if (!info) return;
+      var li = document.createElement('li');
+      var done = state.feelPlan.done.indexOf(x[0]) !== -1;
+      li.className = done ? 'done' : i === p.next ? 'now' : '';
+      li.textContent = tr(info.name + ', ' + info.min + ' min');
+      if (done) li.setAttribute('aria-label', tr(info.name + ', done'));
+      list.appendChild(li);
+    });
+    list.hidden = p.steps.length < 2;
+    var btn = $('for-you-btn');
+    if (p.next === -1) {
+      setText('for-you-hear', p.f.close);
+      setText('for-you-name', 'All done for now');
+      setText('for-you-why', 'Notice how you feel now. You can check in again below.');
+      setAction(btn, { attr: ['data-feel', 'again'] });
+      setText('for-you-btn', 'Start again');
+    } else {
+      var x = p.steps[p.next], info = stepInfo(x[0]);
+      setText('for-you-hear', p.hear);
+      setText('for-you-name', info.name + ', ' + info.min + ' min');
+      setText('for-you-why', x[0] === 'step' ? x[1] + ' ' + currentStep() : x[1]);
+      setAction(btn, info);
+      setText('for-you-btn', info.go);
+    }
+    $('for-you-alt').hidden = !p.hasAlt || p.next === -1;
+    setText('for-you-alt', p.alt ? 'Back to the first idea' : 'Something else');
+    renderGameRow(p);
+  }
+  // Today's games: the ones that suit the feeling first, and none that tend to work against it.
+  function renderGameRow(p) {
+    var row = document.querySelector('#screen-today .game-row');
+    if (!row) return;
+    var idOf = function (t) { return t.getAttribute('data-game') || t.getAttribute('data-more'); };
+    var never = (p.f.never || []).concat(isNight() ? ['catch'] : []);
+    var rank = p.steps.filter(function (x) { return /^(game|more):/.test(x[0]); }).map(function (x) { return x[0].split(':')[1]; }).concat(p.f.games || []);
+    var tiles = [].slice.call(row.querySelectorAll('.game-tile'));
+    tiles.sort(function (a, b) {
+      var ra = rank.indexOf(idOf(a)), rb = rank.indexOf(idOf(b));
+      return (ra === -1 ? 99 : ra) - (rb === -1 ? 99 : rb);
+    });
+    var shown = 0;
+    tiles.forEach(function (t) {
+      row.appendChild(t);
+      var ok = never.indexOf(idOf(t)) === -1 && shown < 3;
+      t.hidden = !ok;
+      if (ok) shown++;
+    });
+    setText('games-title', p.key === 'unknown' || p.key === 'okay' ? 'Play a calm game' : 'Games for how you feel');
+  }
+  // A finished exercise, game or step moves the plan on.
+  function planDone(ref) {
+    var p = feelPlan();
+    if (!p.steps.some(function (x) { return x[0] === ref; }) || state.feelPlan.done.indexOf(ref) !== -1) return false;
+    state.feelPlan.done.push(ref);
+    save();
+    renderForYou();
+    return true;
+  }
+  // After a step: offer the next one, or the closing line when the plan is complete.
+  function renderPlanNext(id, advanced) {
+    var b = $(id);
+    if (!b) return null;
+    var p = feelPlan();
+    var n = advanced && p.next !== -1 ? stepInfo(p.steps[p.next][0]) : null;
+    b.hidden = !n;
+    setAction(b, n);
+    if (n) setText(id, 'Next for you: ' + n.name);
+    return advanced && p.next === -1 ? p.f.close : null;
+  }
+  function feelAction(a) {
+    if (a === 'step') doStep();
+    else if (a === 'jar') openJar();
+    else if (a === 'sos') { planDone('sos'); openSupport(); }
+    else if (a === 'again') { state.feelPlan.done = []; save(); renderForYou(); }
+  }
+  function toggleAlt() {
+    feelPlan();
+    state.feelPlan.alt = !state.feelPlan.alt;
+    save();
+    renderForYou();
+    haptic('light');
   }
   // One tap from a card: straight into the guided exercise, with the optional before rating at the end.
   function startNow(id) {
@@ -2391,7 +2593,7 @@
     var stage = $('game-stage');
     stage.textContent = '';
     go('game');
-    ({ pairs: startPairs, catch: startCatch, bloom: startBloom })[id](stage);
+    ({ pairs: startPairs, catch: startCatch, bloom: startBloom, pop: startPop })[id](stage);
   }
 
   function stopGame() {
@@ -2416,6 +2618,8 @@
     renderSeedPill();
     setText('game-done-title', title);
     setText('game-done-text', text);
+    var close = renderPlanNext('game-plan-next', planDone('game:' + game.id));
+    if (close) setText('game-done-text', close);
     $('game-done').hidden = false;
     var again = $('game-again');
     if (again && again.focus) again.focus();
@@ -2591,6 +2795,68 @@
       function () { if (n > prev) state.gameBest.catch = n; });
   }
 
+  // Bubble Pop: a sheet of bubbles to pop one by one. No timer and no score, just a small thing finished.
+  var POP_COUNT = 30;
+  function startPop(stage) {
+    var field = document.createElement('div');
+    field.className = 'pop-field';
+    field.id = 'pop-field';
+    game.popped = 0;
+    for (var i = 0; i < POP_COUNT; i++) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'bubble';
+      b.setAttribute('aria-label', 'Pop a bubble');
+      b.setAttribute('data-bubble', String(i));
+      (function (el) {
+        // Popped on touch, so a quick tap always lands.
+        el.addEventListener('pointerdown', function () { popBubble(el); });
+        el.addEventListener('click', function () { popBubble(el); });
+      })(b);
+      field.appendChild(b);
+    }
+    stage.appendChild(field);
+    updatePop();
+  }
+  function updatePop() { setText('game-score', game.popped + ' of ' + POP_COUNT + ' popped'); }
+  function popBubble(el) {
+    if (!game || game.id !== 'pop' || game.done || el.classList.contains('popped')) return false;
+    el.classList.add('popped');
+    el.setAttribute('aria-label', 'Popped');
+    el.disabled = true;
+    game.popped++;
+    popSound(game.popped);
+    haptic('light');
+    updatePop();
+    if (game.popped >= POP_COUNT) {
+      game.timers.push(setTimeout(function () {
+        var prev = state.gameBest.pop || 0;
+        finishGame('Every bubble popped', 'All ' + POP_COUNT + ' done. Let your hands rest for a breath and enjoy the quiet.', function () { state.gameBest.pop = prev + 1; });
+      }, 350));
+    }
+    return true;
+  }
+  // A soft, short pop that rises a little as the sheet fills. Only with chimes on.
+  function popSound(n) {
+    if (!state.chime) return false;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    try {
+      chimeCtx = chimeCtx || new AC();
+      var t0 = chimeCtx.currentTime;
+      var o = chimeCtx.createOscillator(), g = chimeCtx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(320 + n * 6, t0);
+      o.frequency.exponentialRampToValueAtTime(140, t0 + 0.09);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.06, t0 + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
+      o.connect(g); g.connect(chimeCtx.destination);
+      o.start(t0); o.stop(t0 + 0.14);
+      return true;
+    } catch (e) { return false; }
+  }
+
   // Breathing Ring: hold to breathe in with the ring, let go to breathe out.
   var BLOOM_IN = 4, BLOOM_OUT = 4, BLOOM_ROUNDS = 6;
   function startBloom(stage) {
@@ -2701,6 +2967,7 @@
       updatePairsScore();
       finishGame('All pairs matched', 'You matched 6 pairs in ' + plural(game.moves, 'move', 'moves') + '.');
     } else if (game.id === 'catch') endCatch();
+    else if (game.id === 'pop') { var bs = document.querySelectorAll('#pop-field .bubble'); for (var i = 0; i < bs.length; i++) popBubble(bs[i]); }
     else endBloom();
   }
 
@@ -3412,6 +3679,8 @@
     if (pf) { partnerFilter = pf; renderPartners(); return; }
     var prog = el.getAttribute('data-program');
     if (prog) { openProgram(prog); return; }
+    var feel = el.getAttribute('data-feel');
+    if (feel) { feelAction(feel); haptic('light'); return; }
     var emotion = el.getAttribute('data-emotion');
     if (emotion) { setEmotion(emotion); return; }
     var dot = el.getAttribute('data-dot');
@@ -3553,6 +3822,7 @@
       case 'wb-submit': submitWb(); break;
       case 'backup-export': exportBackup(); break;
       case 'good-save': saveGood(); break;
+      case 'for-you-alt': toggleAlt(); break;
       case 'good-close': $('good-text').value = ''; closeSheets(); break;
       case 'golden-save': saveGoldenHour(); break;
       case 'golden-clear': clearGoldenHour(); break;
@@ -3658,6 +3928,7 @@
     stopSound: stopSound, fadeSound: fadeSound,
     isCrisis: isCrisis, openSupport: openSupport, startPractice: startPractice, TECH: TECH,
     now: now, dayKey: dayKey, weekKey: weekKey, isNative: isNative, addBadge: function (id) { addBadge(id); save(); },
+    planDone: planDone, renderPlanNext: renderPlanNext,
     publicUrl: PUBLIC_URL, weekGoal: weekGoal, isPlus: isPlus, plusRequired: plusRequired, openShop: openShop
   };
 
@@ -3740,6 +4011,8 @@
     flipCard: flipCard,
     spawnBeam: spawnBeam,
     finishCurrentGame: finishCurrentGame,
+    feelPlan: function () { var p = feelPlan(); return JSON.parse(JSON.stringify({ key: p.key, steps: p.steps, next: p.next, alt: p.alt, hear: p.hear, close: p.f.close })); },
+    stepInfo: stepInfo,
     voiceLines: function () {
       var out = [INTRO.breath, INTRO.steps, INTRO.journal, OUTRO, 'Voice guide on.', 'Get ready', 'Breathe in', 'Breathe out'];
       Object.keys(TECH).forEach(function (k) {
