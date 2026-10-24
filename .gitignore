@@ -41,3 +41,6 @@ site/
 skills-lock.json
 .claude/skills/
 .claude/launch.json
+
+# The iPhone app file is re-signed every few days (scripts/renew-iphone.sh); scripts/deploy.sh uploads it.
+downloads/loosenup-ios.ipa

@@ -156,10 +156,20 @@ npx cap open ios        # opens ios/App/App.xcodeproj in Xcode
 
 The project builds for the iOS Simulator with no account. Installing on a real iPhone needs an Apple Developer Program membership (USD 99 per year): set your Team under Signing and Capabilities, then archive and upload to App Store Connect for TestFlight. A free Apple ID can also run it on your own iPhone for 7 days through Xcode.
 
+LoosenUp is signed with a free Apple ID (team 6D7XLS9CRH), so the iPhone app installs only on the iPhones registered to it, and each build works for 7 days. `scripts/renew-iphone.sh` keeps it going: when 3 days or less are left it rebuilds and re-signs the app, installs it on your iPhone (cable, or the same Wi-Fi after pairing once), and puts the fresh file on `/get`. `FORCE=1` renews right away. To run the check every day at 10:00:
+
+```bash
+cp scripts/com.loosenup.renew-iphone.plist ~/Library/LaunchAgents/ && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.loosenup.renew-iphone.plist
+```
+
+The log is `~/Library/Logs/loosenup-renew-iphone.log`. The iPhone app file is not kept in git.
+
 ### Daily reminders
 
 `@capacitor/local-notifications` schedules a single repeating notification (id 1) at the chosen time, so there is never more than one reminder a day. Android 13 and newer ask for notification permission the first time you save a the daily reminder.
 
 ## Deploy
+
+`bash scripts/deploy.sh` deploys the committed code (HEAD) plus the local iPhone app file to production.
 
 Vercel serves `www/` as static files (no build step). `vercel.json` sets `Cache-Control: no-cache` on `sw.js` and `application/manifest+json` on `manifest.json`.
