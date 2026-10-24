@@ -98,7 +98,7 @@ Both domains (and https://loosenup.vercel.app) serve the same Vercel project. `a
 **Turning payments on (sandbox first):**
 
 1. Razorpay: sign up, stay in Test Mode, create API keys. Then add a webhook to `https://loosenup.anchit-tandon.com/api/plus?hook=razorpay` with a secret, for these events: subscription.activated, charged, pending, halted, cancelled and completed.
-2. Paddle: sign up for a sandbox account and create an API key and a client-side token. Add a notification destination to `https://loosenup.anchit-tandon.com/api/plus?hook=paddle` for subscription events. Approve the domain `loosenup.anchit-tandon.com`.
+2. Paddle: sign up for a sandbox account and create an API key and a client-side token. Add a notification destination to `https://loosenup.anchit-tandon.com/api/plus?hook=paddle` for subscription events. Set **Checkout → Checkout settings → Default payment link** to `https://loosenup.anchit-tandon.com/plus.html` (without it Paddle refuses every checkout with `transaction_default_checkout_url_not_set`). Approve the domain `loosenup.anchit-tandon.com` before going live.
 3. Create the plans: `RAZORPAY_KEY_ID=… RAZORPAY_KEY_SECRET=… PADDLE_API_KEY=… PADDLE_ENV=sandbox node scripts/setup-payments.mjs`
 4. Add these to Vercel (Production): `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `RAZORPAY_PLAN_MONTHLY`, `RAZORPAY_PLAN_YEARLY`, `PADDLE_CLIENT_TOKEN`, `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_PRICE_MONTHLY`, `PADDLE_PRICE_YEARLY` and `PADDLE_ENV` (`sandbox`, then `production`). Then redeploy.
 5. Go live: finish Razorpay KYC and Paddle's seller verification, swap in the live keys, run step 3 again with live keys, and set `PADDLE_ENV=production`.

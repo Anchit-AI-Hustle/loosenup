@@ -101,6 +101,7 @@
       P.Initialize({ token: c.token, eventCallback: function (e) {
         if (e.name === 'checkout.completed') { show('plus-wait'); text('plus-wait-title', 'Confirming your payment...'); waitForActive(30).catch(function (x) { stop(x.message); }); }
         if (e.name === 'checkout.closed' && $('plus-done').hidden) stop('Checkout was closed before paying. Nothing was charged.');
+        if (e.name === 'checkout.error') stop('The payment page could not open. Nothing was charged. Please try again in a moment.');
       } });
       P.Checkout.open({ items: [{ priceId: c.priceId, quantity: 1 }], customData: c.customData, settings: { displayMode: 'overlay', theme: 'light' } });
     });

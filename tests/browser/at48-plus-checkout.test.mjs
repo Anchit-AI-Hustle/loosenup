@@ -17,7 +17,7 @@ const FAKE_RZP = (mode) => `window.Razorpay = function (o) { this.o = o; };
     setTimeout(function () { ${mode === 'close' ? 'o.modal.ondismiss();' : "o.handler(o.order_id ? { razorpay_payment_id: 'pay_1', razorpay_order_id: o.order_id, razorpay_signature: 'sig' } : { razorpay_payment_id: 'pay_1', razorpay_subscription_id: o.subscription_id, razorpay_signature: 'sig' });"} }, 50); };`;
 const FAKE_PADDLE = `window.Paddle = { Environment: { set: function (e) { window.__env = e; } },
   Initialize: function (o) { window.__init = o; },
-  Checkout: { open: function (o) { window.__open = o; setTimeout(function () { window.__init.eventCallback({ name: 'checkout.completed' }); }, 50); } } };`;
+  Checkout: { open: function (o) { window.__open = o; setTimeout(function () { window.__init.eventCallback({ name: window.__paddleFails ? 'checkout.error' : 'checkout.completed' }); }, 50); } } };`;
 
 async function page({ provider = 'razorpay', mode = 'pay', activeAfter = 1, orders = false } = {}) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -141,5 +141,15 @@ test('AT48 Standard Checkout asks Razorpay for redirect mode with our callback, 
   await p.waitForSelector('#plus-done:not([hidden])');
   const o = await p.evaluate(() => ({ redirect: window.__rzp.redirect, cb: window.__rzp.callback_url }));
   assert.deepEqual(o, { redirect: true, cb: server.url + '/api/plus?action=callback' });
+  await ctx.close();
+});
+
+test('AT48 when Paddle cannot open its checkout, the page says so and offers Try again instead of waiting forever', async () => {
+  const { ctx, p, errors } = await page({ provider: 'paddle' });
+  await p.addInitScript(() => { window.__paddleFails = true; });
+  await p.goto(server.url + '/plus.html#k=' + KEY + '&plan=monthly');
+  await p.waitForSelector('#plus-retry:not([hidden])');
+  assert.match(await p.textContent('#plus-error'), /could not open\. Nothing was charged/);
+  assert.deepEqual(errors, []);
   await ctx.close();
 });

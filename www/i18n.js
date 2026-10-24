@@ -228,6 +228,7 @@
     'Choose one small step that helps, and when you will take it.': 'एक छोटा कदम चुनें जो मदद करे, और यह कि कब उठाएँगे।',
     'Picture the good part once more, and smile at it.': 'अच्छे हिस्से की एक बार फिर कल्पना करें, और उस पर मुस्कुराएँ।',
     /* LoosenUp Plus */
+    'The payment page could not open. Nothing was charged. Please try again in a moment.': 'भुगतान पेज नहीं खुल पाया। कोई पैसा नहीं कटा। कृपया थोड़ी देर में फिर से कोशिश करें।',
     'One payment for a month or a year of Plus. It does not renew; buy again any time.': 'Plus के एक महीने या एक साल के लिए एक ही भुगतान। यह अपने आप रिन्यू नहीं होता; जब चाहें फिर से खरीदें।',
     'Secure payment with UPI, cards or netbanking. One payment, no renewal.': 'UPI, कार्ड या नेटबैंकिंग से सुरक्षित भुगतान। एक ही भुगतान, अपने आप रिन्यू नहीं।',
     'One year of Plus': 'Plus का एक साल', 'One month of Plus': 'Plus का एक महीना',
