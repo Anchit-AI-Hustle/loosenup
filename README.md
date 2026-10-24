@@ -93,6 +93,8 @@ Both domains (and https://loosenup.vercel.app) serve the same Vercel project. `a
 
 **Two Razorpay modes.** With only `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` set, Razorpay runs as Standard Checkout: `checkout` creates an order for ₹149 or ₹799, the page opens Razorpay with that `order_id`, and `verify` turns Plus on for one month or one year only when HMAC-SHA256(`order_id|payment_id`, key secret) matches and Razorpay confirms that payment captured the right amount for that order. It does not renew; the app says so. The `order.paid` webhook covers a page that closed before confirming. Once Razorpay Subscriptions is enabled on the account and `RAZORPAY_PLAN_MONTHLY` and `RAZORPAY_PLAN_YEARLY` are set, Razorpay switches to renewing subscriptions (UPI Autopay). The sandbox runs as Standard Checkout today, because Subscriptions is not enabled on the test account. Razorpay's webhook secret is in `~/.config/loosenup/razorpay-webhook-secret` on the Mac that set it up; add the webhook in Razorpay with the events order.paid plus the subscription events below.
 
+**Trying the other region's checkout.** While both providers run on test keys (`rzp_test_` and `PADDLE_ENV=sandbox`), `/plus.html#country=US` (or `?country=` on the API) shows the checkout that country would see, so Paddle can be tested from India. With any live key the server ignores it and always follows the visitor's real country.
+
 **Turning payments on (sandbox first):**
 
 1. Razorpay: sign up, stay in Test Mode, create API keys. Then add a webhook to `https://loosenup.anchit-tandon.com/api/plus?hook=razorpay` with a secret, for these events: subscription.activated, charged, pending, halted, cancelled and completed.

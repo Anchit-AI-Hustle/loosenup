@@ -33,8 +33,12 @@
     text('plus-error', msg);
     if (!$('plus-wait').hidden) { text('plus-wait-title', 'Checkout did not finish'); text('plus-wait-text', 'Nothing was charged unless you saw a payment confirmation.'); $('plus-retry').hidden = false; }
   }
+  // #country=US tries another region's checkout; the server honours it only while payments are in test mode.
+  var country = /^[A-Za-z]{2}$/.test(hash.country || '') ? hash.country.toUpperCase() : '';
+  if (back) { try { country = sessionStorage.getItem('lu.plusCountry') || ''; } catch (e) { /* private mode */ } }
   function call(action, body) {
-    return fetch(API + (body ? '' : '?action=' + action), body
+    if (body && country) body.country = country;
+    return fetch(API + (body ? '' : '?action=' + action + (country ? '&country=' + country : '')), body
       ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ action: action }, body)) }
       : {}).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Please try again.'); return j; }); });
   }
@@ -83,7 +87,7 @@
         // Bank checks go through the page itself, not a popup that phones and in-app browsers block.
         opts.redirect = true;
         opts.callback_url = location.origin + '/api/plus?action=callback';
-        try { sessionStorage.setItem('lu.plusKey', key); sessionStorage.setItem('lu.plusLang', hindi ? 'hi' : ''); } catch (e) { /* private mode */ }
+        try { sessionStorage.setItem('lu.plusKey', key); sessionStorage.setItem('lu.plusLang', hindi ? 'hi' : ''); sessionStorage.setItem('lu.plusCountry', country); } catch (e) { /* private mode */ }
       } else opts.subscription_id = c.subscriptionId;
       var rzp = new window.Razorpay(opts);
       rzp.on && rzp.on('payment.failed', function () { stop('That payment did not go through. Nothing was charged. Try again or use another method.'); });

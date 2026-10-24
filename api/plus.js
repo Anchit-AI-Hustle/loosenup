@@ -28,6 +28,17 @@ const GRACE_MS = 3 * 86400000;
 const problem = (status, message) => Object.assign(new Error(message), { status });
 const env = (k) => process.env[k] || '';
 
+// While both providers run on test keys, a page can ask for another country (?country=US or
+// #country=US on /plus.html) to try the other checkout. With any live key this is ignored.
+export function testMode() {
+  const rzp = env('RAZORPAY_KEY_ID');
+  return (!rzp || rzp.indexOf('rzp_test_') === 0) && env('PADDLE_ENV') !== 'production';
+}
+export function countryFor(header, asked) {
+  const a = String(asked || '').toUpperCase();
+  return testMode() && /^[A-Z]{2}$/.test(a) ? a : String(header || '');
+}
+
 // Razorpay runs as subscriptions (UPI Autopay, renews) when its plans are set, and otherwise as Standard
 // Checkout orders: one payment buys a month or a year of Plus, with no renewal.
 export const AMOUNT_PAISE = { monthly: 14900, yearly: 79900 };
@@ -294,7 +305,8 @@ export default async function handler(req, res) {
       if (!out) throw problem(400, 'Unknown webhook.');
       return res.status(200).json(out);
     }
-    const country = req.headers['x-vercel-ip-country'] || '';
+    const asked = (req.query && req.query.country) || (req.body && typeof req.body === 'object' && req.body.country);
+    const country = countryFor(req.headers['x-vercel-ip-country'], asked);
     const action = (req.query && req.query.action) || (req.body && req.body.action);
     if (req.method === 'GET' && action === 'config') return res.status(200).json(config(country));
     await schema();

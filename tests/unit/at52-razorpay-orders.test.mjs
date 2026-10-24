@@ -149,3 +149,16 @@ test('AT52 redirect mode: Razorpay posts the result to the callback, which verif
   assert.deepEqual(await loc({ ...form, razorpay_signature: hmac('rzp_secret', 'order_1|pay_ok') }), [303, '/plus.html#paid']);
   assert.equal((await a.call('POST', { body: { action: 'status', key } })).json.active, true);
 });
+
+test('AT52 while payments are in test mode a page can ask for another country to try that checkout; with a live key it cannot', async () => {
+  const a = await api({}, { ...ENV, PADDLE_CLIENT_TOKEN: 'test_tok', PADDLE_API_KEY: 'pdl', PADDLE_PRICE_MONTHLY: 'pri_m', PADDLE_PRICE_YEARLY: 'pri_y', PADDLE_ENV: 'sandbox' });
+  assert.equal(a.mod.testMode(), true);
+  const us = await a.call('GET', { query: { action: 'config', country: 'US' }, headers: IN });
+  assert.deepEqual([us.json.provider, us.json.currency, us.json.country], ['paddle', 'USD', 'US']);
+  const bad = await a.call('GET', { query: { action: 'config', country: 'USA<' }, headers: IN });
+  assert.equal(bad.json.provider, 'razorpay', 'only two-letter codes');
+  const live = await api({}, { ...ENV, RAZORPAY_KEY_ID: 'rzp_live_abc', PADDLE_CLIENT_TOKEN: 'live_tok', PADDLE_API_KEY: 'pdl', PADDLE_PRICE_MONTHLY: 'pri_m', PADDLE_PRICE_YEARLY: 'pri_y', PADDLE_ENV: 'production' });
+  assert.equal(live.mod.testMode(), false);
+  const asked = await live.call('GET', { query: { action: 'config', country: 'US' }, headers: IN });
+  assert.equal(asked.json.provider, 'razorpay', 'live payments always follow the real country');
+});
