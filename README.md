@@ -21,7 +21,7 @@ The brand mark is a petal sun that opens on every in-breath, unfurls on the resu
 | iPhone | https://loosenup.anchit-tandon.com | `loosenup-ios-qr.png` |
 
 - **Android (direct install):** open the Android link on the phone and tap **Download for Android**, open `LoosenUp.apk`, allow your browser to install apps if asked (Settings, then Install unknown apps), then tap Install. Direct file: https://loosenup.anchit-tandon.com/download/loosenup-android.apk. The full web app is at https://loosenup.anchit-tandon.com.
-- **iPhone (native app):** open https://loosenup.anchit-tandon.com/install.html in Safari on a registered test iPhone and tap **Install the iPhone app** (a development-signed build served with an Apple install manifest; it renews every 7 days and updates itself in between). **Any iPhone:** open the iPhone link in Safari, tap **Share**, then **Add to Home Screen**. Safari shows this tip on the welcome screen. A native iPhone install needs TestFlight, which needs an Apple Developer account (see Native apps below).
+- **iPhone and iPad:** open the iPhone link in Safari, tap **Share**, then **Add to Home Screen**. It opens full screen, works offline and has every feature. `/get` shows these steps first on an iPhone. There is no web install of the native app: apps signed with a free Apple ID can only be installed from a Mac, and a refused web install removes the copy already on the phone. A native install for anyone needs TestFlight, which needs an Apple Developer account (see Native apps below).
 
 Both domains (and https://loosenup.vercel.app) serve the same Vercel project. `anchit-tandon.com` uses Vercel DNS, so HTTPS is automatic.
 
@@ -173,7 +173,7 @@ npx cap open ios        # opens ios/App/App.xcodeproj in Xcode
 
 The project builds for the iOS Simulator with no account. Installing on a real iPhone needs an Apple Developer Program membership (USD 99 per year): set your Team under Signing and Capabilities, then archive and upload to App Store Connect for TestFlight. A free Apple ID can also run it on your own iPhone for 7 days through Xcode.
 
-LoosenUp is signed with a free Apple ID (team 6D7XLS9CRH), so the iPhone app installs only on the iPhones registered to it, and each build works for 7 days. `scripts/renew-iphone.sh` keeps it going: when 3 days or less are left it rebuilds and re-signs the app, installs it on your iPhone (cable, or the same Wi-Fi after pairing once), and puts the fresh file on `/get`. `FORCE=1` renews right away. To run the check every day at 10:00:
+LoosenUp is signed with a free Apple ID (team 6D7XLS9CRH), so the native iPhone app runs only on the iPhones registered to it, each build works for 7 days, and only a Mac can install it (never a web link). `scripts/renew-iphone.sh` keeps it going: when 3 days or less are left it rebuilds and re-signs the app and installs it on your iPhone (cable, or the same Wi-Fi after pairing once). If the iPhone is not reachable, the next check installs it. `FORCE=1` renews right away. To run the check every day at 10:00:
 
 ```bash
 cp scripts/com.loosenup.renew-iphone.plist ~/Library/LaunchAgents/ && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.loosenup.renew-iphone.plist
@@ -187,6 +187,6 @@ The log is `~/Library/Logs/loosenup-renew-iphone.log`. The iPhone app file is no
 
 ## Deploy
 
-`bash scripts/deploy.sh` deploys the committed code (HEAD) plus the local iPhone app file to production.
+`bash scripts/deploy.sh` deploys the committed code (HEAD) to production.
 
 Vercel serves `www/` as static files (no build step). `vercel.json` sets `Cache-Control: no-cache` on `sw.js` and `application/manifest+json` on `manifest.json`.

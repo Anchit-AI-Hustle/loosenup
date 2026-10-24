@@ -13,7 +13,8 @@ test('AT19 live: /get shows every downloadable app, and / is the full app', { sk
   assert.equal(await title(HOME + '/'), 'LoosenUp');
   const page = await (await fetch(HOME + '/get')).text();
   assert.match(page, /download\/loosenup-android\.apk/);
-  assert.match(page, /itms-services:\/\/\?action=download-manifest&amp;url=https:\/\/loosenup\.anchit-tandon\.com\/loosenup-ios\.plist/);
+  assert.match(page, /Add to Home Screen/);
+  assert.doesNotMatch(page, /itms-services/);
 });
 
 test('AT19 live: the APK downloads as an Android package', { skip }, async () => {
@@ -42,17 +43,12 @@ test('AT21 live: the update manifest and bundle are served to the apps', { skip 
   assert.equal(buf.toString('ascii', 0, 2), 'PK');
 });
 
-test('AT27 live: the iPhone install manifest and app file are served over HTTPS', { skip }, async () => {
-  const m = await fetch(IOS + '/loosenup-ios.plist');
-  assert.equal(m.status, 200);
-  assert.match(m.headers.get('content-type'), /xml/);
-  assert.match(await m.text(), /com\.loosenup\.calm/);
-  const ipa = await fetch(IOS + '/download/loosenup-ios.ipa');
-  assert.equal(ipa.status, 200);
-  const buf = Buffer.from(await ipa.arrayBuffer());
-  assert.equal(buf.subarray(0, 2).toString(), 'PK');
+test('AT27 live: no iPhone web install is offered, so a refused install can never remove the app', { skip }, async () => {
+  assert.equal((await fetch(IOS + '/loosenup-ios.plist')).status, 404);
+  assert.equal((await fetch(IOS + '/download/loosenup-ios.ipa', { method: 'HEAD' })).status, 404);
   const page = await (await fetch(IOS + '/install.html')).text();
-  assert.match(page, /itms-services:\/\/\?action=download-manifest/);
+  assert.doesNotMatch(page, /itms-services/);
+  assert.match(page, /Open LoosenUp in Safari/);
 });
 
 test('AT30 live: organisations work end to end on Neon, and small or single-network groups stay private', { skip }, async () => {

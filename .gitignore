@@ -44,3 +44,4 @@ skills-lock.json
 
 # The iPhone app file is re-signed every few days (scripts/renew-iphone.sh); scripts/deploy.sh uploads it.
 downloads/loosenup-ios.ipa
+downloads/.iphone-install-pending

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, statSync } from 'node:fs';
+import { readFileSync, statSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { ROOT, read } from '../helpers/app.mjs';
 
@@ -10,7 +10,7 @@ test('AT18 install page offers a direct Android download and iPhone home screen 
   assert.match(html, /<a id="apk-download"[^>]*href="\/download\/loosenup-android\.apk"/);
   assert.match(html, /Install unknown apps/);
   assert.match(html, /Add to Home Screen/);
-  assert.match(html, /Install the iPhone app/);
+  assert.match(html, /Open LoosenUp in Safari/);
   assert.match(html, /href="tel:14416"/);
   assert.match(html, /A wellbeing companion, not medical care\./);
 });
@@ -37,19 +37,16 @@ test('AT18 Me links to the install page on the web', () => {
   assert.match(read('www/index.html'), /<a id="install-page-link"[^>]*href="\/install\.html"/);
 });
 
-test('AT27 the iPhone app installs from a link: install button, Apple manifest and a signed app file', () => {
+test('AT27 iPhone on /get adds LoosenUp to the home screen and never tries a web install', () => {
+  // A free Apple ID build cannot install from a web link, and a refused install removes the copy
+  // already on the phone. So /get offers only the home screen app on iPhone.
   const html = read('www/install.html');
-  const link = html.match(/id="ipa-install"[^>]*href="([^"]+)"/) || html.match(/href="([^"]+)"[^>]*id="ipa-install"/);
-  assert.ok(link, 'install button present');
-  assert.equal(link[1].replace(/&amp;/g, '&'), 'itms-services://?action=download-manifest&url=https://loosenup.anchit-tandon.com/loosenup-ios.plist');
-  const plist = read('www/loosenup-ios.plist');
-  assert.match(plist, /<string>software-package<\/string>\s*<key>url<\/key><string>https:\/\/loosenup\.anchit-tandon\.com\/download\/loosenup-ios\.ipa<\/string>/);
-  assert.match(plist, /<key>bundle-identifier<\/key><string>com\.loosenup\.calm<\/string>/);
-  assert.match(plist, /<key>title<\/key><string>LoosenUp<\/string>/);
-  const ipa = readFileSync(path.join(ROOT, 'downloads', 'loosenup-ios.ipa'));
-  assert.ok(ipa.length > 500000, 'app file is a real build');
-  assert.equal(ipa.subarray(0, 2).toString(), 'PK', 'app file is a zip archive');
-  assert.ok(ipa.includes(Buffer.from('Payload/App.app/embedded.mobileprovision')), 'signed with a provisioning profile');
+  assert.doesNotMatch(html, /itms-services/);
+  assert.match(html, /<a id="iphone-open"[^>]*href="https:\/\/loosenup\.anchit-tandon\.com\/"/);
+  assert.match(html, /Add to Home Screen, then Add/);
+  assert.match(html, /iPhones and iPads see their card first/);
+  assert.equal(existsSync(path.join(ROOT, 'www', 'loosenup-ios.plist')), false, 'no install manifest is served');
   const vercel = JSON.parse(read('vercel.json'));
-  assert.match(vercel.buildCommand, /cp downloads\/loosenup-ios\.ipa site\/download\/loosenup-ios\.ipa/);
+  assert.doesNotMatch(vercel.buildCommand, /\.ipa/, 'no iPhone app file is published');
+  assert.ok(!vercel.headers.some((h) => /plist|ipa/.test(h.source)));
 });

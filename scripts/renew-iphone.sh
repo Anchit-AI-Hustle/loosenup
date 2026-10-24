@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Keeps the LoosenUp iPhone app working on Anchit's own iPhone on the free Apple ID.
 #
-# A free Apple ID signs apps for 7 days. This rebuilds and re-signs the app when 3 days or less
-# are left, installs it on the iPhone (cable, or the same Wi-Fi after pairing once), and puts the
-# fresh file on https://loosenup.anchit-tandon.com/get so it can also be reinstalled from Safari.
+# A free Apple ID signs apps for 7 days, and Apple only lets a Mac install them (cable, or the same
+# Wi-Fi after pairing once), never a web link. This rebuilds and re-signs the app when 3 days or less
+# are left and installs it on the iPhone. If the iPhone is not reachable, the next run tries again.
 #
 #   bash scripts/renew-iphone.sh          # renews only when needed
 #   FORCE=1 bash scripts/renew-iphone.sh  # renews now
@@ -16,7 +16,7 @@ export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/us
 BUNDLE_ID="com.loosenup.calm"
 TEAM="6D7XLS9CRH"
 IPA="downloads/loosenup-ios.ipa"
-SITE="https://loosenup.anchit-tandon.com"
+PENDING="downloads/.iphone-install-pending"
 PROFILES="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
@@ -32,6 +32,11 @@ days_left() {
   local end; end="$(plutil -extract ExpirationDate raw -o - "$d/p.plist" 2>/dev/null)" || { echo 0; return; }
   echo $(( ($(date -j -u -f '%Y-%m-%dT%H:%M:%SZ' "$end" +%s) - $(date +%s)) / 86400 ))
 }
+
+# A build that could not reach the iPhone last time goes on as soon as the iPhone is around.
+if [ -z "${FORCE:-}" ] && [ -f "$PENDING" ] && [ -f "$IPA" ] && [ "$(days_left "$IPA")" -gt 0 ]; then
+  if bash scripts/install-iphone.sh "$IPA"; then rm -f "$PENDING"; note "Your iPhone has the renewed LoosenUp."; say "Installed the waiting build."; else say "The iPhone is still not reachable."; fi
+fi
 
 if [ -z "${FORCE:-}" ] && [ -f "$IPA" ]; then
   LEFT="$(days_left "$IPA")"
@@ -62,23 +67,11 @@ LEFT="$(days_left "$NEW")"
 cp "$NEW" "$IPA"
 say "Signed for $LEFT days."
 
-PHONE="no"
-if bash scripts/install-iphone.sh "$IPA"; then PHONE="yes"; fi
-
-# Only put it online when the committed site is what is already live, so this never ships unreleased work.
-if [ "$(git show HEAD:www/app.js | shasum | cut -c1-40)" = "$(curl -fsS "$SITE/app.js" | shasum | cut -c1-40)" ]; then
-  bash scripts/deploy.sh
-  for wait in 10 20 30 60; do
-    if [ "$(shasum "$IPA" | cut -c1-40)" = "$(curl -fsS "$SITE/download/loosenup-ios.ipa" | shasum | cut -c1-40)" ]; then say "The fresh app is on $SITE/get."; break; fi
-    sleep "$wait"
-  done
-else
-  say "The committed app differs from the live site, so the website was left alone. Deploy when ready: bash scripts/deploy.sh"
-fi
-
-if [ "$PHONE" = "yes" ]; then
+if bash scripts/install-iphone.sh "$IPA"; then
+  rm -f "$PENDING"
   note "Renewed for $LEFT days and updated on your iPhone."
 else
-  note "Renewed for $LEFT days. Open loosenup.anchit-tandon.com/get in Safari on your iPhone to reinstall."
+  touch "$PENDING"
+  note "Renewed for $LEFT days. Put your iPhone on the same Wi-Fi as this Mac, unlocked, and it updates on the next check."
 fi
 say "Done."

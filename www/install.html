@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Install LoosenUp</title>
-  <meta name="description" content="Install LoosenUp on Android or iPhone: two calm minutes to loosen up and feel lighter.">
+  <meta name="description" content="Get LoosenUp on Android or iPhone: two calm minutes to loosen up and feel lighter.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="LoosenUp">
   <meta property="og:title" content="Get LoosenUp on Android, iPhone or the web">
-  <meta property="og:description" content="Two calm minutes to loosen up and feel lighter. Install the Android app, the iPhone app, or add LoosenUp to your home screen.">
+  <meta property="og:description" content="Two calm minutes to loosen up and feel lighter. Install the Android app, or add LoosenUp to your home screen on iPhone.">
   <meta property="og:url" content="https://loosenup.anchit-tandon.com/get">
   <meta property="og:image" content="https://loosenup.anchit-tandon.com/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -73,27 +73,16 @@
       </article>
 
       <article class="card" id="iphone">
-        <p class="eyebrow platform">iPhone</p>
-        <h2 class="subtitle">Install the iPhone app</h2>
-        <a id="ipa-install" class="btn btn-sun" href="itms-services://?action=download-manifest&amp;url=https://loosenup.anchit-tandon.com/loosenup-ios.plist">Install the iPhone app</a>
-        <ol class="steps">
-          <li>Open this page in Safari on your iPhone and tap Install the iPhone app.</li>
-          <li>Tap Install when iOS asks. LoosenUp appears on your home screen.</li>
-          <li>The first time only: Settings, General, VPN and Device Management, tap the developer app and tap Trust.</li>
-        </ol>
-        <p class="fine">This is a test build for registered test iPhones. It renews every 7 days and keeps itself up to date in between. On any other iPhone, use the home screen app below.</p>
-      </article>
-
-      <article class="card" id="iphone-web">
         <p class="eyebrow platform">iPhone and iPad</p>
         <h2 class="subtitle">Add LoosenUp to your home screen</h2>
+        <a id="iphone-open" class="btn btn-sun" href="https://loosenup.anchit-tandon.com/">Open LoosenUp in Safari</a>
         <ol class="steps">
-          <li>Open <strong>loosenup.anchit-tandon.com</strong> in Safari.</li>
-          <li>Tap the Share button.</li>
+          <li>Tap Open LoosenUp in Safari above.</li>
+          <li>Tap the Share button at the bottom of Safari.</li>
           <li>Tap Add to Home Screen, then Add.</li>
-          <li>Open LoosenUp from your home screen. It works offline, with every feature.</li>
+          <li>Open LoosenUp from your home screen. It opens full screen, works offline and has every feature.</li>
         </ol>
-        <a class="btn btn-soft" href="https://loosenup.anchit-tandon.com/">Open LoosenUp</a>
+        <p class="fine">LoosenUp on iPhone runs from your home screen like any other app. An App Store version can follow later.</p>
       </article>
 
       <article class="card">
@@ -108,6 +97,9 @@
   </div>
   <script src="/helplines.js"></script>
   <script>
+    /* iPhones and iPads see their card first. */
+    (function () { var ua = navigator.userAgent || ''; var ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+      var a = document.getElementById('android'), i = document.getElementById('iphone'); if (ios && a && i) a.parentNode.insertBefore(i, a); })();
     /* Helpline links come from the same source as the app (www/helplines.js). */
     (function () { var H = window.LoosenUpHelplines; if (!H) return;
       document.querySelectorAll('[data-hl]').forEach(function (a) { var p = a.getAttribute('data-hl').split('.'); var v = H[p[0]] && H[p[0]][p[1]]; if (v) a.setAttribute('href', v); }); })();
