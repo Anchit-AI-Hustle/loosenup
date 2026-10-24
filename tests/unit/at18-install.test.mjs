@@ -44,6 +44,9 @@ test('AT27 iPhone on /get adds LoosenUp to the home screen and never tries a web
   assert.doesNotMatch(html, /itms-services/);
   assert.match(html, /<a id="iphone-open"[^>]*href="https:\/\/loosenup\.anchit-tandon\.com\/"/);
   assert.match(html, /Add to Home Screen, then Add/);
+  assert.match(html, /<button id="iphone-install"[^>]*>Install LoosenUp<\/button>/, 'a real Install button');
+  assert.match(html, /id="a2hs"[^>]*role="dialog"/, 'Install opens a three-step guide');
+  assert.match(html, /beforeinstallprompt/, 'browsers with an install prompt get it directly');
   assert.match(html, /iPhones and iPads see their card first/);
   assert.equal(existsSync(path.join(ROOT, 'www', 'loosenup-ios.plist')), false, 'no install manifest is served');
   const vercel = JSON.parse(read('vercel.json'));
