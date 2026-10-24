@@ -8,7 +8,14 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 SITE="https://loosenup.anchit-tandon.com"
-ask() { local v; read -r -s -p "$1: " v; echo >&2; printf %s "$v"; }
+# Hidden input makes a double paste easy to miss, so a value made of two identical halves is kept once.
+ask() {
+  local v h; read -r -s -p "$1: " v; echo >&2
+  v="$(printf %s "$v" | tr -d '[:space:]')"
+  h=$(( ${#v} / 2 ))
+  if [ $(( ${#v} % 2 )) -eq 0 ] && [ "$h" -gt 0 ] && [ "${v:0:$h}" = "${v:$h}" ]; then echo "  (pasted twice; using it once)" >&2; v="${v:0:$h}"; fi
+  printf %s "$v"
+}
 setenv() {
   npx --yes vercel env rm "$1" production -y >/dev/null 2>&1 || true
   printf %s "$2" | npx --yes vercel env add "$1" production >/dev/null
