@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>LoosenUp Plus</title>
+  <meta name="description" content="LoosenUp Plus: every guided programme, every sleep session and every seasonal pack. Breathing, SOS and helplines stay free for everyone.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#EDF7FF">
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .plus { display: flex; flex-direction: column; gap: 16px; padding: 6px 0 24px; }
+    .plus .price-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .plus .price-card { display: grid; gap: 6px; padding: 16px; border-radius: 20px; border: 2px solid var(--line); background: var(--glass); text-align: left; font: inherit; color: var(--ink); cursor: pointer; }
+    .plus .price-card[aria-pressed="true"] { border-color: var(--leaf-2); box-shadow: inset 0 0 0 1px var(--leaf-2); }
+    .plus .price-card strong { font-size: 24px; }
+    .plus .key-box { font: 700 15px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; padding: 12px 14px; border-radius: 14px; background: rgba(39, 110, 79, .08); }
+    .plus .perks { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+    .plus .legal { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+    .plus .legal a { color: var(--leaf-2); }
+    .plus [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true"><span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span></div>
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="/" style="color: inherit; text-decoration: none;">
+        <img class="brand-mark" src="/favicon.png" alt="" width="34" height="34">
+        <span class="wordmark">LoosenUp</span>
+      </a>
+    </header>
+    <main class="plus">
+      <p class="eyebrow">Support LoosenUp</p>
+      <h1 class="title">LoosenUp Plus</h1>
+
+      <article class="card" id="plus-offer">
+        <ul class="perks">
+          <li>Every day of every guided programme: Better sleep, Exam calm, Recovering from burnout</li>
+          <li>Every sleep session: body scan, yoga nidra and sleep stories</li>
+          <li>Every seasonal pack: exams, appraisal season, monsoon, festivals</li>
+        </ul>
+        <p class="fine">Breathing, games, the journal, SOS and every helpline stay free for everyone, always.</p>
+        <div class="price-row" role="group" aria-label="Choose a plan">
+          <button class="price-card" type="button" data-plan="monthly" aria-pressed="false"><span>Monthly</span><strong id="price-monthly">₹149</strong><span class="fine">per month</span></button>
+          <button class="price-card" type="button" data-plan="yearly" aria-pressed="true"><span>Yearly, save 55%</span><strong id="price-yearly">₹799</strong><span class="fine">per year</span></button>
+        </div>
+        <button id="plus-buy" class="btn btn-sun" type="button">Continue to secure payment</button>
+        <p class="fine" id="plus-pay-note">Renews automatically. Cancel any time in Me, and Plus stays on until the end of the period you paid for.</p>
+      </article>
+
+      <article class="card" id="plus-wait" hidden>
+        <h2 class="subtitle" id="plus-wait-title">Opening secure checkout...</h2>
+        <p class="muted" id="plus-wait-text">This takes a moment.</p>
+        <button id="plus-retry" class="btn btn-soft" type="button" hidden>Try again</button>
+      </article>
+
+      <article class="card" id="plus-done" hidden>
+        <h2 class="subtitle">LoosenUp Plus is on. Thank you.</h2>
+        <p id="plus-until" class="muted"></p>
+        <p class="field-label">Your Plus key</p>
+        <p class="key-box" id="plus-key" data-no-tr></p>
+        <p class="fine">Keep this key. It restores Plus on another phone: Me, then Restore Plus. It is not linked to your name or email.</p>
+        <button id="plus-copy" class="btn btn-soft" type="button">Copy key</button>
+        <a id="plus-back" class="btn btn-sun" href="/">Back to LoosenUp</a>
+        <p class="fine">Using the LoosenUp app? Switch back to it. Plus turns on by itself.</p>
+      </article>
+
+      <p id="plus-error" class="fine" role="alert" aria-live="assertive"></p>
+
+      <nav class="legal fine" aria-label="Policies">
+        <a href="/terms.html">Terms</a><a href="/privacy.html">Privacy</a><a href="/refunds.html">Refunds and cancellation</a>
+      </nav>
+      <p class="fine" id="plus-merchant">Payments in India are handled by Razorpay. Outside India, Paddle.com is the merchant of record and reseller for all orders, and handles sales tax.</p>
+    </main>
+    <p class="footnote">A wellbeing companion, not medical care.</p>
+  </div>
+  <script src="/i18n.js"></script>
+  <script src="/plus-checkout.js"></script>
+</body>
+</html>

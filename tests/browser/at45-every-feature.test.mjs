@@ -809,14 +809,13 @@ test('Me: backup exports a file and restores it; reset starts fresh', async () =
   await done(ctx, errors);
 });
 
-test('LoosenUp Plus: the shop opens and a demo purchase unlocks every programme day', async () => {
+test('LoosenUp Plus: the sheet shows real prices, and before payments open nothing is locked or chargeable', async () => {
   const { ctx, page, errors } = await phone();
   await page.evaluate(() => window.LoosenUp.openShop());
   assert.ok(await page.isVisible('#shop-sheet'));
-  await page.click('[data-sku="fullbloomYear"]');
-  assert.ok(await page.isVisible('#checkout-sheet'));
-  await page.click('#checkout-confirm');
-  assert.equal((await st(page)).plan, 'fullbloom');
+  assert.match(await text(page, '#shop-sheet'), /₹149[\s\S]*₹799/);
+  assert.doesNotMatch(await text(page, '#shop-sheet'), /demo/i);
+  assert.equal(await page.evaluate(() => window.LoosenUp.plusRequired()), false);
   await done(ctx, errors);
 });
 

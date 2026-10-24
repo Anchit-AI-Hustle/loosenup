@@ -1,5 +1,5 @@
 /* LoosenUp service worker: precache the shell, cache-first for same-origin GET. */
-var CACHE = 'loosenup-v2.3.2';
+var CACHE = 'loosenup-v2.4.0';
 var SHELL = [
   '/',
   '/index.html',
@@ -40,6 +40,8 @@ self.addEventListener('fetch', function (event) {
   if (request.method !== 'GET') return;
   var url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  // Server answers (Plus status, prices, reminder keys) are always live, never cached.
+  if (url.pathname.indexOf('/api/') === 0) return;
 
   if (request.mode === 'navigate') {
     var isAppShell = url.pathname === '/' || url.pathname === '/index.html';

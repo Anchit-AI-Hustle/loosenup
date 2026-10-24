@@ -77,11 +77,23 @@
     });
     p.appendChild(after);
     sc.appendChild(p);
-    core.register('sleep', function () { $('sleep-list').hidden = !!sleepRun; $('sleep-player').hidden = !sleepRun; });
+    core.register('sleep', function () { $('sleep-list').hidden = !!sleepRun; $('sleep-player').hidden = !sleepRun; renderSleepLocks(); });
+  }
+  // The body scan is always free; the other sleep sessions are part of LoosenUp Plus.
+  var FREE_SLEEP = 'scan';
+  function sleepLocked(id) { return id !== FREE_SLEEP && core.plusRequired(); }
+  function renderSleepLocks() {
+    var b = document.querySelectorAll('[data-sleep]');
+    for (var i = 0; i < b.length; i++) {
+      var id = b[i].getAttribute('data-sleep'), tag = b[i].querySelector('.plus-tag');
+      if (sleepLocked(id) && !tag) { tag = mk('span', 'tag plus-tag', 'Plus'); b[i].insertBefore(tag, b[i].firstChild); }
+      if (!sleepLocked(id) && tag) tag.remove();
+    }
   }
   function sleepStart(id) {
     var s = (window.LoosenUpSleep || []).filter(function (x) { return x.id === id; })[0];
     if (!s) return false;
+    if (sleepLocked(id)) { core.openShop('Every sleep session is part of LoosenUp Plus. The body scan is always free.'); return false; }
     sleepStop(true);
     var st = S();
     sleepRun = { s: s, i: -1, lineLeft: 0, elapsed: 0, total: sessionSecs(s), paused: false, after: st.sleepAfter == null ? 15 : st.sleepAfter };
@@ -424,6 +436,7 @@
       var ic = mk('span', 'pack-ic', p.icon); ic.setAttribute('aria-hidden', 'true'); head.appendChild(ic);
       head.appendChild(mk('h2', 'subtitle', p.name));
       if (cur && cur.id === p.id) head.appendChild(mk('span', 'tag', 'In season'));
+      if (core.plusRequired()) head.appendChild(mk('span', 'tag plus-tag', 'Plus'));
       c.appendChild(head);
       c.appendChild(mk('p', 'muted', p.desc));
       p.items.forEach(function (it) { c.appendChild(btn(it[2], 'btn btn-soft pack-item', { 'data-pack-item': it[0] + ':' + it[1] })); });
@@ -431,6 +444,7 @@
     });
   }
   function openPackItem(v) {
+    if (core.plusRequired()) { core.openShop('Seasonal packs are part of LoosenUp Plus.'); return false; }
     var p = v.split(':');
     if (p[0] === 'practice') core.startPractice(p[1]);
     else if (p[0] === 'program') L.openProgram(p[1]);
@@ -665,7 +679,7 @@
   if (core.current() && core.current() !== 'welcome') core.go(core.current());
 
   window.LoosenUpMore = {
-    sleepStart: sleepStart, sleepTick: sleepTick, sleepStop: sleepStop, sleepRun: function () { return sleepRun && { id: sleepRun.s.id, i: sleepRun.i, elapsed: sleepRun.elapsed, total: sleepRun.total, done: !!sleepRun.done }; },
+    sleepStart: sleepStart, sleepLocked: sleepLocked, sleepTick: sleepTick, sleepStop: sleepStop, sleepRun: function () { return sleepRun && { id: sleepRun.s.id, i: sleepRun.i, elapsed: sleepRun.elapsed, total: sleepRun.total, done: !!sleepRun.done }; },
     subscribePush: subscribePush, pushSupported: pushSupported, setLength: setLength, setGoal: setGoal, inSeason: inSeason, packs: PACKS,
     saveJournal: saveJournal, traceStart: traceStart, traceEnd: function () { return trace ? traceEnd() : null; }, dotAt: dotAt, onPhase: onPhase, vibrate: vibrate
   };

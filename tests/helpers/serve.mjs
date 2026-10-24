@@ -20,6 +20,11 @@ const TYPES = {
 export function startServer(port = 0) {
   const server = http.createServer(async (req, res) => {
     let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    // Like the live site before payments are switched on: Plus is not for sale yet.
+    if (p === '/api/plus') {
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ enabled: false, provider: null, currency: 'INR', prices: { monthly: '₹149', yearly: '₹799' } }));
+    }
     if (p.endsWith('/')) p += 'index.html';
     const file = path.join(WWW, path.normalize(p));
     if (!file.startsWith(WWW)) { res.writeHead(403); return res.end(); }

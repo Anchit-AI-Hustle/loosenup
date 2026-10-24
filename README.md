@@ -78,14 +78,26 @@ Both domains (and https://loosenup.vercel.app) serve the same Vercel project. `a
 | Privacy | All data stays on the device in localStorage (`loosenup.v1`). No accounts, no analytics, fonts are self-hosted. |
 | Daily reminder | A daily time you choose. On the web it shows a gentle in-app note. On the Android and iOS apps it schedules one real local notification per day. |
 
-### Prices (placeholders)
+### LoosenUp Plus (real subscriptions)
 
-| Item | INR | USD |
+| | India (Razorpay) | Everywhere else (Paddle) |
 | --- | --- | --- |
-| LoosenUp Plus, monthly | ₹149 / month | USD 4.99 / month |
-| LoosenUp Plus, yearly | ₹799 / year | USD 34.99 / year |
+| Monthly | ₹149 | US$4.99 plus local tax |
+| Yearly | ₹799 | US$34.99 plus local tax |
+| Pays with | UPI, UPI Autopay, cards, netbanking | Cards, Apple Pay, Google Pay, PayPal |
+| Tax | You file GST | Paddle is the merchant of record and handles sales tax and VAT |
 
-Exchange rate check on 17 Oct 2026 (open.er-api.com, updated 00:02 UTC): **USD 1 = ₹95.11**. At that rate USD 6.99 is about ₹665, so the INR prices sit at roughly 45 percent of the USD prices. That is a deliberate purchasing power discount for India, in line with common app store regional pricing. Revisit before going live.
+**What Plus opens:** every programme day after day 3, every sleep session (the body scan stays free), and every seasonal pack. Breathing, games, the journal, SOS, helplines and the safety plan are always free. Until a payment provider is configured, nothing is locked.
+
+**How it works:** Choose a plan → `/api/plus` makes a Plus key (stored only as a hash) → `/plus.html#k=…` opens Razorpay or Paddle (in the browser on phones) → a signed payment (Razorpay) or a signed webhook (Paddle) turns Plus on → the app checks the key on launch and when it comes back. Webhooks keep renewals, failed payments and cancellations current. The key restores Plus on another phone (Me → Restore Plus). Cancel in Me keeps Plus to the end of the paid period. Policies: `/terms.html`, `/privacy.html`, `/refunds.html`.
+
+**Turning payments on (sandbox first):**
+
+1. Razorpay: sign up, stay in Test Mode, create API keys. Then add a webhook to `https://loosenup.anchit-tandon.com/api/plus?hook=razorpay` with a secret, for these events: subscription.activated, charged, pending, halted, cancelled and completed.
+2. Paddle: sign up for a sandbox account and create an API key and a client-side token. Add a notification destination to `https://loosenup.anchit-tandon.com/api/plus?hook=paddle` for subscription events. Approve the domain `loosenup.anchit-tandon.com`.
+3. Create the plans: `RAZORPAY_KEY_ID=… RAZORPAY_KEY_SECRET=… PADDLE_API_KEY=… PADDLE_ENV=sandbox node scripts/setup-payments.mjs`
+4. Add these to Vercel (Production): `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `RAZORPAY_PLAN_MONTHLY`, `RAZORPAY_PLAN_YEARLY`, `PADDLE_CLIENT_TOKEN`, `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_PRICE_MONTHLY`, `PADDLE_PRICE_YEARLY` and `PADDLE_ENV` (`sandbox`, then `production`). Then redeploy.
+5. Go live: finish Razorpay KYC and Paddle's seller verification, swap in the live keys, run step 3 again with live keys, and set `PADDLE_ENV=production`.
 
 ## Project layout
 

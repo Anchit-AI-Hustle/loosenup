@@ -50,18 +50,19 @@ test('AT29 one programme day a calendar day: the day runs the paired exercise an
   assert.match(app.$('#program-day-title').textContent, /Dim the last hour/);
 });
 
-test('AT29 days 1 to 3 are free; day 4 opens LoosenUp Plus, which unlocks it', () => {
+test('AT29 days 1 to 3 are free; day 4 opens LoosenUp Plus once payments are open, and an active plan unlocks it', () => {
   const app = ready();
   for (let d = 1; d <= 3; d++) { app.B.setNow(day(d)); app.B.openProgram('exam'); doDay(app); }
   app.B.setNow(day(4));
+  app.B.openProgram('exam');
+  assert.match(app.$('#program-start').textContent, /Start today's practice/, 'free for everyone while Plus cannot be bought');
+  app.B.setState({ payConfig: { enabled: true, provider: 'razorpay', currency: 'INR', prices: { monthly: '₹149', yearly: '₹799' } } });
   app.B.openProgram('exam');
   assert.match(app.$('#program-start').textContent, /Unlock with LoosenUp Plus/);
   app.click('#program-start');
   assert.equal(app.visible('#shop-sheet'), true);
   assert.match(app.$('#shop-note').textContent, /Day 4 onwards/);
-  app.click('[data-sku="fullbloomYear"]');
-  app.click('#checkout-confirm');
-  assert.equal(app.B.state().plan, 'fullbloom');
+  app.B.setState({ plus: { key: 'LU' + 'b'.repeat(32), plan: 'yearly', provider: 'razorpay', active: true, until: day(300).toISOString() } });
   app.B.openProgram('exam');
   assert.match(app.$('#program-start').textContent, /Start today's practice/);
   assert.match(app.$('#program-day-title').textContent, /Sleep is study time/);
@@ -71,15 +72,14 @@ test('AT29 LoosenUp Plus is ₹149 a month or ₹799 a year and lists the progra
   const app = ready();
   app.B.openShop();
   const t = app.$('#shop-sheet').textContent.replace(/\s+/g, ' ');
-  assert.match(t, /₹149\/mo or USD 4\.99\/mo/);
-  assert.match(t, /₹799\/yr or USD 34\.99\/yr/);
+  assert.match(t, /₹149 a month/);
+  assert.match(t, /₹799 a year/);
   assert.match(t, /Exam calm/);
-  assert.match(t, /DEMO checkout/);
 });
 
 test('AT29 finishing every day of a programme earns the Finisher badge', () => {
   const app = ready();
-  app.B.setState({ plan: 'fullbloom' });
+  app.B.setState({ plus: { key: 'LU' + 'b'.repeat(32), active: true, until: day(300).toISOString() } });
   for (let d = 1; d <= 14; d++) { app.B.setNow(day(d)); app.B.openProgram('exam'); doDay(app); }
   const s = app.B.state();
   assert.equal(s.programs.exam.done.length, 14);

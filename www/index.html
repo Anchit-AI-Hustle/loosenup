@@ -817,10 +817,25 @@
           </div>
           <button id="open-support" class="btn btn-ghost" type="button">Open SOS and helplines</button>
         </article>
-        <article class="card">
+        <article class="card" id="plan-card">
           <h2 class="subtitle">Your plan</h2>
           <p id="me-plan" class="muted"></p>
           <button id="open-shop" class="btn btn-soft" type="button">See LoosenUp Plus</button>
+          <div id="plus-manage" hidden>
+            <p class="field-label">Your Plus key</p>
+            <p id="plus-key-view" class="fine plus-key" data-no-tr></p>
+            <button id="plus-copy-key" class="btn btn-soft btn-small" type="button">Copy key</button>
+            <button id="plus-cancel" class="btn btn-ghost" type="button">Cancel at the end of this period</button>
+          </div>
+          <details id="plus-restore" class="fold">
+            <summary>Restore Plus</summary>
+            <div class="fold-body">
+              <label class="field-label" for="plus-restore-key">Your Plus key</label>
+              <input id="plus-restore-key" class="text-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="LU...">
+              <button id="plus-restore-btn" class="btn btn-soft" type="button">Restore</button>
+            </div>
+          </details>
+          <p id="plus-status" class="fine" aria-live="polite"></p>
         </article>
         <article class="card">
           <h2 class="subtitle">Daily reminder</h2>
@@ -938,32 +953,22 @@
   <section id="shop-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="shop-title" hidden>
     <div class="sheet-grip" aria-hidden="true"></div>
     <h2 id="shop-title" class="title">LoosenUp Plus</h2>
-    <p class="demo-flag">DEMO checkout. Nothing is charged.</p>
     <p id="shop-note" class="muted"></p>
     <article class="card plan-card">
-      <p class="eyebrow">Subscription</p>
-      <h3 class="plan-name">LoosenUp Plus</h3>
       <ul class="plan-perks">
-        <li>Every guided programme, every day: Better sleep in 21 days, Exam calm, Recovering from burnout</li>
-        <li>New programmes as they arrive</li>
-        <li>Supports free calm breaks and SOS for everyone</li>
+        <li>Every day of every guided programme: Better sleep, Exam calm, Recovering from burnout</li>
+        <li>Every sleep session: body scan, yoga nidra and sleep stories</li>
+        <li>Every seasonal pack: exams, appraisal season, monsoon, festivals</li>
       </ul>
-      <p class="price">₹149/mo <span class="or">or</span> USD 4.99/mo</p>
-      <button class="btn btn-sun" type="button" data-sku="fullbloom">Choose monthly (demo)</button>
-      <p class="price">₹799/yr <span class="or">or</span> USD 34.99/yr <em class="save">Save 55%</em></p>
-      <button class="btn btn-soft" type="button" data-sku="fullbloomYear">Choose yearly (demo)</button>
+      <p class="price"><span id="shop-price-monthly">₹149</span> a month</p>
+      <button class="btn btn-soft" type="button" data-plus-plan="monthly">Choose monthly</button>
+      <p class="price"><span id="shop-price-yearly">₹799</span> a year <em class="save">Save 55%</em></p>
+      <button class="btn btn-sun" type="button" data-plus-plan="yearly">Choose yearly</button>
+      <p id="shop-status" class="fine" aria-live="polite">Secure payment with UPI, cards or netbanking. Renews automatically; cancel any time in Me.</p>
     </article>
-    <p class="fine">Every calm break, tool and SOS stays free. Prices are placeholders while LoosenUp is in preview.</p>
+    <p class="fine">Breathing, games, the journal, SOS and every helpline stay free for everyone, always.</p>
+    <p class="fine"><a href="https://loosenup.anchit-tandon.com/terms.html" target="_blank" rel="noopener">Terms</a> · <a href="https://loosenup.anchit-tandon.com/privacy.html" target="_blank" rel="noopener">Privacy</a> · <a href="https://loosenup.anchit-tandon.com/refunds.html" target="_blank" rel="noopener">Refunds</a></p>
     <button id="shop-close" class="btn btn-ghost" type="button">Close</button>
-  </section>
-
-  <section id="checkout-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="checkout-title" hidden>
-    <div class="sheet-grip" aria-hidden="true"></div>
-    <h2 id="checkout-title" class="title">DEMO checkout</h2>
-    <p class="demo-flag">This is a demo. Nothing is charged and no payment details are asked for.</p>
-    <div class="card"><p><strong id="checkout-item"></strong></p><p id="checkout-price" class="muted"></p></div>
-    <button id="checkout-confirm" class="btn btn-sun" type="button">Complete demo purchase</button>
-    <button id="checkout-cancel" class="btn btn-ghost" type="button">Not now</button>
   </section>
 
   <section id="support-sheet" class="sheet sos-sheet" role="dialog" aria-modal="true" aria-labelledby="support-title" hidden>

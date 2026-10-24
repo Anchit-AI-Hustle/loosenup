@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.3.2';
+  var VERSION = '2.4.0';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -201,10 +201,6 @@
     'Every break plants something good.'
   ];
 
-  var SKUS = {
-    fullbloom: { name: 'LoosenUp Plus, monthly', price: '₹149/mo or USD 4.99/mo' },
-    fullbloomYear: { name: 'LoosenUp Plus, yearly', price: '₹799/yr or USD 34.99/yr' }
-  };
 
   var CRISIS = [
     /suicid/i, /\bkill(ing)?\s+my\s*self\b/i, /\bend(ing)?\s+it\s+all\b/i, /\bend(ing)?\s+my\s+life\b/i,
@@ -255,7 +251,7 @@
       games: { day: null, count: 0 }, gameBest: { pairs: null, catch: 0, bloom: 0 },
       moods: [], smallSteps: [], goodThings: [], trusted: null, sosLocation: false, jarXp: { day: null, count: 0 },
       careTeam: null, safetyPlan: null, wellbeing: [], toolXp: { day: null, count: 0 }, reframes: 0, theme: 'auto', lang: 'en', programs: {}, org: null, emotions: [], safetyAskedDay: null, lessonsDone: [], chime: true, bed: 'none',
-      lengthMin: 2, weeklyGoal: 3, hapticBreath: false, textSize: 'normal', journal: [], sleepAfter: 15,
+      lengthMin: 2, weeklyGoal: 3, hapticBreath: false, textSize: 'normal', journal: [], sleepAfter: 15, plus: null, payConfig: null,
       lock: { enabled: false, salt: '', hash: '', bio: false }
     };
   }
@@ -269,6 +265,8 @@
         for (var k in p) if (Object.prototype.hasOwnProperty.call(s, k)) s[k] = p[k];
       }
     } catch (e) { /* storage unavailable: start fresh in memory */ }
+    // The old demo checkout never charged anyone, so it never grants Plus.
+    if (s.plan === 'fullbloom') s.plan = 'free';
     return s;
   }
   var state = load();
@@ -478,28 +476,108 @@
     if (!keepFocus && lastFocus && lastFocus.focus && document.contains(lastFocus)) lastFocus.focus();
   }
 
-  var pendingSku = null;
+  /* ---------- LoosenUp Plus: real subscriptions (Razorpay in India, Paddle elsewhere) ---------- */
+  // On the website Plus talks to its own server; the phone apps talk to the public one.
+  function plusApi() { return (!isNative() && /^https?:$/.test(location.protocol) ? location.origin : PUBLIC_URL) + '/api/plus'; }
+  var PLUS_GRACE = 3 * 86400000;
+  function plusCall(action, body) {
+    if (typeof fetch !== 'function') return Promise.reject(new Error('offline'));
+    return fetch(plusApi() + (body ? '' : '?action=' + action), body
+      ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ action: action }, body)) } : {})
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Please try again.'); return j; }); });
+  }
+  // Plus is on while the paid period lasts (with a few days' grace for a renewal that is still going through).
+  function isPlus() {
+    var p = state.plus;
+    if (!p || !p.active) return false;
+    return !p.until || new Date(p.until).getTime() + PLUS_GRACE > now().getTime();
+  }
+  // Paid parts are locked only when Plus can actually be bought; until then everything stays free.
+  function plusRequired() { return !!(state.payConfig && state.payConfig.enabled) && !isPlus(); }
+  function loadPayConfig() {
+    return plusCall('config').then(function (c) { state.payConfig = { enabled: !!c.enabled, provider: c.provider, currency: c.currency, prices: c.prices }; save(); renderShop(); return state.payConfig; })
+      .catch(function () { return state.payConfig; });
+  }
+  function applyPlus(st) {
+    var p = state.plus || {};
+    state.plus = { key: p.key, plan: st.plan || p.plan, provider: st.provider || p.provider, active: !!st.active, until: st.until || null,
+      cancelAtEnd: !!st.cancelAtEnd, checked: now().getTime() };
+    save();
+    if (current && RENDER[current]) RENDER[current]();
+  }
+  function refreshPlus() {
+    if (!state.plus || !state.plus.key) return Promise.resolve(false);
+    return plusCall('status', { key: state.plus.key }).then(function (st) { var was = isPlus(); applyPlus(st); if (!was && isPlus()) toast('LoosenUp Plus is on. Thank you.'); return isPlus(); })
+      .catch(function () { return isPlus(); });
+  }
+  function renderShop() {
+    var c = state.payConfig, on = !!(c && c.enabled);
+    if (c && c.prices) { setText('shop-price-monthly', c.prices.monthly); setText('shop-price-yearly', c.prices.yearly); }
+    var b = document.querySelectorAll('[data-plus-plan]');
+    // Plan buttons show only when Plus can actually be bought.
+    for (var i = 0; i < b.length; i++) b[i].hidden = !on || isPlus();
+    setText('shop-status', isPlus() ? 'Plus is on. Manage it in Me.'
+      : on ? (c.provider === 'razorpay' ? 'Secure payment with UPI, cards or netbanking. Renews automatically; cancel any time in Me.' : 'Secure payment by card, Apple Pay, Google Pay or PayPal. Renews automatically; cancel any time in Me.')
+      : 'LoosenUp Plus opens soon. Until then, everything in LoosenUp is free.');
+  }
   function openShop(note) {
     setText('shop-note', note || '');
     $('shop-note').hidden = !note;
+    renderShop();
     openSheet('shop-sheet');
+    loadPayConfig();
   }
-  function openCheckout(sku) {
-    pendingSku = sku;
-    setText('checkout-item', SKUS[sku].name);
-    setText('checkout-price', SKUS[sku].price + '. Demo only, nothing is charged.');
-    openSheet('checkout-sheet');
+  // Buying: the server makes a Plus key first, then the secure checkout page opens with it.
+  // In the phone apps the page opens in the browser; Plus turns on here when the app comes back.
+  function buyPlus(plan) {
+    if (!state.payConfig || !state.payConfig.enabled) { renderShop(); return Promise.resolve(false); }
+    setText('shop-status', 'Opening secure checkout...');
+    return plusCall('start', { plan: plan }).then(function (s) {
+      state.plus = { key: s.key, plan: s.plan, provider: s.provider, active: false, until: null, cancelAtEnd: false, checked: null };
+      save();
+      // On the website the checkout stays on this site; the phone apps open it in the browser.
+      var base = !isNative() && /^https?:$/.test(location.protocol) ? location.origin : PUBLIC_URL;
+      var url = base + '/plus.html#k=' + encodeURIComponent(s.key) + '&plan=' + plan + (state.lang === 'hi' ? '&lang=hi' : '');
+      openUrl(url);
+      return true;
+    }).catch(function (e) { setText('shop-status', e.message === 'offline' ? 'Connect to the internet to continue.' : e.message); return false; });
   }
-  function demoPurchase(sku) {
-    var item = SKUS[sku];
-    if (!item) return;
-    state.plan = 'fullbloom';
-    state.purchases.push({ sku: sku, ts: now().getTime(), demo: true });
-    save();
-    renderSeedPill();
-    if (RENDER[current]) RENDER[current]();
-    closeSheets();
-    toast('Welcome to LoosenUp Plus (demo). Every programme is open.');
+  function openUrl(url) { window.location.href = url; }
+  function restorePlus() {
+    var k = ($('plus-restore-key').value || '').trim();
+    if (!/^LU[A-Za-z0-9_-]{20,40}$/.test(k)) { setText('plus-status', 'That Plus key does not look right.'); return Promise.resolve(false); }
+    setText('plus-status', 'Checking...');
+    return plusCall('status', { key: k }).then(function (st) {
+      state.plus = { key: k };
+      applyPlus(st);
+      $('plus-restore-key').value = '';
+      setText('plus-status', st.active ? 'LoosenUp Plus is restored on this phone.' : 'That key has no active plan.');
+      return !!st.active;
+    }).catch(function (e) { setText('plus-status', e.message === 'offline' ? 'Connect to the internet to restore.' : e.message); return false; });
+  }
+  var cancelArmed = false;
+  function cancelPlus() {
+    if (!cancelArmed) { cancelArmed = true; setText('plus-cancel', 'Tap again to cancel at the end of this period'); return Promise.resolve(false); }
+    cancelArmed = false;
+    setText('plus-status', 'Cancelling...');
+    return plusCall('cancel', { key: state.plus.key }).then(function (st) {
+      applyPlus(st);
+      setText('plus-status', 'Cancelled. No more payments, and Plus stays on until the end of this period.');
+      return true;
+    }).catch(function (e) { setText('plus-status', e.message); return false; });
+  }
+  function plusDate(iso) { return new Date(iso).toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' }); }
+  function renderPlan() {
+    var p = state.plus, on = isPlus();
+    setText('me-plan', on
+      ? 'LoosenUp Plus' + (p.until ? (p.cancelAtEnd ? ': on until ' + plusDate(p.until) + ', then it ends.' : ': on, renews ' + plusDate(p.until) + '.') : ': on.')
+      : 'Free: every calm break, tool and SOS, always.');
+    $('open-shop').hidden = on;
+    $('plus-manage').hidden = !(p && p.key && (on || p.active));
+    if (p && p.key) setText('plus-key-view', p.key);
+    $('plus-cancel').hidden = !on || !!p.cancelAtEnd;
+    setText('plus-cancel', 'Cancel at the end of this period');
+    cancelArmed = false;
   }
   function openSupport() {
     renderSos();
@@ -1525,7 +1603,7 @@
   function renderMe() {
     renderOrg();
     setText('me-title', state.name ? state.name + '\'s corner' : 'Your corner');
-    setText('me-plan', state.plan === 'fullbloom' ? 'LoosenUp Plus (demo): every programme, every day.' : 'Free: every calm break, tool and SOS, always.');
+    renderPlan();
     if (state.goldenHour) $('golden-time').value = state.goldenHour;
     $('golden-clear').hidden = !state.goldenHour;
     // The phone apps schedule a local notification; the website sends a Web Push notification where the browser allows it.
@@ -1729,7 +1807,7 @@
     var finished = done >= total;
     var doneToday = ps.lastDay === dayKey(now());
     var day = finished ? total : done + 1;
-    var locked = !finished && day > PROGRAM_FREE_DAYS && state.plan !== 'fullbloom';
+    var locked = !finished && day > PROGRAM_FREE_DAYS && plusRequired();
     return { started: true, day: day, total: total, done: done, doneToday: doneToday, finished: finished, locked: locked };
   }
   function activeProgram() {
@@ -1785,14 +1863,14 @@
     else setText('program-start', st.started ? 'Start today\'s practice' : 'Start day 1');
     $('program-wait').hidden = !(st.doneToday && !st.finished);
     setText('program-wait', 'Done for today. Day ' + st.day + ' opens tomorrow.');
-    $('program-paywall').hidden = state.plan === 'fullbloom';
+    $('program-paywall').hidden = !plusRequired();
     var dots = $('program-days');
     dots.textContent = '';
     for (var i = 1; i <= st.total; i++) {
       var s = document.createElement('span');
       var done = st.started && i <= (st.done || 0);
       var isToday = !st.finished && i === st.day;
-      var paid = i > PROGRAM_FREE_DAYS && state.plan !== 'fullbloom';
+      var paid = i > PROGRAM_FREE_DAYS && plusRequired();
       s.className = 'pday' + (done ? ' done' : '') + (isToday ? ' today' : '') + (paid && !done ? ' paid' : '');
       s.textContent = String(i);
       s.setAttribute('aria-label', 'Day ' + i + (done ? ', done' : isToday ? ', today' : paid ? ', LoosenUp Plus' : ''));
@@ -3316,7 +3394,8 @@
     var ctx = el.getAttribute('data-context');
     var pick = el.getAttribute('data-pick');
     var tab = el.getAttribute('data-tab');
-    var sku = el.getAttribute('data-sku');
+    var plusPlan = el.getAttribute('data-plus-plan');
+    if (plusPlan) { buyPlus(plusPlan); return; }
     var gameId = el.getAttribute('data-game');
     var card = el.getAttribute('data-card');
     var guide = el.getAttribute('data-guide');
@@ -3389,7 +3468,6 @@
       return;
     }
     if (tab) { go(tab); return; }
-    if (sku) { openCheckout(sku); return; }
     switch (id) {
       case 'gift-go': startCheckin('guided'); break;
       case 'checkin-next':
@@ -3418,8 +3496,10 @@
       case 'start-break': startCheckin('guided'); break;
       case 'breathe-now': breatheNow(); break;
       case 'open-shop': openShop(); break;
-      case 'shop-close': case 'checkout-cancel': case 'support-close': case 'reset-cancel': closeSheets(); document.body.classList.remove('lock-sos'); break;
-      case 'checkout-confirm': demoPurchase(pendingSku); break;
+      case 'plus-restore-btn': restorePlus(); break;
+      case 'plus-cancel': cancelPlus(); break;
+      case 'plus-copy-key': if (navigator.clipboard && state.plus) navigator.clipboard.writeText(state.plus.key).then(function () { toast('Plus key copied.'); }); break;
+      case 'shop-close': case 'support-close': case 'reset-cancel': closeSheets(); document.body.classList.remove('lock-sos'); break;
       case 'open-support': case 'sos-btn': case 'support-card-sos': openSupport(); break;
       case 'sos-add-trusted': setUpTrusted(); break;
       case 'trusted-edit': renderTrusted(true); break;
@@ -3554,6 +3634,9 @@
     document.addEventListener('visibilitychange', function () { if (!document.hidden) liveUpdate(); });
     sendPulse();
     loadVoiceClips();
+    loadPayConfig();
+    refreshPlus();
+    document.addEventListener('visibilitychange', function () { if (!document.hidden && state.plus && state.plus.key && !isPlus()) refreshPlus(); });
   }
 
   /* ---------- Hooks for www/more.js (sleep, journal, goal, packs, games) ---------- */
@@ -3575,7 +3658,7 @@
     stopSound: stopSound, fadeSound: fadeSound,
     isCrisis: isCrisis, openSupport: openSupport, startPractice: startPractice, TECH: TECH,
     now: now, dayKey: dayKey, weekKey: weekKey, isNative: isNative, addBadge: function (id) { addBadge(id); save(); },
-    publicUrl: PUBLIC_URL, weekGoal: weekGoal
+    publicUrl: PUBLIC_URL, weekGoal: weekGoal, isPlus: isPlus, plusRequired: plusRequired, openShop: openShop
   };
 
   /* ---------- Public API (used by the app shell and the test suite) ---------- */
@@ -3637,7 +3720,14 @@
     core: core,
     helplines: HL,
     openShop: function (note) { openShop(note); },
-    demoPurchase: demoPurchase,
+    isPlus: isPlus,
+    plusRequired: plusRequired,
+    buyPlus: buyPlus,
+    restorePlus: restorePlus,
+    cancelPlus: cancelPlus,
+    refreshPlus: refreshPlus,
+    loadPayConfig: loadPayConfig,
+    setOpenUrl: function (fn) { openUrl = fn; },
     isCrisis: isCrisis,
     sosHref: sosHref,
     spaces: SPACES,

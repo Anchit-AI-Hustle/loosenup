@@ -88,3 +88,9 @@ html[data-theme="dark"] .tool-more .tool-ic { background: #CFEBDD; color: #1E5A4
 
 /* Emotion names never break mid-word ("Overwhelmed" shrinks a little instead). */
 .emo-name { overflow-wrap: normal; word-break: normal; font-size: min(12px, 3.1vw); letter-spacing: -.1px; }
+
+/* LoosenUp Plus */
+.plus-tag { background: #FFF1C9; color: #6B4A00; }
+.plus-key { font: 700 14px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; padding: 10px 12px; border-radius: 12px; background: rgba(39, 110, 79, .08); color: var(--ink); }
+#plus-restore > summary { font-weight: 800; }
+html[data-theme="dark"] .plus-tag { background: #4A3B12; color: #FFE6A3; }

@@ -18,31 +18,47 @@ test('AT7 every calm break starts straight away on the free plan; there is no pe
   assert.equal(app.$('#seed-pill'), null, 'no Seeds counter anywhere');
 });
 
-test('AT7 LoosenUp Plus is a clearly labelled demo subscription in INR and USD, for programmes only', () => {
+test('AT7 before payments open, LoosenUp Plus shows its prices but cannot be bought, and everything stays free', () => {
   const app = makeApp({ now: day(1) });
   onboard(app);
   app.B.openShop();
   const t = app.$('#shop-sheet').textContent.replace(/\s+/g, ' ');
-  for (const p of ['₹149', 'USD 4.99/mo', '₹799', 'USD 34.99']) assert.ok(t.includes(p), `price ${p}`);
-  assert.match(t, /LoosenUp Plus/);
-  assert.match(t, /DEMO/);
-  assert.match(t, /Every calm break, tool and SOS stays free/);
-  assert.doesNotMatch(t, /Seed/);
+  for (const p of ['₹149', '₹799', 'Every sleep session', 'Every seasonal pack', 'Exam calm']) assert.ok(t.includes(p), p);
+  assert.doesNotMatch(t, /DEMO|demo/);
+  assert.match(t, /SOS and every helpline stay free/);
+  assert.match(app.$('#shop-status').textContent, /opens soon/);
+  assert.equal(app.visible('[data-plus-plan="yearly"]'), false);
+  assert.equal(app.B.plusRequired(), false, 'nothing is locked while nobody can pay');
 });
 
-test('AT7 a demo purchase changes the plan only after a clearly labelled confirmation', () => {
+test('AT7 choosing a plan makes a Plus key on the server and opens the secure checkout page; nothing unlocks until paid', async () => {
   const app = makeApp({ now: day(1) });
   onboard(app);
+  const calls = [];
+  app.window.fetch = async (url, opts) => {
+    const body = opts && opts.body ? JSON.parse(opts.body) : {};
+    calls.push({ url, body });
+    const json = /action=config/.test(url) ? { enabled: true, provider: 'razorpay', currency: 'INR', prices: { monthly: '₹149', yearly: '₹799' } }
+      : body.action === 'start' ? { key: 'LU' + 'a'.repeat(32), provider: 'razorpay', plan: body.plan } : { active: false };
+    return { ok: true, json: async () => json };
+  };
+  await app.B.loadPayConfig();
+  const opened = [];
+  app.B.setOpenUrl((u) => opened.push(u));
   app.B.openShop();
-  app.click('[data-sku="fullbloom"]');
-  assert.equal(app.visible('#checkout-sheet'), true);
-  assert.match(app.$('#checkout-sheet').textContent, /DEMO/);
-  assert.equal(app.B.state().plan, 'free', 'nothing changes before confirm');
-  app.click('#checkout-confirm');
-  assert.equal(app.B.state().plan, 'fullbloom');
-  assert.equal(app.B.state().purchases[0].demo, true);
-  app.B.go('me');
-  assert.match(app.$('#me-plan').textContent, /LoosenUp Plus/);
+  assert.equal(app.visible('[data-plus-plan="yearly"]'), true);
+  await app.B.buyPlus('yearly');
+  assert.equal(calls.find((c) => c.body.action === 'start').body.plan, 'yearly');
+  assert.equal(opened[0], app.window.location.origin + '/plus.html#k=LU' + 'a'.repeat(32) + '&plan=yearly');
+  assert.equal(app.B.state().plus.key, 'LU' + 'a'.repeat(32));
+  assert.equal(app.B.isPlus(), false, 'not Plus until the payment is confirmed');
+  assert.equal(app.B.plusRequired(), true);
+});
+
+test('AT7 an old demo purchase never counts as Plus', () => {
+  const app = makeApp({ now: day(1), state: { onboarded: true, name: 'Asha', plan: 'fullbloom', purchases: [{ sku: 'fullbloom', demo: true }] } });
+  assert.equal(app.B.state().plan, 'free');
+  assert.equal(app.B.isPlus(), false);
 });
 
 test('AT7 Breathe now starts a free guided breath from Today without any shop', () => {
