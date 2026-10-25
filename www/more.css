@@ -52,8 +52,9 @@ html.sleep-dim .sky, html.sleep-dim .topbar { opacity: .35; }
 .gt-pop { background: linear-gradient(160deg, #DCEFFF, #FFFFFF 75%); }
 html[data-theme="dark"] .gt-pop { background: linear-gradient(160deg, #1E3A55, #1A2436 75%); }
 .game-tile[hidden] { display: none; }
-/* The date sits on the hero sky, which changes colour through the day: a deeper green keeps it readable at every hour. */
-html:not([data-theme="dark"]) #today-date { color: #1D5A3F; }
+/* The date sits on the hero sky, which changes colour through the day: a deeper green keeps it readable on the light day skies.
+   The night sky is dark navy, so there the date keeps the warm gold eyebrow colour instead. */
+html:not([data-theme="dark"]) .sky-card:not([data-time="Quiet nights"]) #today-date { color: #1D5A3F; }
 /* For you: a caring first line, then a short plan of steps. */
 .for-you-hear { font-size: 16px; line-height: 1.35; font-weight: 800; color: var(--ink); margin: 2px 0 8px; }
 /* The plan chips already name the current step, so its heading is for screen readers only. */
