@@ -1021,8 +1021,17 @@ html[data-theme="dark"] body { background: linear-gradient(180deg, #0B1322 0%, #
 html[data-theme="dark"] .cloud { background: rgba(255, 255, 255, 0.045); }
 html[data-theme="dark"] .sky::before { opacity: .35; }
 html[data-theme="dark"] .topbar { background: linear-gradient(180deg, rgba(11, 19, 34, .94), rgba(14, 22, 38, .8)); border-bottom-color: rgba(255, 255, 255, .06); }
-html[data-theme="dark"] .tabbar-inner { background: rgba(20, 30, 46, .9); }
-html[data-theme="dark"] .tabbar button[aria-selected="true"] { color: #8FD3AE; background: rgba(122, 196, 152, .14); }
+/* The bar sits over dark cards, so it gets its own lighter surface, a visible edge and a fade behind it. */
+html[data-theme="dark"] .tabbar::before {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: calc(100% + 28px); z-index: -1; pointer-events: none;
+  background: linear-gradient(to top, rgba(11, 19, 34, .94) 45%, rgba(11, 19, 34, 0));
+}
+html[data-theme="dark"] .tabbar-inner {
+  background: rgba(38, 52, 76, .97); border-color: rgba(255, 255, 255, .16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 18px 40px -12px rgba(0, 0, 0, .85);
+}
+html[data-theme="dark"] .tabbar button { color: #C9D4DE; }
+html[data-theme="dark"] .tabbar button[aria-selected="true"] { color: #A8E6C4; background: rgba(143, 211, 174, .2); }
 html[data-theme="dark"] .eyebrow, html[data-theme="dark"] .tag, html[data-theme="dark"] .gain-num { color: #8FD3AE; }
 html[data-theme="dark"] .btn-soft { background: rgba(255, 255, 255, .06); color: #8FD3AE; box-shadow: inset 0 0 0 2px rgba(122, 196, 152, .4); }
 html[data-theme="dark"] .btn-ghost, html[data-theme="dark"] a:not(.btn) { color: #8FD3AE; }
