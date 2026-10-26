@@ -16,12 +16,13 @@ const solvePairs = (app) => {
   Object.values(byKind).forEach(([a, b]) => { app.click(`[data-card="${a}"]`); app.click(`[data-card="${b}"]`); });
 };
 
-test('AT14 Play tab lists four calm games', () => {
+test('AT14 Play tab lists every calm game', () => {
   const app = ready();
   app.click('[data-tab="play"]');
   assert.equal(app.B.currentScreen(), 'play');
   const names = [...app.document.querySelectorAll('#panel-games [data-game]')].map((b) => b.textContent);
-  assert.equal(names.length, 4);
+  assert.equal(names.length, 9);
+  for (const n of ['Colour Sort', 'Zen Sand', 'Star Connect', 'Gentle Stack', 'Kind Notes']) assert.match(names.join(' '), new RegExp(n));
   assert.match(names.join(' '), /Bubble Pop/);
   assert.match(names.join(' '), /Calm Pairs/);
   assert.match(names.join(' '), /Sunbeam Catch/);
@@ -105,7 +106,7 @@ test('AT14 games are one tap from Today, and Back returns to Today', () => {
   const app = ready();
   app.B.go('today');
   const tiles = [...app.document.querySelectorAll('#screen-today .game-tile:not([hidden])')].map((b) => b.getAttribute('data-game') || b.getAttribute('data-more'));
-  assert.equal(tiles.length, 3, 'three games fit the moment');
+  assert.equal(tiles.length, 10, 'every game is one swipe away when nothing works against the feeling');
   assert.ok(tiles.includes('catch'));
   app.click('#screen-today [data-game="catch"]');
   assert.equal(app.B.currentScreen(), 'game');

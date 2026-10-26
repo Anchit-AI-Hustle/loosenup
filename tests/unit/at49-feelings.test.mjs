@@ -62,7 +62,8 @@ test('AT49 crying: gentle first, no games or scores, and support is close', () =
   assert.equal(app.B.feelPlan().key, 'crying');
   assert.match(app.$('#for-you-hear').textContent, /cry|here with you|explain/i);
   assert.ok(!refs(app).some((r) => r.startsWith('game:')), 'no game in the plan');
-  assert.ok(shownGames(app).every((g) => g === 'bloom' || g === 'trace'), 'only slow breathing games show');
+  assert.ok(shownGames(app).every((g) => ['bloom', 'trace', 'sand', 'kind'].includes(g)), 'only slow, gentle games show');
+  assert.equal(shownGames(app)[0], 'bloom', 'slow breathing comes first');
   assert.equal(app.B.feelPlan().steps[0][0], 'tech:wave');
   app.click('#for-you-alt');
   assert.ok(refs(app).includes('sos'), 'Something else offers someone to talk to');

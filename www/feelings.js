@@ -2,7 +2,7 @@
    Each plan follows the same shape: acknowledge first, settle the body (or lift it gently when
    energy is low), shift attention or meaning, then end on a small win and notice the change.
    Sources behind each choice are listed in README, Feelings. A step is one of:
-     tech:<id>  a guided exercise      game:<id>  a calm game      more:trace  Trace the square
+     tech:<id>  a guided exercise      game:<id>  a calm game (pairs, catch, bloom, pop, sort, sand, stars, stack, kind)      more:trace  Trace the square
      step       today's Small step     jar        the Good things jar          sos  SOS support
    "never" lists games that tend to work against that feeling, so they are not suggested. */
 (function () {
@@ -18,9 +18,9 @@
         ['tech:release', 'Squeeze, then let go. Your body gets an outlet that ends in letting go.'],
         ['game:pairs', 'A steady game gives your mind a break from replaying it.']],
       alt: [['tech:pause', 'A few calm steps before you reply to anyone, so you can answer from care.'],
-        ['game:pop', 'Pop the bubbles slowly, one by one.']],
+        ['game:sand', 'Draw slow lines in the sand and watch them soften away.']],
       close: 'You cooled it down yourself. What happened still matters, and now you get to choose what to do about it.',
-      games: ['pairs', 'pop', 'bloom'], never: ['catch']
+      games: ['sand', 'pop', 'pairs', 'stack', 'bloom'], never: ['catch']
     },
     worried: {
       hear: ['Worry is your mind trying to protect you. It is working overtime right now.',
@@ -29,10 +29,10 @@
       plan: [['tech:sigh', 'Two breaths in, then one long breath out. No holding, just a slow way to help your body settle.'],
         ['tech:name', 'Putting the feeling into words can make it feel smaller.'],
         ['tech:park', 'Write it down and give it a time, so your mind can stop holding it.']],
-      alt: [['game:pairs', 'A gentle matching game gives the worried pictures in your mind something else to do.'],
+      alt: [['game:stack', 'Set blocks down slowly, one by one. It gives a looping mind something else to hold.'],
         ['tech:breeze', 'Soft, even breathing with no holds.']],
       close: 'It is written down and it can wait. For now, you have done enough.',
-      games: ['pairs', 'bloom', 'pop'], never: ['catch']
+      games: ['stack', 'sort', 'pairs', 'bloom', 'pop'], never: ['catch']
     },
     sad: {
       hear: ['That sounds really heavy. It is okay to feel sad about this.',
@@ -44,7 +44,7 @@
       alt: [['tech:letitout', 'Type whatever is there. Nothing is saved.'],
         ['tech:reach', 'Think of someone kind, and maybe send a small hello.']],
       close: 'You let yourself feel it, and you are still here. That takes strength.',
-      games: ['bloom', 'pairs', 'pop'], never: ['catch']
+      games: ['kind', 'bloom', 'stars', 'pairs', 'pop'], never: ['catch']
     },
     crying: {
       hear: ['It is okay to cry. You do not need to stop.',
@@ -56,7 +56,7 @@
       alt: [['tech:letitout', 'Type whatever is there. Nothing is saved.'],
         ['sos', 'Talk to someone now. Tele-MANAS is free, any time, on 14416.']],
       close: 'You got through that wave. That was hard, and you did it.',
-      games: ['bloom'], never: ['catch', 'pairs', 'pop']
+      games: ['bloom', 'sand', 'kind'], never: ['catch', 'pairs', 'pop', 'sort', 'stack', 'stars']
     },
     tired: {
       hear: ['You have been carrying a lot. Of course you are tired.',
@@ -67,7 +67,7 @@
       alt: [['tech:lift', 'Or a small lift: a little daylight, a stretch and some water.'],
         ['game:catch', 'A light, easy game to wake your attention gently.']],
       close: 'You gave yourself a few minutes. That counts.',
-      games: ['bloom', 'pop', 'pairs'], never: []
+      games: ['sand', 'bloom', 'pop', 'sort', 'pairs'], never: ['stack']
     },
     lonely: {
       hear: ['Feeling alone is one of the hardest feelings. Thank you for telling me.',
@@ -78,7 +78,7 @@
       alt: [['tech:warmth', 'Send warm wishes to the people in your life.'],
         ['tech:letitout', 'Type what you would tell someone who understood. Nothing is saved.']],
       close: 'You reached toward someone. Even a small hello connects you.',
-      games: ['pairs', 'bloom', 'pop'], never: []
+      games: ['kind', 'stars', 'pairs', 'bloom', 'pop'], never: []
     },
     overwhelmed: {
       hear: ['That is a lot to carry at once. No wonder it feels like too much.',
@@ -86,11 +86,11 @@
         'Let us get it out of your head so it can stop spinning.'],
       plan: [['tech:sigh', 'A minute of long breaths out first, so your body can settle.'],
         ['tech:park', 'Get it out of your head, then pick just one piece.'],
-        ['game:pop', 'Finish one small thing, bubble by bubble, and see it done.']],
+        ['game:sort', 'Put each stone in its bowl, one by one, and see everything sorted.']],
       alt: [['tech:here', 'Come back to one thing at a time, one sense at a time.'],
         ['game:pairs', 'A calm game with one simple thing to do.']],
       close: 'It is out of your head and on the page. One piece is done, and you can see it.',
-      games: ['pop', 'pairs', 'bloom'], never: ['catch']
+      games: ['sort', 'pop', 'sand', 'pairs', 'bloom'], never: ['catch', 'stack']
     },
     frustrated: {
       hear: ['It is so annoying when you are trying hard and it will not move.',
@@ -99,9 +99,9 @@
       plan: [['tech:release', 'Squeeze your hands and jaw, then let them go soft.'],
         ['game:pop', 'A small thing you are sure to finish, so one thing goes right.']],
       alt: [['tech:cooldown', 'Long breaths out to let the heat go.'],
-        ['game:pairs', 'A calm game you can finish at your own pace.']],
+        ['game:stars', 'Join the stars one tap at a time. Every picture comes together.']],
       close: 'You finished something. When you go back, start with the smallest piece.',
-      games: ['pop', 'pairs', 'bloom'], never: ['catch']
+      games: ['pop', 'stars', 'sand', 'sort', 'pairs'], never: ['catch', 'stack']
     },
     restless: {
       hear: ['Your body feels wound up. Let us give that energy somewhere to go.',
@@ -113,7 +113,7 @@
       alt: [['tech:release', 'Tense each area, then let it go soft.'],
         ['game:pop', 'Pop the bubbles one by one, in a steady rhythm.']],
       close: 'Your body let some of that go. Notice your shoulders now.',
-      games: ['pop', 'bloom', 'pairs'], never: ['catch']
+      games: ['sand', 'pop', 'stack', 'sort', 'bloom'], never: ['catch']
     },
     harsh: {
       hear: ['You are being really hard on yourself right now. That voice sounds harsh.',
@@ -122,9 +122,9 @@
       plan: [['tech:kind', 'This is hard, others feel it too, and you can be kind to yourself.'],
         ['tech:friend', 'Look at the facts, then speak to yourself like a good friend would.']],
       alt: [['tech:letitout', 'Write what a kind friend would say to you. Nothing is saved.'],
-        ['game:bloom', 'Slow breaths with the ring, with nothing to prove.']],
+        ['game:kind', 'Tap three kind words, then read them as if a friend wrote them.']],
       close: 'You just spoke to yourself the way a good friend would. That kind voice is yours too.',
-      games: ['bloom', 'pairs', 'pop'], never: []
+      games: ['kind', 'bloom', 'sand', 'pairs', 'stars'], never: []
     },
     flat: {
       hear: ['Feeling flat is uncomfortable, even if it seems small.',
@@ -136,7 +136,7 @@
       alt: [['game:pairs', 'A memory game to give your mind something to do.'],
         ['tech:hope', 'Picture something you are looking forward to.']],
       close: 'Notice that little spark. You made it happen.',
-      games: ['catch', 'pairs', 'pop'], never: []
+      games: ['catch', 'stars', 'stack', 'pairs', 'pop'], never: []
     },
     racing: {
       hear: ['Your mind is still busy from the day. That is really common.',
@@ -147,7 +147,7 @@
       alt: [['tech:cooldown', 'Long, slow breaths out.'],
         ['more:sleep', 'A guided sleep session to drift off with.']],
       close: 'Tomorrow is written down. It can wait there until morning.',
-      games: ['bloom'], never: ['catch', 'pairs', 'pop']
+      games: ['bloom', 'sand'], never: ['catch', 'pairs', 'pop', 'sort', 'stack', 'stars']
     },
 
     /* ---------- Good feelings: savour them and make them last ---------- */
@@ -159,7 +159,7 @@
         ['jar', 'Save what helped you get here in your Good things jar.']],
       alt: [['game:bloom', 'Six slow breaths to stay in it.']],
       close: 'Saved. You can come back to this feeling.',
-      games: ['bloom', 'pairs', 'pop'], never: []
+      games: ['bloom', 'sand', 'stars', 'pairs', 'pop'], never: []
     },
     happy: {
       hear: ['That is lovely! What made today good?',
@@ -170,7 +170,7 @@
       alt: [['game:catch', 'A playful game while you are feeling bright.'],
         ['tech:reach', 'Tell someone who would be glad for you.']],
       close: 'Want to tell someone who would be glad for you? Good news feels even better when it is shared.',
-      games: ['catch', 'pairs', 'pop'], never: []
+      games: ['catch', 'stack', 'stars', 'pairs', 'pop'], never: []
     },
     grateful: {
       hear: ['What a nice thing to notice. Who or what made it happen?',
@@ -180,7 +180,7 @@
         ['tech:warmth', 'Send a warm wish to them.']],
       alt: [['tech:reach', 'Send them a quick thank you.']],
       close: 'Want to send them a quick thank you? It can make their day too.',
-      games: ['pairs', 'bloom', 'catch'], never: []
+      games: ['kind', 'stars', 'pairs', 'bloom', 'catch'], never: []
     },
     hopeful: {
       hear: ['Hold onto that hope. What would it look like if it went well?',
@@ -189,7 +189,7 @@
       plan: [['tech:hope', 'Picture it going well, plan for one bump in the road, and choose one first step.']],
       alt: [['tech:savour', 'Stay with the hopeful feeling a little longer.']],
       close: 'Hope plus a small plan is a strong pair.',
-      games: ['catch', 'pairs', 'pop'], never: []
+      games: ['stars', 'catch', 'stack', 'pairs', 'pop'], never: []
     },
     loved: {
       hear: ['That warmth is real. Let it sink in for a moment.',
@@ -199,7 +199,7 @@
         ['jar', 'Save who made you feel this way.']],
       alt: [['tech:warmth', 'Send warm wishes back to them.']],
       close: 'Saved. You can come back to this feeling any time.',
-      games: ['bloom', 'pairs', 'pop'], never: []
+      games: ['kind', 'bloom', 'stars', 'pairs', 'pop'], never: []
     },
     energetic: {
       hear: ['You have got energy today! Let us use it on something you care about.',
@@ -209,19 +209,19 @@
         ['step', 'One small step you would be glad you did.']],
       alt: [['tech:lift', 'Move around a little and enjoy it.']],
       close: 'You put that energy somewhere good.',
-      games: ['catch', 'pairs', 'pop'], never: []
+      games: ['catch', 'stack', 'pop', 'sort', 'pairs'], never: []
     },
 
     /* ---------- No strong feeling picked: a gentle suggestion by the time of day ---------- */
     okay: {
       hear: ['Okay is okay. Here is something small to make the day a little lighter.'],
       close: 'A small break, done. Notice how you feel now.',
-      games: ['pairs', 'pop', 'catch'], never: []
+      games: ['pairs', 'sort', 'stars', 'pop', 'catch'], never: []
     },
     unknown: {
       hear: ['How are you, really? Tap a face below, or start with this.'],
       close: 'A small break, done. Notice how you feel now.',
-      games: ['pairs', 'pop', 'catch'], never: []
+      games: ['pairs', 'sort', 'stars', 'pop', 'catch'], never: []
     }
   };
 

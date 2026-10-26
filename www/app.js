@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.5.9';
+  var VERSION = '2.6.0';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -1788,10 +1788,15 @@
   /* ---------- Play: calm mini-games (every round ends kindly) ---------- */
 
   var GAMES = {
-    pairs: { name: 'Calm Pairs', help: 'Turn two cards at a time. Matching pairs stay open. Take all the time you like.' },
-    catch: { name: 'Sunbeam Catch', help: 'Tap the sunbeams and petals as they drift by. Every catch fills your jar.' },
-    bloom: { name: 'Breathing Ring', help: 'Press and hold while the ring grows to breathe in. Let go as it shrinks to breathe out. Six slow breaths.' },
-    pop: { name: 'Bubble Pop', help: 'Pop every bubble, one at a time, at your own pace. There is no timer.' }
+    pairs: { name: 'Calm Pairs', help: 'Turn two cards. Find the pairs.' },
+    catch: { name: 'Sunbeam Catch', help: 'Tap the drifting light.' },
+    bloom: { name: 'Breathing Ring', help: 'Hold to breathe in. Let go to breathe out.' },
+    pop: { name: 'Bubble Pop', help: 'Pop every bubble. No timer.' },
+    sort: { name: 'Colour Sort', help: 'Drag or tap each stone into its bowl.' },
+    sand: { name: 'Zen Sand', help: 'Draw slow lines. Watch them soften.' },
+    stars: { name: 'Star Connect', help: 'Tap the glowing star.' },
+    stack: { name: 'Gentle Stack', help: 'Tap to set each block down. Every block lands.' },
+    kind: { name: 'Kind Notes', help: 'Tap three kind words for yourself.' }
   };
   var FLOWERS = [['Bright sun', '#FFC857'], ['Moon', '#B9A3F0'], ['Cloud', '#8CC8F0'], ['Wave', '#4FA9C8'], ['Star', '#FFB088'], ['Heart', '#F28FA0']];
   var game = null;
@@ -2293,7 +2298,7 @@
   // Acknowledge first, settle the body (or lift it gently when energy is low), shift attention or
   // meaning, then end on a small win. Progress is kept for the day, so each step leads to the next.
   var FEEL = window.LoosenUpFeelings || { feelings: {}, byTime: {}, order: [], nightAsRacing: [] };
-  var GAME_MIN = { pairs: 2, catch: 1, bloom: 1, pop: 1 };
+  var GAME_MIN = { pairs: 2, catch: 1, bloom: 1, pop: 1, sort: 1, sand: 1, stars: 2, stack: 1, kind: 1 };
   var EMO_BY_KEY = {};
   EMOTIONS.forEach(function (em) { EMO_BY_KEY[em[0]] = em; });
   function isNight() { return bucketOf(now().getTime()) === 'Quiet nights'; }
@@ -2390,26 +2395,54 @@
     setText('for-you-alt', p.alt ? 'Back to the first idea' : 'Something else');
     renderGameRow(p);
   }
-  // Today's games: the ones that suit the feeling first, and none that tend to work against it.
+  // Every game, in the order that suits the feeling, without the ones that tend to work against it.
+  var ALL_GAMES = ['pairs', 'pop', 'bloom', 'sort', 'sand', 'stars', 'stack', 'kind', 'catch', 'trace'];
+  function gameRank(p) {
+    p = p || feelPlan();
+    var never = (p.f.never || []).concat(isNight() ? ['catch'] : []);
+    var rank = p.steps.filter(function (x) { return /^(game|more):/.test(x[0]); }).map(function (x) { return x[0].split(':')[1]; }).concat(p.f.games || [], ALL_GAMES);
+    var out = [];
+    rank.forEach(function (id) { if (ALL_GAMES.indexOf(id) !== -1 && never.indexOf(id) === -1 && out.indexOf(id) === -1) out.push(id); });
+    return out;
+  }
+  // Today's games: a swipeable row with the best fit first.
   function renderGameRow(p) {
     var row = document.querySelector('#screen-today .game-row');
     if (!row) return;
     var idOf = function (t) { return t.getAttribute('data-game') || t.getAttribute('data-more'); };
-    var never = (p.f.never || []).concat(isNight() ? ['catch'] : []);
-    var rank = p.steps.filter(function (x) { return /^(game|more):/.test(x[0]); }).map(function (x) { return x[0].split(':')[1]; }).concat(p.f.games || []);
+    var rank = gameRank(p);
     var tiles = [].slice.call(row.querySelectorAll('.game-tile'));
     tiles.sort(function (a, b) {
       var ra = rank.indexOf(idOf(a)), rb = rank.indexOf(idOf(b));
       return (ra === -1 ? 99 : ra) - (rb === -1 ? 99 : rb);
     });
-    var shown = 0;
     tiles.forEach(function (t) {
       row.appendChild(t);
-      var ok = never.indexOf(idOf(t)) === -1 && shown < 3;
-      t.hidden = !ok;
-      if (ok) shown++;
+      t.hidden = rank.indexOf(idOf(t)) === -1;
     });
+    row.scrollLeft = 0;
     setText('games-title', p.key === 'unknown' || p.key === 'okay' ? 'Play a calm game' : 'Games for how you feel');
+  }
+  // After a game: one tap into another that suits the feeling, preferring ones not played yet today.
+  var playedGames = [];
+  function renderNextGame(id) {
+    var b = $('game-next-game');
+    if (!b) return null;
+    var rank = gameRank().filter(function (g) { return g !== id; });
+    var fresh = rank.filter(function (g) { return playedGames.indexOf(g) === -1; });
+    var next = fresh[0] || rank[0] || null;
+    b.hidden = !next;
+    setAction(b, next && { attr: next === 'trace' ? ['data-more', 'trace'] : ['data-game', next] });
+    if (next) setText('game-next-game', 'Try ' + (next === 'trace' ? 'Trace the square' : GAMES[next].name));
+    return next;
+  }
+  // Score line plus a thin progress bar. No share hides the bar.
+  function gameProgress(text, share) {
+    setText('game-score', text);
+    var bar = $('game-bar');
+    if (!bar) return;
+    bar.hidden = share == null;
+    if (share != null) $('game-bar-fill').style.width = Math.round(Math.max(0, Math.min(1, share)) * 100) + '%';
   }
   // A finished exercise, game or step moves the plan on.
   function planDone(ref) {
@@ -2586,14 +2619,16 @@
   function openGame(id) {
     stopGame();
     game = { id: id, timers: [], done: false };
+    if (playedGames.indexOf(id) === -1) playedGames.push(id);
     setText('game-title', GAMES[id].name);
     setText('game-help', GAMES[id].help);
-    setText('game-score', '');
+    gameProgress('', null);
     $('game-done').hidden = true;
+    $('game-keep').hidden = true;
     var stage = $('game-stage');
     stage.textContent = '';
     go('game');
-    ({ pairs: startPairs, catch: startCatch, bloom: startBloom, pop: startPop })[id](stage);
+    ({ pairs: startPairs, catch: startCatch, bloom: startBloom, pop: startPop, sort: startSort, sand: startSand, stars: startStars, stack: startStack, kind: startKind })[id](stage);
   }
 
   function stopGame() {
@@ -2620,6 +2655,7 @@
     setText('game-done-text', text);
     var close = renderPlanNext('game-plan-next', planDone('game:' + game.id));
     if (close) setText('game-done-text', close);
+    renderNextGame(game.id);
     $('game-done').hidden = false;
     var again = $('game-again');
     if (again && again.focus) again.focus();
@@ -2664,7 +2700,7 @@
   }
   function updatePairsScore() {
     var matched = game.deck.filter(function (c) { return c.done; }).length / 2;
-    setText('game-score', matched + ' of 6 pairs');
+    gameProgress(matched + ' of 6 pairs', matched / 6);
   }
   function flipCard(i) {
     if (!game || game.id !== 'pairs' || game.done) return;
@@ -2748,7 +2784,7 @@
     if (window.requestAnimationFrame && !prefersReducedMotion()) game.raf = window.requestAnimationFrame(step);
   }
   function updateCatch() {
-    setText('game-score', plural(game.caught, 'sunbeam', 'sunbeams'));
+    gameProgress(plural(game.caught, 'sunbeam', 'sunbeams'), 1 - game.left / CATCH_SECONDS);
     setText('catch-jar', 'In your jar: ' + game.caught + (game.left > 0 ? '   ' + Math.floor(game.left / 60) + ':' + pad(game.left % 60) : ''));
   }
   function spawnBeam() {
@@ -2818,7 +2854,7 @@
     stage.appendChild(field);
     updatePop();
   }
-  function updatePop() { setText('game-score', game.popped + ' of ' + POP_COUNT + ' popped'); }
+  function updatePop() { gameProgress(game.popped + ' of ' + POP_COUNT + ' popped', game.popped / POP_COUNT); }
   function popBubble(el) {
     if (!game || game.id !== 'pop' || game.done || el.classList.contains('popped')) return false;
     el.classList.add('popped');
@@ -2906,7 +2942,7 @@
     hold.addEventListener('keydown', function (e) { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); setHold(true); } });
     hold.addEventListener('keyup', function (e) { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setHold(false); } });
     hold.addEventListener('contextmenu', function (e) { e.preventDefault(); });
-    setText('game-score', '0 of ' + BLOOM_ROUNDS + ' breaths');
+    gameProgress('0 of ' + BLOOM_ROUNDS + ' breaths', 0);
   }
   function setHold(on) {
     if (!game || game.id !== 'bloom' || game.done) return;
@@ -2951,7 +2987,7 @@
     f.setAttribute('viewBox', '0 0 40 40');
     miniFlower(f, 20, 20, 12, FLOWERS[(game.round - 1) % FLOWERS.length][1]);
     row.appendChild(f);
-    setText('game-score', game.round + ' of ' + BLOOM_ROUNDS + ' breaths');
+    gameProgress(game.round + ' of ' + BLOOM_ROUNDS + ' breaths', game.round / BLOOM_ROUNDS);
     if (game.round >= BLOOM_ROUNDS) endBloom();
   }
   function endBloom() {
@@ -2960,6 +2996,566 @@
     finishGame('Six slow breaths', 'You moved with the ring ' + pct + '% of the time. Every breath counted.',
       function () { if (pct > prev) state.gameBest.bloom = pct; });
   }
+  // A soft tone that glides from one pitch to another. Only with chimes on.
+  function tone(f0, f1, dur, vol) {
+    if (!state.chime) return false;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    try {
+      chimeCtx = chimeCtx || new AC();
+      var t0 = chimeCtx.currentTime;
+      var o = chimeCtx.createOscillator(), g = chimeCtx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f0, t0);
+      o.frequency.exponentialRampToValueAtTime(f1, t0 + dur * 0.8);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(vol || 0.05, t0 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(chimeCtx.destination);
+      o.start(t0); o.stop(t0 + dur + 0.02);
+      return true;
+    } catch (e) { return false; }
+  }
+  function mkEl(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function gameButton(cls, text, label) {
+    var b = mkEl('button', cls, text);
+    b.type = 'button';
+    if (label) b.setAttribute('aria-label', label);
+    return b;
+  }
+
+  // Colour Sort: drag or tap each stone into the bowl of its colour. It ends with everything in its place.
+  var SORT_COLOURS = [['Sun', '#FFC857'], ['Sky', '#8CC8F0'], ['Rose', '#F28FA0']];
+  var SORT_EACH = 4;
+  function startSort(stage) {
+    var wrap = mkEl('div', 'sort-stage');
+    var tray = mkEl('div', 'sort-tray');
+    tray.id = 'sort-tray';
+    var kinds = [];
+    SORT_COLOURS.forEach(function (c, k) { for (var j = 0; j < SORT_EACH; j++) kinds.push(k); });
+    game.stones = shuffle(kinds).map(function (k) { return { kind: k, done: false }; });
+    game.picked = -1;
+    game.sorted = 0;
+    game.stones.forEach(function (s, i) {
+      var b = gameButton('stone', null, SORT_COLOURS[s.kind][0] + ' stone');
+      b.setAttribute('data-stone', String(i));
+      b.setAttribute('aria-pressed', 'false');
+      b.style.setProperty('--sc', SORT_COLOURS[s.kind][1]);
+      // A little scatter, so the tray looks untidy before you begin.
+      b.style.setProperty('--rot', Math.round(rng() * 40 - 20) + 'deg');
+      b.style.setProperty('--dy', Math.round(rng() * 12 - 6) + 'px');
+      dragStone(b, i);
+      tray.appendChild(b);
+    });
+    var bowls = mkEl('div', 'sort-bowls');
+    SORT_COLOURS.forEach(function (c, k) {
+      var b = gameButton('sort-bowl', null, c[0] + ' bowl');
+      b.setAttribute('data-bowl', String(k));
+      b.style.setProperty('--sc', c[1]);
+      b.appendChild(mkEl('span', 'bowl-pile'));
+      b.appendChild(mkEl('span', 'bowl-name', c[0]));
+      b.addEventListener('click', function () { if (game && game.id === 'sort' && game.picked !== -1) sortStone(game.picked, k); });
+      bowls.appendChild(b);
+    });
+    wrap.appendChild(tray);
+    wrap.appendChild(bowls);
+    stage.appendChild(wrap);
+    updateSort();
+  }
+  function dragStone(b, i) {
+    var start = null;
+    var reset = function () { start = null; b.classList.remove('dragging'); b.style.transform = ''; };
+    b.addEventListener('pointerdown', function (e) {
+      if (!game || game.id !== 'sort' || game.done || game.stones[i].done) return;
+      start = { x: e.clientX, y: e.clientY, moved: false };
+      if (b.setPointerCapture) { try { b.setPointerCapture(e.pointerId); } catch (x) { /* capture is optional */ } }
+    });
+    b.addEventListener('pointermove', function (e) {
+      if (!start) return;
+      var dx = e.clientX - start.x, dy = e.clientY - start.y;
+      if (!start.moved && Math.abs(dx) + Math.abs(dy) < 8) return;
+      start.moved = true;
+      b.classList.add('dragging');
+      b.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(1.15)';
+    });
+    b.addEventListener('pointerup', function (e) {
+      if (!start) return;
+      var moved = start.moved;
+      reset();
+      if (!moved) return;
+      b.setAttribute('data-dragged', '1');
+      var k = bowlAt(e.clientX, e.clientY);
+      if (k !== null) sortStone(i, k);
+    });
+    b.addEventListener('pointercancel', reset);
+    b.addEventListener('click', function () {
+      // The click that follows a drag is not a tap.
+      if (b.getAttribute('data-dragged')) { b.removeAttribute('data-dragged'); return; }
+      pickStone(i);
+    });
+  }
+  function bowlAt(x, y) {
+    var bowls = document.querySelectorAll('.sort-bowl');
+    for (var k = 0; k < bowls.length; k++) {
+      var r = bowls[k].getBoundingClientRect();
+      if (r.width && x >= r.left - 12 && x <= r.right + 12 && y >= r.top - 12 && y <= r.bottom + 12) return k;
+    }
+    return null;
+  }
+  function pickStone(i) {
+    if (!game || game.id !== 'sort' || game.done || !game.stones[i] || game.stones[i].done) return false;
+    game.picked = game.picked === i ? -1 : i;
+    paintSort();
+    haptic('light');
+    return true;
+  }
+  function sortStone(i, k) {
+    if (!game || game.id !== 'sort' || game.done) return false;
+    var s = game.stones[i];
+    if (!s || s.done) return false;
+    var bowl = document.querySelector('.sort-bowl[data-bowl="' + k + '"]');
+    if (s.kind !== k) {
+      // Not this bowl: it gives a small wobble, and the stone stays in your hand.
+      game.picked = i;
+      paintSort();
+      if (bowl) { bowl.classList.remove('nudge'); void bowl.offsetWidth; bowl.classList.add('nudge'); }
+      return false;
+    }
+    s.done = true;
+    game.picked = -1;
+    game.sorted++;
+    var b = document.querySelector('.stone[data-stone="' + i + '"]');
+    if (b) { b.classList.add('placed'); b.disabled = true; b.setAttribute('aria-label', 'Sorted'); }
+    if (bowl) { var dot = mkEl('i'); dot.style.background = SORT_COLOURS[k][1]; bowl.querySelector('.bowl-pile').appendChild(dot); }
+    tone(440 + game.sorted * 20, 330, 0.2);
+    haptic('light');
+    paintSort();
+    updateSort();
+    if (game.sorted >= game.stones.length) {
+      game.timers.push(setTimeout(function () {
+        var n = (state.gameBest.sort || 0) + 1;
+        finishGame('Everything in its place', 'Every stone is in its bowl. Notice how tidy and settled it looks.', function () { state.gameBest.sort = n; });
+      }, 400));
+    }
+    return true;
+  }
+  function paintSort() {
+    var stones = document.querySelectorAll('#sort-tray .stone');
+    for (var j = 0; j < stones.length; j++) stones[j].setAttribute('aria-pressed', String(game.picked === j));
+    var bowls = document.querySelectorAll('.sort-bowl');
+    for (var k = 0; k < bowls.length; k++) bowls[k].classList.toggle('ready', game.picked !== -1);
+  }
+  function updateSort() { gameProgress(game.sorted + ' of ' + game.stones.length + ' sorted', game.sorted / game.stones.length); }
+
+  // Zen Sand: draw slow lines with a finger, a rake or a pebble. The lines soften away on their own.
+  var SAND_LINES = 10, SAND_W = 600, SAND_H = 450, SAND_BASE = '#F1DDB5';
+  function startSand(stage) {
+    var wrap = mkEl('div', 'sand-stage');
+    var cv = mkEl('canvas', 'sand-canvas');
+    cv.id = 'sand-canvas';
+    cv.width = SAND_W;
+    cv.height = SAND_H;
+    cv.setAttribute('role', 'img');
+    cv.setAttribute('aria-label', 'Sand tray');
+    var tools = mkEl('div', 'chips sand-tools');
+    tools.setAttribute('role', 'group');
+    tools.setAttribute('aria-label', 'Sand tools');
+    [['rake', 'Rake'], ['line', 'Finger'], ['stone', 'Pebble']].forEach(function (t) {
+      var b = gameButton('chip', t[1]);
+      b.setAttribute('data-sand-tool', t[0]);
+      b.setAttribute('aria-pressed', String(t[0] === 'rake'));
+      b.addEventListener('click', function () { setSandTool(t[0]); });
+      tools.appendChild(b);
+    });
+    var smooth = gameButton('chip', 'Smooth it');
+    smooth.id = 'sand-smooth';
+    smooth.addEventListener('click', function () { paintSandBase(); haptic('light'); tone(300, 180, 0.5, 0.03); });
+    tools.appendChild(smooth);
+    wrap.appendChild(cv);
+    wrap.appendChild(tools);
+    stage.appendChild(wrap);
+    game.tool = 'rake';
+    game.lines = 0;
+    game.stroke = null;
+    game.ctx = null;
+    try { game.ctx = cv.getContext ? cv.getContext('2d') : null; } catch (e) { game.ctx = null; }
+    paintSandBase();
+    var at = function (e) {
+      var r = cv.getBoundingClientRect();
+      return { x: r.width ? (e.clientX - r.left) * SAND_W / r.width : 0, y: r.height ? (e.clientY - r.top) * SAND_H / r.height : 0 };
+    };
+    cv.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      if (cv.setPointerCapture) { try { cv.setPointerCapture(e.pointerId); } catch (x) { /* capture is optional */ } }
+      sandBegin(at(e));
+    });
+    cv.addEventListener('pointermove', function (e) { if (game && game.stroke) sandMove(at(e)); });
+    cv.addEventListener('pointerup', function () { sandEnd(); });
+    cv.addEventListener('pointercancel', function () { sandEnd(); });
+    // The sand settles a little at a time, so old lines fade while you draw new ones.
+    if (game.ctx && !prefersReducedMotion()) {
+      game.timers.push(setInterval(function () {
+        if (!game || game.id !== 'sand' || !game.ctx) return;
+        game.ctx.fillStyle = 'rgba(241, 221, 181, 0.035)';
+        game.ctx.fillRect(0, 0, SAND_W, SAND_H);
+      }, 120));
+    }
+    updateSand();
+  }
+  function setSandTool(t) {
+    if (!game || game.id !== 'sand') return;
+    game.tool = t;
+    var bs = document.querySelectorAll('[data-sand-tool]');
+    for (var i = 0; i < bs.length; i++) bs[i].setAttribute('aria-pressed', String(bs[i].getAttribute('data-sand-tool') === t));
+    haptic('light');
+  }
+  function paintSandBase() {
+    var c = game && game.ctx;
+    if (!c) return;
+    c.fillStyle = SAND_BASE;
+    c.fillRect(0, 0, SAND_W, SAND_H);
+    // A fine grain, so it reads as sand rather than paper.
+    for (var i = 0; i < 900; i++) {
+      c.fillStyle = rng() < 0.5 ? 'rgba(201, 155, 90, 0.18)' : 'rgba(255, 248, 230, 0.5)';
+      c.fillRect(rng() * SAND_W, rng() * SAND_H, 2, 2);
+    }
+  }
+  function groove(a, b, offset) {
+    var c = game.ctx;
+    if (!c) return;
+    var dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1;
+    var nx = -dy / len * offset, ny = dx / len * offset;
+    c.lineCap = 'round';
+    c.strokeStyle = 'rgba(176, 128, 70, 0.55)';
+    c.lineWidth = 13;
+    c.beginPath(); c.moveTo(a.x + nx, a.y + ny); c.lineTo(b.x + nx, b.y + ny); c.stroke();
+    c.strokeStyle = 'rgba(255, 246, 224, 0.85)';
+    c.lineWidth = 4;
+    c.beginPath(); c.moveTo(a.x + nx - 3, a.y + ny - 3); c.lineTo(b.x + nx - 3, b.y + ny - 3); c.stroke();
+  }
+  function pebble(p) {
+    var c = game.ctx;
+    if (!c) return;
+    for (var r = 78; r >= 30; r -= 24) {
+      c.strokeStyle = 'rgba(176, 128, 70, 0.45)'; c.lineWidth = 10;
+      c.beginPath(); c.arc(p.x, p.y, r, 0, Math.PI * 2); c.stroke();
+      c.strokeStyle = 'rgba(255, 246, 224, 0.8)'; c.lineWidth = 3.5;
+      c.beginPath(); c.arc(p.x - 1.5, p.y - 1.5, r, 0, Math.PI * 2); c.stroke();
+    }
+    c.fillStyle = '#8E8173';
+    c.beginPath(); c.ellipse(p.x, p.y, 20, 16, 0.3, 0, Math.PI * 2); c.fill();
+    c.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    c.beginPath(); c.ellipse(p.x - 4, p.y - 4, 5, 3, 0.3, 0, Math.PI * 2); c.fill();
+  }
+  function sandBegin(p) {
+    if (!game || game.id !== 'sand' || game.done) return false;
+    if (game.tool === 'stone') {
+      pebble(p);
+      tone(220, 150, 0.6, 0.04);
+      haptic('light');
+      sandLine();
+      return true;
+    }
+    game.stroke = { last: p, len: 0 };
+    return true;
+  }
+  function sandMove(p) {
+    var s = game.stroke;
+    if (!s) return;
+    var d = Math.hypot(p.x - s.last.x, p.y - s.last.y);
+    if (d < 2) return;
+    if (game.tool === 'rake') [-26, 0, 26].forEach(function (o) { groove(s.last, p, o); });
+    else groove(s.last, p, 0);
+    s.len += d;
+    s.last = p;
+  }
+  function sandEnd() {
+    if (!game || game.id !== 'sand' || !game.stroke) return false;
+    var long = game.stroke.len > 60;
+    game.stroke = null;
+    if (long) { tone(260, 200, 0.4, 0.025); sandLine(); }
+    return long;
+  }
+  function sandLine() {
+    game.lines++;
+    updateSand();
+    if (game.lines >= SAND_LINES) game.timers.push(setTimeout(endSand, 600));
+  }
+  // For tests and keyboards: draw one stroke through the given points.
+  function sandStroke(points) {
+    if (!game || game.id !== 'sand' || !points || !points.length) return false;
+    sandBegin(points[0]);
+    for (var i = 1; i < points.length; i++) sandMove(points[i]);
+    return game.tool === 'stone' ? true : sandEnd();
+  }
+  function updateSand() { gameProgress(game.lines + ' of ' + SAND_LINES + ' lines', Math.min(1, game.lines / SAND_LINES)); }
+  function endSand() {
+    if (!game || game.id !== 'sand') return;
+    var n = (state.gameBest.sand || 0) + 1;
+    finishGame('Smooth and still', 'Ten slow lines in the sand. Let your hands rest, and enjoy the quiet.', function () { state.gameBest.sand = n; });
+  }
+
+  // Star Connect: tap the glowing star to join it to the last. Three pictures make a full sky.
+  var SKIES = [
+    { name: 'The Kite', stars: [[50, 12], [76, 40], [50, 66], [24, 40], [58, 90]], order: [4, 2, 1, 0, 3, 2] },
+    { name: 'The Boat', stars: [[18, 64], [82, 64], [68, 82], [32, 82], [50, 64], [50, 16], [76, 54]], order: [0, 1, 2, 3, 0, 4, 5, 6, 4] },
+    { name: 'Saptarishi', stars: [[10, 34], [27, 28], [42, 34], [55, 44], [58, 66], [84, 72], [88, 48]], order: [0, 1, 2, 3, 4, 5, 6, 3] }
+  ];
+  function startStars(stage) {
+    var sky = mkEl('div', 'stars-sky');
+    sky.id = 'stars-sky';
+    var lines = document.createElementNS(SVGNS, 'svg');
+    lines.setAttribute('viewBox', '0 0 100 100');
+    lines.setAttribute('preserveAspectRatio', 'none');
+    lines.setAttribute('class', 'stars-lines');
+    lines.setAttribute('aria-hidden', 'true');
+    lines.id = 'stars-lines';
+    sky.appendChild(lines);
+    var label = mkEl('p', 'stars-name');
+    label.id = 'stars-name';
+    label.setAttribute('aria-live', 'polite');
+    sky.appendChild(label);
+    stage.appendChild(sky);
+    game.sky = 0;
+    starsRound();
+  }
+  function starsRound() {
+    var sky = $('stars-sky'), c = SKIES[game.sky];
+    var old = sky.querySelectorAll('.star');
+    for (var i = 0; i < old.length; i++) sky.removeChild(old[i]);
+    $('stars-lines').textContent = '';
+    $('stars-name').textContent = '';
+    sky.classList.remove('complete');
+    game.step = 0;
+    c.stars.forEach(function (p, j) {
+      var b = gameButton('star', null, 'Star');
+      b.setAttribute('data-star', String(j));
+      b.style.left = p[0] + '%';
+      b.style.top = p[1] + '%';
+      b.addEventListener('click', function () { tapStar(j); });
+      sky.appendChild(b);
+    });
+    paintStars();
+  }
+  function paintStars() {
+    var c = SKIES[game.sky], next = c.order[game.step];
+    var bs = document.querySelectorAll('#stars-sky .star');
+    for (var j = 0; j < bs.length; j++) {
+      var on = j === next && game.step < c.order.length;
+      bs[j].classList.toggle('next', on);
+      bs[j].setAttribute('aria-label', on ? 'Next star' : bs[j].classList.contains('lit') ? 'Joined star' : 'Star');
+    }
+    var share = (game.sky + game.step / c.order.length) / SKIES.length;
+    gameProgress('Sky ' + (game.sky + 1) + ' of ' + SKIES.length, share);
+  }
+  function tapStar(j) {
+    if (!game || game.id !== 'stars' || game.done) return false;
+    var c = SKIES[game.sky];
+    if (game.step >= c.order.length) return false;
+    var b = document.querySelector('#stars-sky .star[data-star="' + j + '"]');
+    if (c.order[game.step] !== j) {
+      // Not this one yet: the next star twinkles brighter to show the way.
+      var nx = document.querySelector('#stars-sky .star.next');
+      if (nx) { nx.classList.remove('hint'); void nx.offsetWidth; nx.classList.add('hint'); }
+      return false;
+    }
+    if (game.step > 0) {
+      var a = c.stars[c.order[game.step - 1]], p = c.stars[j];
+      var ln = svg('line', { x1: a[0], y1: a[1], x2: p[0], y2: p[1], class: 'star-line' }, $('stars-lines'));
+      ln.setAttribute('vector-effect', 'non-scaling-stroke');
+    }
+    if (b) b.classList.add('lit');
+    game.step++;
+    tone(520 + game.step * 40, 700 + game.step * 40, 0.35, 0.04);
+    haptic('light');
+    paintStars();
+    if (game.step >= c.order.length) {
+      $('stars-sky').classList.add('complete');
+      setText('stars-name', c.name);
+      tone(660, 990, 0.9, 0.05);
+      game.timers.push(setTimeout(function () {
+        if (!game || game.id !== 'stars') return;
+        game.sky++;
+        if (game.sky >= SKIES.length) endStars();
+        else starsRound();
+      }, 1500));
+    }
+    return true;
+  }
+  function endStars() {
+    if (!game || game.id !== 'stars') return;
+    var n = (state.gameBest.stars || 0) + 1;
+    finishGame('Your sky is full', 'Three pictures in the stars, joined one calm tap at a time.', function () { state.gameBest.stars = n; });
+  }
+
+  // Gentle Stack: a block glides slowly above the tower. Tap to set it down. Every block lands.
+  var STACK_COUNT = 12, STACK_MIN = 26, STACK_H = 30;
+  var STACK_COLOURS = ['#4FA67C', '#8CC8F0', '#FFC857', '#F28FA0', '#B9A3F0', '#FFB088'];
+  function startStack(stage) {
+    var field = mkEl('div', 'stack-field');
+    field.id = 'stack-field';
+    var tower = mkEl('div', 'stack-tower');
+    tower.id = 'stack-tower';
+    field.appendChild(tower);
+    var drop = gameButton('btn btn-sun stack-drop', 'Set it down');
+    drop.id = 'stack-drop';
+    drop.addEventListener('click', function () { dropBlock(); });
+    field.addEventListener('pointerdown', function (e) { e.preventDefault(); dropBlock(); });
+    stage.appendChild(field);
+    stage.appendChild(drop);
+    game.blocks = [{ x: 20, w: 60 }];
+    game.just = 0;
+    addStackBlock(game.blocks[0], 0, false);
+    nextStackBlock();
+    var speed = prefersReducedMotion() ? 12 : 20; // percent of the width per second: slow on purpose
+    game.timers.push(setInterval(function () {
+      var m = game && game.id === 'stack' && game.moving;
+      if (!m) return;
+      m.x += m.dir * speed * 0.03;
+      if (m.x <= 0) { m.x = 0; m.dir = 1; }
+      if (m.x >= 100 - m.w) { m.x = 100 - m.w; m.dir = -1; }
+      m.el.style.left = m.x.toFixed(2) + '%';
+    }, 30));
+    updateStack();
+  }
+  function addStackBlock(b, level, moving) {
+    var d = mkEl('div', 'stack-block' + (moving ? ' moving' : ''));
+    d.style.left = b.x + '%';
+    d.style.width = b.w + '%';
+    d.style.bottom = (level * STACK_H) + 'px';
+    d.style.background = STACK_COLOURS[level % STACK_COLOURS.length];
+    $('stack-tower').appendChild(d);
+    return d;
+  }
+  function nextStackBlock() {
+    var last = game.blocks[game.blocks.length - 1], level = game.blocks.length;
+    var fromLeft = level % 2 === 1;
+    var m = { x: fromLeft ? 0 : 100 - last.w, w: last.w, dir: fromLeft ? 1 : -1 };
+    m.el = addStackBlock(m, level, true);
+    game.moving = m;
+    // Keep the top of the tower in view as it grows.
+    $('stack-tower').style.transform = 'translateY(' + (Math.max(0, level - 8) * STACK_H) + 'px)';
+  }
+  function dropBlock() {
+    if (!game || game.id !== 'stack' || game.done || !game.moving) return false;
+    var m = game.moving, last = game.blocks[game.blocks.length - 1];
+    var x = m.x, w = m.w;
+    if (Math.abs(x - last.x) < 3) {
+      // Just right: it snaps into line and grows back a little.
+      x = last.x;
+      w = Math.min(60, last.w + 4);
+      x = Math.max(0, Math.min(100 - w, x - 2));
+      game.just++;
+      m.el.classList.add('just');
+      tone(660, 880, 0.35, 0.05);
+    } else {
+      var lo = Math.max(x, last.x), hi = Math.min(x + w, last.x + last.w);
+      var over = hi - lo;
+      // A block that slides off the edge still lands, centred on the one below at the smallest size.
+      if (over < STACK_MIN) { w = Math.min(STACK_MIN, last.w); x = last.x + (last.w - w) / 2; }
+      else { w = over; x = lo; }
+      tone(380 + game.blocks.length * 15, 300, 0.25, 0.04);
+    }
+    m.el.classList.remove('moving');
+    m.el.style.left = x + '%';
+    m.el.style.width = w + '%';
+    game.blocks.push({ x: x, w: w });
+    game.moving = null;
+    haptic('light');
+    updateStack();
+    if (game.blocks.length - 1 >= STACK_COUNT) {
+      game.timers.push(setTimeout(function () {
+        var just = game.just, prev = state.gameBest.stack || 0;
+        finishGame('A steady tower', 'Twelve blocks, set down at your own pace. Take a slow breath and enjoy it.', function () { if (just > prev) state.gameBest.stack = just; });
+      }, 500));
+    } else nextStackBlock();
+    return true;
+  }
+  function updateStack() {
+    var n = game.blocks.length - 1;
+    gameProgress(n + ' of ' + STACK_COUNT + ' blocks', n / STACK_COUNT);
+  }
+
+  // Kind Notes: tap three kind words for yourself. They gather into a note you can keep.
+  var KIND_WORDS = [
+    'I am doing my best.', 'This is hard, and I am handling it.', 'I can go gently today.', 'I deserve rest.',
+    'Small steps still count.', 'I am allowed to learn as I go.', 'My feelings make sense.', 'I can be patient with myself.',
+    'I have got through hard days before.', 'I am enough as I am.', 'It is okay to ask for help.', 'I can start again, any time.',
+    'I am getting stronger, a little each day.', 'I can be my own good friend.', 'Today counts, even the quiet parts.', 'I am worth being kind to.'
+  ];
+  var KIND_PICK = 3, KIND_SHOWN = 6;
+  function startKind(stage) {
+    var note = mkEl('div', 'kind-note');
+    note.id = 'kind-note';
+    note.appendChild(mkEl('p', 'kind-note-head', 'A note to me'));
+    var lines = mkEl('ol', 'kind-lines');
+    lines.id = 'kind-lines';
+    for (var i = 0; i < KIND_PICK; i++) lines.appendChild(mkEl('li', 'kind-line'));
+    note.appendChild(lines);
+    var cloud = mkEl('div', 'kind-cloud');
+    cloud.id = 'kind-cloud';
+    var other = gameButton('btn btn-ghost btn-small', 'Other words');
+    other.id = 'kind-other';
+    other.addEventListener('click', function () { kindWords(); haptic('light'); });
+    stage.appendChild(note);
+    stage.appendChild(cloud);
+    stage.appendChild(other);
+    game.kept = [];
+    kindWords();
+    updateKind();
+  }
+  // Fills the cloud with words not yet chosen.
+  function kindWords() {
+    if (!game || game.id !== 'kind' || game.done) return;
+    var cloud = $('kind-cloud');
+    cloud.textContent = '';
+    var pool = shuffle(KIND_WORDS.filter(function (w) { return game.kept.indexOf(w) === -1; })).slice(0, KIND_SHOWN);
+    pool.forEach(function (w, i) {
+      var b = gameButton('kind-word', w);
+      b.setAttribute('data-kind-word', String(KIND_WORDS.indexOf(w)));
+      b.style.animationDelay = (-(i * 0.7)).toFixed(1) + 's';
+      b.addEventListener('click', function () { pickKind(b); });
+      cloud.appendChild(b);
+    });
+  }
+  function pickKind(b) {
+    if (typeof b === 'number') b = document.querySelectorAll('#kind-cloud .kind-word')[b];
+    if (!b || !game || game.id !== 'kind' || game.done || b.disabled || game.kept.length >= KIND_PICK) return false;
+    var w = KIND_WORDS[+b.getAttribute('data-kind-word')];
+    game.kept.push(w);
+    b.disabled = true;
+    b.classList.add('kept');
+    var li = document.querySelectorAll('#kind-lines .kind-line')[game.kept.length - 1];
+    if (li) { li.textContent = w; li.classList.add('filled'); }
+    tone(500 + game.kept.length * 90, 620 + game.kept.length * 90, 0.5, 0.04);
+    haptic('light');
+    updateKind();
+    if (game.kept.length >= KIND_PICK) {
+      $('kind-other').hidden = true;
+      $('kind-cloud').hidden = true;
+      game.timers.push(setTimeout(function () {
+        var n = (state.gameBest.kind || 0) + 1;
+        finishGame('A kind note, from you', 'Read it slowly, once, as if a good friend wrote it to you.', function () { state.gameBest.kind = n; });
+        var keep = $('game-keep');
+        if (keep) keep.hidden = false;
+      }, 600));
+    }
+    return true;
+  }
+  function updateKind() { gameProgress(game.kept.length + ' of ' + KIND_PICK + ' chosen', game.kept.length / KIND_PICK); }
+  // Keeps the finished note in the Good things jar.
+  function keepKindNote() {
+    if (!game || game.id !== 'kind' || game.kept.length < KIND_PICK || game.keptInJar) return false;
+    game.keptInJar = true;
+    state.goodThings.push({ day: dayKey(now()), text: game.kept.join(' ').slice(0, 160) });
+    if (state.goodThings.length > 200) state.goodThings = state.goodThings.slice(-200);
+    save();
+    renderJar();
+    $('game-keep').hidden = true;
+    toast('Saved in your jar.');
+    return true;
+  }
+
   function finishCurrentGame() {
     if (!game) return;
     if (game.id === 'pairs') {
@@ -2968,6 +3564,11 @@
       finishGame('All pairs matched', 'You matched 6 pairs in ' + plural(game.moves, 'move', 'moves') + '.');
     } else if (game.id === 'catch') endCatch();
     else if (game.id === 'pop') { var bs = document.querySelectorAll('#pop-field .bubble'); for (var i = 0; i < bs.length; i++) popBubble(bs[i]); }
+    else if (game.id === 'sort') game.stones.forEach(function (st, j) { sortStone(j, st.kind); });
+    else if (game.id === 'sand') endSand();
+    else if (game.id === 'stars') endStars();
+    else if (game.id === 'stack') { while (game && !game.done && game.moving) dropBlock(); }
+    else if (game.id === 'kind') { while (game && game.kept.length < KIND_PICK && pickKind(0)) { /* the first free word each time */ } }
     else endBloom();
   }
 
@@ -3762,6 +4363,8 @@
       case 'result-done': go('today'); break;
       case 'game-back': go(lastTab || 'play'); break;
       case 'game-again': if (game) openGame(game.id); break;
+      case 'game-keep': keepKindNote(); break;
+      case 'games-all': go('play'); setSeg('games'); break;
       case 'start-break': startCheckin('guided'); break;
       case 'breathe-now': breatheNow(); break;
       case 'open-shop': openShop(); break;
@@ -4011,6 +4614,16 @@
     flipCard: flipCard,
     spawnBeam: spawnBeam,
     finishCurrentGame: finishCurrentGame,
+    pickStone: pickStone,
+    sortStone: sortStone,
+    sandStroke: sandStroke,
+    setSandTool: setSandTool,
+    tapStar: tapStar,
+    dropBlock: dropBlock,
+    pickKind: pickKind,
+    keepKindNote: keepKindNote,
+    gameRank: function () { return gameRank(); },
+    skies: SKIES,
     feelPlan: function () { var p = feelPlan(); return JSON.parse(JSON.stringify({ key: p.key, steps: p.steps, next: p.next, alt: p.alt, hear: p.hear, close: p.f.close })); },
     stepInfo: stepInfo,
     voiceLines: function () {

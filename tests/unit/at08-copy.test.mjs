@@ -54,7 +54,7 @@ test('AT8 rendered UI text on every screen has no banned words', () => {
   app.click('#after-next'); grab();
   app.click('#result-done');
   for (const t of ['today', 'play', 'progress', 'me']) { app.click(`[data-tab="${t}"]`); grab(); }
-  for (const g of ['pairs', 'catch', 'bloom']) { app.B.openGame(g); app.B.finishCurrentGame(); grab(); }
+  for (const g of ['pairs', 'catch', 'bloom', 'pop', 'sort', 'sand', 'stars', 'stack', 'kind']) { app.B.openGame(g); app.B.finishCurrentGame(); grab(); }
   app.B.go('today');
   app.B.openShop(); grab();
   const attrs = [...app.document.querySelectorAll('[aria-label],[placeholder],[title]')]

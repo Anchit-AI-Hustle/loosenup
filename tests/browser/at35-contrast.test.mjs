@@ -72,7 +72,7 @@ for (const scheme of ['light', 'dark']) {
     for (const tool of ['support', 'safety', 'reframe', 'learn', 'wellbeing', 'programs']) { await page.evaluate((t) => window.LoosenUp.go(t), tool); await audit('tool-' + tool); }
     await page.evaluate(() => window.LoosenUp.openProgram('sleep')); await audit('program');
     await page.evaluate(() => window.LoosenUp.openLesson('breath')); await audit('lesson');
-    for (const g of ['pairs', 'catch', 'bloom']) { await page.evaluate((x) => window.LoosenUp.openGame(x), g); await audit('game-' + g); }
+    for (const g of ['pairs', 'catch', 'bloom', 'sort', 'sand', 'stars', 'stack', 'kind']) { await page.evaluate((x) => window.LoosenUp.openGame(x), g); await audit('game-' + g); }
     await page.evaluate(() => { window.LoosenUp.go('today'); window.LoosenUp.openShop(); }); await audit('plus');
     await page.evaluate(() => { document.getElementById('shop-close').click(); document.getElementById('sos-btn').click(); }); await audit('sos');
     await ctx.close();

@@ -293,7 +293,10 @@ test('AT32 every screen fits small phones (320, 360, 390 px): no sideways scroll
           const rc = el.getBoundingClientRect();
           if (!rc.width || !rc.height) continue;
           const pov = el.parentElement && getComputedStyle(el.parentElement).overflowX;
-          if ((rc.right > W + 1 || rc.left < -1) && !['auto', 'scroll', 'hidden'].includes(pov)) out.push('off screen: ' + (el.id || el.className || el.tagName));
+          // Anything inside a sideways-scrolling row (like Today's games) is reached with a swipe.
+          let swipe = false;
+          for (let p = el.parentElement; p && !swipe; p = p.parentElement) swipe = ['auto', 'scroll'].includes(getComputedStyle(p).overflowX);
+          if ((rc.right > W + 1 || rc.left < -1) && !swipe && !['auto', 'scroll', 'hidden'].includes(pov)) out.push('off screen: ' + (el.id || el.className || el.tagName));
         }
         const tab = document.getElementById('tabbar');
         if (tab && !tab.hidden) {

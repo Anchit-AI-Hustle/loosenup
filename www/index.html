@@ -331,12 +331,17 @@
           </div>
         </article>
         <section class="block" aria-labelledby="games-title">
-          <div class="block-head"><h2 class="subtitle" id="games-title">Play a calm game</h2><span class="tag">1 tap</span></div>
+          <div class="block-head"><h2 class="subtitle" id="games-title">Play a calm game</h2><button id="games-all" class="link-btn" type="button">See all</button></div>
           <div class="game-row">
             <button class="game-tile gt-pairs" type="button" data-game="pairs"><span class="gt-ic" aria-hidden="true">🃏</span><strong>Calm Pairs</strong><span>Match the pairs</span></button>
             <button class="game-tile gt-catch" type="button" data-game="catch"><span class="gt-ic" aria-hidden="true">☀️</span><strong>Sunbeam Catch</strong><span>Tap the light</span></button>
             <button class="game-tile gt-ring" type="button" data-game="bloom"><span class="gt-ic" aria-hidden="true">🫧</span><strong>Breathing Ring</strong><span>Hold to breathe</span></button>
             <button class="game-tile gt-pop" type="button" data-game="pop"><span class="gt-ic" aria-hidden="true">🔵</span><strong>Bubble Pop</strong><span>Pop them all</span></button>
+            <button class="game-tile gt-sort" type="button" data-game="sort"><span class="gt-ic" aria-hidden="true"><svg viewBox="0 0 36 36"><circle cx="10" cy="10" r="5" fill="#FFC857"/><circle cx="25" cy="8" r="5" fill="#8CC8F0"/><circle cx="18" cy="17" r="4.5" fill="#F28FA0"/><path d="M3 22h30a15 10 0 0 1-30 0z" fill="#4FA67C"/></svg></span><strong>Colour Sort</strong><span>Sort the stones</span></button>
+            <button class="game-tile gt-sand" type="button" data-game="sand"><span class="gt-ic" aria-hidden="true"><svg viewBox="0 0 36 36"><rect x="3" y="5" width="30" height="26" rx="8" fill="#F1DDB5"/><path d="M7 13c5-4 9 4 14 0s7-3 8-2M7 19c5-4 9 4 14 0s7-3 8-2M7 25c5-4 9 4 13 0" fill="none" stroke="#B08046" stroke-width="2" stroke-linecap="round"/><ellipse cx="26" cy="24" rx="3.5" ry="3" fill="#8E8173"/></svg></span><strong>Zen Sand</strong><span>Draw in sand</span></button>
+            <button class="game-tile gt-stars" type="button" data-game="stars"><span class="gt-ic" aria-hidden="true"><svg viewBox="0 0 36 36"><rect x="2" y="2" width="32" height="32" rx="9" fill="#2B3A67"/><path d="M8 26L14 12L22 18L28 8" fill="none" stroke="#FFE9A8" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="26" r="2.6" fill="#FFE9A8"/><circle cx="14" cy="12" r="2.6" fill="#FFE9A8"/><circle cx="22" cy="18" r="2.6" fill="#FFE9A8"/><circle cx="28" cy="8" r="3" fill="#FFC857"/></svg></span><strong>Star Connect</strong><span>Join the stars</span></button>
+            <button class="game-tile gt-stack" type="button" data-game="stack"><span class="gt-ic" aria-hidden="true"><svg viewBox="0 0 36 36"><rect x="5" y="27" width="26" height="6" rx="2" fill="#4FA67C"/><rect x="8" y="20" width="21" height="6" rx="2" fill="#8CC8F0"/><rect x="10" y="13" width="17" height="6" rx="2" fill="#FFC857"/><rect x="13" y="4" width="13" height="6" rx="2" fill="#F28FA0"/></svg></span><strong>Gentle Stack</strong><span>Build slowly</span></button>
+            <button class="game-tile gt-kind" type="button" data-game="kind"><span class="gt-ic" aria-hidden="true"><svg viewBox="0 0 36 36"><rect x="5" y="5" width="26" height="27" rx="5" fill="#FFF6E3" stroke="#F2A72B" stroke-width="1.5"/><path d="M10 13h16M10 18h12M10 23h8" stroke="#C9A06A" stroke-width="2" stroke-linecap="round"/><path d="M25 29s-4.5-2.8-4.5-5.8a2.2 2.2 0 0 1 4.5-.7 2.2 2.2 0 0 1 4.5.7c0 3-4.5 5.8-4.5 5.8z" fill="#F28FA0"/></svg></span><strong>Kind Notes</strong><span>Words for you</span></button>
           </div>
         </section>
         <article id="mood-card" class="card mood-card">
@@ -716,7 +721,6 @@
         </div>
 
         <div id="panel-breathe" class="seg-panel" role="tabpanel" aria-labelledby="seg-breathe">
-          <p class="muted">Pick any exercise. You rate how you feel before and after, so your Calm gain keeps growing.</p>
           <h2 class="panel-head">Breathing</h2>
           <div id="practice-breath" class="practice-grid"></div>
           <h2 class="panel-head">Body and mind</h2>
@@ -726,30 +730,48 @@
         </div>
 
         <div id="panel-games" class="seg-panel" role="tabpanel" aria-labelledby="seg-games" hidden>
-          <p class="muted">Gentle games with nothing to rush.</p>
           <div class="games">
             <button id="game-pairs-open" class="game-card" type="button" data-game="pairs">
               <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><rect x="4" y="8" width="20" height="28" rx="6" fill="#FFB088"/><rect x="30" y="18" width="20" height="28" rx="6" fill="#fff" stroke="#4FA67C" stroke-width="2"/><circle cx="40" cy="32" r="5" fill="#FFC857"/></svg></span>
-              <span><strong>Calm Pairs</strong><span>Turn the cards and find the pairs.</span></span>
+              <span><strong>Calm Pairs</strong><span>Match the pairs</span></span>
             </button>
             <button id="game-catch-open" class="game-card" type="button" data-game="catch">
               <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><circle cx="18" cy="16" r="8" fill="#FFC857"/><circle cx="36" cy="30" r="6" fill="#FFB088"/><path d="M14 40h26l-3 10H17z" fill="#4FA67C"/></svg></span>
-              <span><strong>Sunbeam Catch</strong><span>Tap drifting sunbeams into your jar.</span></span>
+              <span><strong>Sunbeam Catch</strong><span>Tap the light</span></span>
             </button>
             <button id="game-bloom-open" class="game-card" type="button" data-game="bloom">
               <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><use href="#petal-sun" x="7" y="7" width="40" height="40"/></svg></span>
-              <span><strong>Breathing Ring</strong><span>Hold to breathe in, let go to breathe out.</span></span>
+              <span><strong>Breathing Ring</strong><span>Hold to breathe</span></span>
             </button>
             <button id="game-pop-open" class="game-card" type="button" data-game="pop">
               <span class="game-art" aria-hidden="true"><svg viewBox="0 0 54 54"><circle cx="16" cy="18" r="9" fill="#7CC0EE"/><circle cx="37" cy="18" r="9" fill="#BFE3FF"/><circle cx="16" cy="38" r="9" fill="#BFE3FF"/><circle cx="37" cy="38" r="6" fill="#7CC0EE" opacity=".35"/><circle cx="13" cy="15" r="2.5" fill="#fff"/><circle cx="34" cy="15" r="2.5" fill="#fff"/></svg></span>
-              <span><strong>Bubble Pop</strong><span>Pop a sheet of bubbles, one by one.</span></span>
+              <span><strong>Bubble Pop</strong><span>Pop them all</span></span>
+            </button>
+            <button id="game-sort-open" class="game-card" type="button" data-game="sort">
+              <span class="game-art" aria-hidden="true"><svg viewBox="0 0 36 36"><circle cx="10" cy="10" r="5" fill="#FFC857"/><circle cx="25" cy="8" r="5" fill="#8CC8F0"/><circle cx="18" cy="17" r="4.5" fill="#F28FA0"/><path d="M3 22h30a15 10 0 0 1-30 0z" fill="#4FA67C"/></svg></span>
+              <span><strong>Colour Sort</strong><span>Sort the stones</span></span>
+            </button>
+            <button id="game-sand-open" class="game-card" type="button" data-game="sand">
+              <span class="game-art" aria-hidden="true"><svg viewBox="0 0 36 36"><rect x="3" y="5" width="30" height="26" rx="8" fill="#F1DDB5"/><path d="M7 13c5-4 9 4 14 0s7-3 8-2M7 19c5-4 9 4 14 0s7-3 8-2M7 25c5-4 9 4 13 0" fill="none" stroke="#B08046" stroke-width="2" stroke-linecap="round"/><ellipse cx="26" cy="24" rx="3.5" ry="3" fill="#8E8173"/></svg></span>
+              <span><strong>Zen Sand</strong><span>Draw in sand</span></span>
+            </button>
+            <button id="game-stars-open" class="game-card" type="button" data-game="stars">
+              <span class="game-art" aria-hidden="true"><svg viewBox="0 0 36 36"><rect x="2" y="2" width="32" height="32" rx="9" fill="#2B3A67"/><path d="M8 26L14 12L22 18L28 8" fill="none" stroke="#FFE9A8" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="26" r="2.6" fill="#FFE9A8"/><circle cx="14" cy="12" r="2.6" fill="#FFE9A8"/><circle cx="22" cy="18" r="2.6" fill="#FFE9A8"/><circle cx="28" cy="8" r="3" fill="#FFC857"/></svg></span>
+              <span><strong>Star Connect</strong><span>Join the stars</span></span>
+            </button>
+            <button id="game-stack-open" class="game-card" type="button" data-game="stack">
+              <span class="game-art" aria-hidden="true"><svg viewBox="0 0 36 36"><rect x="5" y="27" width="26" height="6" rx="2" fill="#4FA67C"/><rect x="8" y="20" width="21" height="6" rx="2" fill="#8CC8F0"/><rect x="10" y="13" width="17" height="6" rx="2" fill="#FFC857"/><rect x="13" y="4" width="13" height="6" rx="2" fill="#F28FA0"/></svg></span>
+              <span><strong>Gentle Stack</strong><span>Build slowly</span></span>
+            </button>
+            <button id="game-kind-open" class="game-card" type="button" data-game="kind">
+              <span class="game-art" aria-hidden="true"><svg viewBox="0 0 36 36"><rect x="5" y="5" width="26" height="27" rx="5" fill="#FFF6E3" stroke="#F2A72B" stroke-width="1.5"/><path d="M10 13h16M10 18h12M10 23h8" stroke="#C9A06A" stroke-width="2" stroke-linecap="round"/><path d="M25 29s-4.5-2.8-4.5-5.8a2.2 2.2 0 0 1 4.5-.7 2.2 2.2 0 0 1 4.5.7c0 3-4.5 5.8-4.5 5.8z" fill="#F28FA0"/></svg></span>
+              <span><strong>Kind Notes</strong><span>Words for you</span></span>
             </button>
           </div>
           <p id="play-note" class="fine center"></p>
         </div>
 
         <div id="panel-sounds" class="seg-panel" role="tabpanel" aria-labelledby="seg-sounds" hidden>
-          <p class="muted">Made on your device, works offline. Keep LoosenUp open while a sound plays.</p>
           <div class="sound-grid">
             <button class="sound" type="button" data-sound="rain" aria-pressed="false"><strong>Rain</strong><span>Soft and steady</span></button>
             <button class="sound" type="button" data-sound="ocean" aria-pressed="false"><strong>Ocean</strong><span>Slow waves</span></button>
@@ -773,13 +795,19 @@
           <div><p class="eyebrow" id="game-kicker">Play</p><h1 id="game-title" class="title"></h1></div>
           <p id="game-score" class="game-score" aria-live="polite"></p>
         </div>
-        <p id="game-help" class="muted"></p>
+        <div id="game-bar" class="game-bar" aria-hidden="true" hidden><i id="game-bar-fill"></i></div>
+        <p id="game-help" class="game-hint"></p>
         <div id="game-stage" class="game-stage"></div>
         <div id="game-done" class="card game-done" hidden>
           <p id="game-done-title" class="title"></p>
           <p id="game-done-text" class="muted"></p>
+          <span class="game-burst" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          <button id="game-keep" class="btn btn-soft" type="button" hidden>Keep it in my jar</button>
           <button id="game-plan-next" class="btn btn-sun" type="button" hidden>Next for you</button>
-          <button id="game-again" class="btn btn-sun" type="button">Play again</button>
+          <div class="row game-done-row">
+            <button id="game-again" class="btn btn-soft" type="button">Play again</button>
+            <button id="game-next-game" class="btn btn-sun" type="button" hidden>Another game</button>
+          </div>
         </div>
         <button id="game-back" class="btn btn-ghost" type="button">Back</button>
       </section>
