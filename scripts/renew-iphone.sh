@@ -55,6 +55,14 @@ say "Copying the current app into the iPhone project ..."
 npx cap copy ios >/dev/null
 
 say "Building and signing ..."
+# A free Apple ID only keeps the phone on its device list while builds target it, and without it Xcode
+# cannot make a new profile. A quick build aimed at the phone registers it again. Optional: the phone may be away.
+PHONE="$(xcrun devicectl list devices 2>/dev/null | awk '/physical/ && !/unavailable/ { for (i = 1; i <= NF; i++) if ($i ~ /^[0-9A-F]+-[0-9A-F]+$/ && length($i) == 25) { print $i; exit } }')"
+if [ -n "$PHONE" ]; then
+  xcodebuild build -project ios/App/App.xcodeproj -scheme App -configuration Release -destination "id=$PHONE" \
+    -derivedDataPath "$WORK/register" -allowProvisioningUpdates -allowProvisioningDeviceRegistration \
+    DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic -quiet || say "Could not reach the phone for signing; trying the build anyway."
+fi
 xcodebuild archive -project ios/App/App.xcodeproj -scheme App -configuration Release \
   -destination 'generic/platform=iOS' -archivePath "$WORK/App.xcarchive" \
   -allowProvisioningUpdates DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic -quiet
