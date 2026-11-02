@@ -31,9 +31,10 @@ test('AT28 every exercise has a card, all open from day one', () => {
   const app = ready();
   app.B.go('play');
   const ids = [...app.document.querySelectorAll('#panel-breathe [data-practice]')].map((b) => b.getAttribute('data-practice'));
-  assert.deepEqual(ids.sort(), ['breeze', 'cooldown', 'desk', 'here', 'kind', 'letitout', 'pause', 'quick', 'release', 'sigh', 'square', 'warmth']);
+  assert.deepEqual(ids.sort(), Object.keys(app.B.techniques).sort(), 'every exercise, including the ones For you suggests');
+  assert.equal(ids.length, 22);
   const breath = [...app.document.querySelectorAll('#practice-breath [data-practice]')].map((b) => b.getAttribute('data-practice'));
-  assert.deepEqual(breath, ['quick', 'sigh', 'breeze', 'square', 'cooldown']);
+  assert.deepEqual(breath, ['quick', 'sigh', 'breeze', 'wave', 'square', 'cooldown']);
   assert.equal(app.document.querySelectorAll('#panel-breathe [data-practice][disabled]').length, 0, 'nothing locked');
   assert.match(app.$('[data-practice="quick"]').textContent, /Always free/);
   assert.match(app.$('[data-practice="square"]').textContent, /2 min · Work/);

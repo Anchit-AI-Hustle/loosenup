@@ -260,3 +260,16 @@ html[data-theme="dark"] .stack-field { background: linear-gradient(180deg, #1E2A
   .kind-word, .star.next, .star.hint, .game-done:not([hidden]), .game-done:not([hidden]) .game-burst i, .sort-bowl.nudge { animation: none; }
   .stack-tower { transition: none; }
 }
+
+/* Review 2.6.1: long names fit their tiles. */
+.emo { padding-inline: 2px; }
+.emo[data-emotion="overwhelmed"] .emo-name { font-size: min(11.5px, 2.8vw); letter-spacing: -.5px; }
+@media (max-width: 400px) { .emotions { gap: 6px; } }
+.spaces.carousel .space-card strong { font-size: 18px; }
+#screen-support .fine a, #screen-sos .fine a { color: var(--leaf-2); font-weight: 800; }
+html[data-theme="dark"] #screen-support .fine a, html[data-theme="dark"] #screen-sos .fine a { color: #A8E6C4; }
+.jar { white-space: nowrap; }
+.timer-chips { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.timer-chips .chip { padding-inline: 4px; justify-content: center; text-align: center; }
+/* The celebration dots stay behind the words. */
+.game-done > :not(.game-burst) { position: relative; z-index: 1; }

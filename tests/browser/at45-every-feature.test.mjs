@@ -266,7 +266,10 @@ test('Emotion meter: 17 feelings, three levels each, a fourth tap clears, and Pr
 test('Today layout: games, Sleep journal and more, season card, and the More help fold with every tool', async () => {
   const { ctx, page, errors } = await phone();
   assert.deepEqual((await page.locator('#screen-today .game-row .game-tile strong').allInnerTexts()).sort(), ['Breathing Ring', 'Bubble Pop', 'Calm Pairs', 'Colour Sort', 'Gentle Stack', 'Kind Notes', 'Star Connect', 'Sunbeam Catch', 'Trace the square', 'Zen Sand']);
-  assert.equal(await page.locator('#screen-today .game-row .game-tile:visible').count(), 10, 'every game, best fit first, in one swipeable row');
+  // Every game that suits the moment (Sunbeam Catch rests at night), best fit first, in one swipeable row.
+  const fit = await page.evaluate(() => window.LoosenUp.gameRank());
+  assert.ok(fit.length >= 9);
+  assert.deepEqual(await page.locator('#screen-today .game-row .game-tile:visible').evaluateAll((ts) => ts.map((t) => t.getAttribute('data-game') || t.getAttribute('data-more'))), fit);
   assert.deepEqual(await page.locator('#more-row-kit .tool strong').allInnerTexts(), ['Sleep', 'Journal', 'Support a friend', 'Seasonal packs']);
   assert.ok(await page.isVisible('#screen-today .season-card'), 'October is festival season');
   assert.equal(await page.isVisible('#steps-card'), false, 'More help starts folded');

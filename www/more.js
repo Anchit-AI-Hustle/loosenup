@@ -471,7 +471,7 @@
   var trace = null;
   var SIDE = 4, ROUNDS = 3;
   function buildTrace() {
-    var sc = screen('trace', 'Calm game', 'Trace the square', 'Keep your finger on the glowing dot as it travels round the square. Breathe in up the side, hold across the top, out down the side, rest along the bottom.');
+    var sc = screen('trace', 'Calm game', 'Trace the square', 'Follow the glowing dot round the square. Breathe in up, hold across, out down, rest along the bottom.');
     var wrap = mk('div', 'trace-wrap');
     wrap.innerHTML = '<svg id="trace-svg" class="trace-svg" viewBox="0 0 220 220" aria-label="Trace the square"><rect x="30" y="30" width="160" height="160" rx="14" class="trace-path"/><circle id="trace-dot" cx="30" cy="190" r="13" class="trace-dot"/><circle id="trace-finger" cx="-50" cy="-50" r="9" class="trace-finger"/></svg>';
     sc.appendChild(wrap);

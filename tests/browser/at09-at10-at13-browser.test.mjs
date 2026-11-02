@@ -139,7 +139,7 @@ test('AT10 offline shell works after first load', async () => {
   await page.reload();
   await page.waitForSelector('#screen-welcome:not([hidden])');
   const title = await page.title();
-  assert.equal(title, 'LoosenUp');
+  assert.equal(title, 'LoosenUp: two calm minutes');
   const cssOk = await page.evaluate(() => getComputedStyle(document.body).fontFamily.includes('Nunito'));
   assert.ok(cssOk, 'styles.css served from cache');
   const fontOk = await page.evaluate(async () => { await document.fonts.ready; return document.fonts.check('16px Nunito') && document.fonts.check('16px Fraunces'); });
@@ -244,7 +244,7 @@ test('AT19 with the service worker active, /install.html still shows the install
   await page.goto(server.url + '/install.html');
   assert.equal(await page.title(), 'Install LoosenUp');
   await page.goto(server.url + '/');
-  assert.equal(await page.title(), 'LoosenUp');
+  assert.equal(await page.title(), 'LoosenUp: two calm minutes');
   assert.deepEqual(errors, []);
   await ctx.close();
 });

@@ -132,7 +132,14 @@
   translatePage();
   selectPlan(plan);
   call('config').then(function (c) {
-    if (c.prices) { $('price-monthly').textContent = c.prices.monthly; $('price-yearly').textContent = c.prices.yearly; }
+    if (c.prices) {
+      $('price-monthly').textContent = c.prices.monthly;
+      $('price-yearly').textContent = c.prices.yearly;
+      // The saving follows the prices shown, so it is right in every currency.
+      var num = function (p) { return parseFloat(String(p).replace(/[^\d.]/g, '')); };
+      var save = Math.round((1 - num(c.prices.yearly) / (12 * num(c.prices.monthly))) * 100);
+      if (save > 0 && save < 100) text('price-yearly-note', 'per year, save ' + save + '%');
+    }
     renews = c.renews !== false;
     if (c.enabled && !renews) text('plus-pay-note', 'One payment for a month or a year of Plus. It does not renew; buy again any time.');
     if (!c.enabled) { $('plus-buy').disabled = true; text('plus-pay-note', 'LoosenUp Plus opens soon. Until then, everything in LoosenUp is free.'); return; }

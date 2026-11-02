@@ -417,7 +417,9 @@
     /* ---- Pick and session ---- */
     'Your break for right now': 'इस पल के लिए आपका ब्रेक', 'Why this one': 'यह क्यों', 'Or choose another': 'या कोई और चुनें',
     'Another idea': 'कोई और सुझाव', 'Begin (Full Bloom)': 'शुरू करें (Full Bloom)', 'Begin (add Seeds)': 'शुरू करें (Seeds जोड़ें)',
-    'Quick breeze instead, 60s, always free': 'इसकी जगह Quick breeze, 60 सेकंड, हमेशा मुफ़्त',
+    'Quick breeze instead, 60s, always free': 'इसकी जगह Quick breeze, 60 सेकंड, हमेशा मुफ़्त', 'Quick breeze instead, one minute, always free': 'इसकी जगह Quick breeze, एक मिनट, हमेशा मुफ़्त',
+    'Open the install page on your phone: Download for Android, or Install on iPhone in Safari.': 'अपने फ़ोन पर इंस्टॉल पेज खोलें: Android के लिए डाउनलोड करें, या iPhone पर Safari में इंस्टॉल बटन दबाएँ।',
+    'Follow the glowing dot round the square. Breathe in up, hold across, out down, rest along the bottom.': 'चमकते बिंदु के साथ वर्ग के चारों ओर चलें। ऊपर जाते साँस लें, ऊपर रोकें, नीचे आते छोड़ें, नीचे आराम करें।',
     'Quick breeze · 60s, always free': 'Quick breeze · 60 सेकंड, हमेशा मुफ़्त',
     'All your Seeds are planted. Add a few more, or take a free Quick breeze.': 'आपके सारे Seeds लग चुके हैं। कुछ और जोड़ें, या मुफ़्त Quick breeze लें।',
     'Guided break': 'गाइडेड ब्रेक', 'Finish early': 'जल्दी पूरा करें', 'Voice on': 'आवाज़ चालू', 'Voice off': 'आवाज़ बंद',
@@ -1132,6 +1134,7 @@
     [/^Next for you: (.+)$/, function (m) { return 'आपके लिए अगला: ' + t(m[1]); }],
     [/^(.+), done$/, function (m) { return t(m[1]) + ', पूरा'; }],
     [/^(\d+) of (\d+) popped$/, function (m) { return m[2] + ' में से ' + m[1] + ' फूटे'; }],
+    [/^per year, save (\d+)%$/, function (m) { return 'हर साल, ' + m[1] + '% की बचत'; }],
     [/^(\d+) of (\d+) sorted$/, function (m) { return m[2] + ' में से ' + m[1] + ' रखे गए'; }],
     [/^(\d+) of (\d+) lines$/, function (m) { return m[2] + ' में से ' + m[1] + ' लकीरें'; }],
     [/^(\d+) of (\d+) blocks$/, function (m) { return m[2] + ' में से ' + m[1] + ' ब्लॉक'; }],

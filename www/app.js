@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.6.0';
+  var VERSION = '2.6.1';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -1588,7 +1588,7 @@
     setText('prog-streak', gp.days + ' / ' + gp.goal);
     setText('prog-best', gp.days >= gp.goal ? 'Goal met this week' : 'Days this week');
     setText('prog-total', String(all.length));
-    setText('prog-avg', signed(avgGain(all)));
+    setText('prog-avg', all.length ? signed(avgGain(all)) : 'Not yet');
     var wb = state.wellbeing && state.wellbeing.length ? state.wellbeing[state.wellbeing.length - 1] : null;
     setText('prog-wb', wb ? wb.score + ' / 100' : 'Not yet');
     setText('prog-wb-note', wb ? wellbeingNote(wb.score).split('. ')[0] + '.' : 'Take the two-week check below.');
@@ -1776,7 +1776,7 @@
     if (isStandalone()) setText('install-text', 'LoosenUp is installed. Lovely to have you here.');
     else if (installEvt) setText('install-text', 'Add LoosenUp to your home screen for quick, offline breaks.');
     else if (ios) setText('install-text', 'On iPhone: open loosenup.anchit-tandon.com in Safari, tap Share, then Add to Home Screen.');
-    else setText('install-text', 'On Android: open the Chrome menu, then Install app. On iPhone: Safari Share, then Add to Home Screen.');
+    else setText('install-text', 'Open the install page on your phone: Download for Android, or Install on iPhone in Safari.');
   }
 
   function registerSW() {
@@ -2529,8 +2529,8 @@
   /* ---------- Calm: breathing, games and sounds in one screen ---------- */
   var SEGS = ['breathe', 'games', 'sounds'];
   var calmSeg = 'breathe';
-  var BREATH_LIST = ['quick', 'sigh', 'breeze', 'square', 'cooldown'];
-  var MIND_LIST = ['here', 'release', 'letitout', 'kind', 'desk', 'pause', 'warmth'];
+  var BREATH_LIST = ['quick', 'sigh', 'breeze', 'wave', 'square', 'cooldown'];
+  var MIND_LIST = ['here', 'name', 'release', 'shake', 'letitout', 'park', 'tomorrow', 'kind', 'friend', 'savour', 'lift', 'hope', 'reach', 'desk', 'pause', 'warmth'];
   function setSeg(seg, focus) {
     if (SEGS.indexOf(seg) === -1) seg = 'breathe';
     calmSeg = seg;
@@ -2785,7 +2785,7 @@
   }
   function updateCatch() {
     gameProgress(plural(game.caught, 'sunbeam', 'sunbeams'), 1 - game.left / CATCH_SECONDS);
-    setText('catch-jar', 'In your jar: ' + game.caught + (game.left > 0 ? '   ' + Math.floor(game.left / 60) + ':' + pad(game.left % 60) : ''));
+    setText('catch-jar', 'In your jar: ' + game.caught + (game.left > 0 ? '  ' + Math.floor(game.left / 60) + ':' + pad(game.left % 60) : ''));
   }
   function spawnBeam() {
     if (!game || game.id !== 'catch' || game.done) return null;
