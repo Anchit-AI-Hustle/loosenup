@@ -38,7 +38,7 @@ test('AT12 live: production URL loads the app over HTTPS from Vercel', { skip },
   assert.equal(r.status, 200);
   assert.ok(r.headers.get('x-vercel-id'), 'served by Vercel');
   const html = await r.text();
-  assert.match(html, /<title>LoosenUp<\/title>/);
+  assert.match(html, /<title>LoosenUp: two calm minutes<\/title>/);
   assert.match(html, /A wellbeing companion, not medical care\./);
 });
 

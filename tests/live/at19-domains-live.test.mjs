@@ -10,7 +10,7 @@ const title = async (url) => ((await (await fetch(url)).text()).match(/<title>([
 
 test('AT19 live: /get shows every downloadable app, and / is the full app', { skip }, async () => {
   assert.equal(await title(HOME + '/get'), 'Install LoosenUp');
-  assert.equal(await title(HOME + '/'), 'LoosenUp');
+  assert.equal(await title(HOME + '/'), 'LoosenUp: two calm minutes');
   const page = await (await fetch(HOME + '/get')).text();
   assert.match(page, /download\/loosenup-android\.apk/);
   assert.match(page, /Add to Home Screen/);
@@ -25,7 +25,7 @@ test('AT19 live: the APK downloads as an Android package', { skip }, async () =>
 });
 
 test('AT19 live: the full app is served with its manifest and service worker', { skip }, async () => {
-  assert.equal(await title(IOS + '/'), 'LoosenUp');
+  assert.equal(await title(IOS + '/'), 'LoosenUp: two calm minutes');
   const m = await fetch(IOS + '/manifest.json');
   assert.match(m.headers.get('content-type'), /application\/manifest\+json/);
   const sw = await fetch(IOS + '/sw.js');
