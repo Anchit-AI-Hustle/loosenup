@@ -273,3 +273,17 @@ html[data-theme="dark"] #screen-support .fine a, html[data-theme="dark"] #screen
 .timer-chips .chip { padding-inline: 4px; justify-content: center; text-align: center; }
 /* The celebration dots stay behind the words. */
 .game-done > :not(.game-burst) { position: relative; z-index: 1; }
+
+/* 2.7: first-run focus, Send to a friend, and a gentle glow when a link opens the mood check-in. */
+.focus-pick { display: grid; gap: 8px; margin: 4px 0 2px; }
+.focus-chips { justify-content: center; }
+#screen-gift .focus-chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+#screen-gift .focus-chip { justify-content: center; padding-inline: 6px; font-size: 14.5px; }
+#screen-gift .how-steps { gap: 8px; }
+#screen-gift .how-steps li { padding-block: 10px; }
+.focus-chip span { font-size: 16px; }
+.send-btn { display: block; margin: 6px auto 0; }
+#screen-result .send-btn { margin-top: 2px; }
+.glow { animation: glow 1.6s ease-out 1; }
+@keyframes glow { 0% { box-shadow: 0 0 0 0 rgba(255, 200, 87, .9); } 100% { box-shadow: 0 0 0 18px rgba(255, 200, 87, 0); } }
+@media (prefers-reduced-motion: reduce) { .glow { animation: none; } }

@@ -4,4 +4,9 @@
     <string name="title_activity_main">LoosenUp</string>
     <string name="package_name">com.loosenup.calm</string>
     <string name="custom_url_scheme">com.loosenup.calm</string>
+    <string name="shortcut_breathe">Breathe now</string>
+    <string name="shortcut_checkin">Check in</string>
+    <string name="shortcut_checkin_long">How are you?</string>
+    <string name="shortcut_sos">SOS</string>
+    <string name="shortcut_sos_long">SOS support</string>
 </resources>

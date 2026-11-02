@@ -130,6 +130,10 @@
           <li><strong>Take two calm minutes</strong><span>A guided exercise picked for what you are carrying.</span></li>
           <li><strong>See your Calm gain</strong><span>Rate again, and watch what really helps you over the weeks.</span></li>
         </ol>
+        <div class="focus-pick">
+          <p class="field-label center" id="focus-title">What brings you here? Tap any.</p>
+          <div class="chips focus-chips" role="group" aria-labelledby="focus-title" data-focus-group></div>
+        </div>
         <p class="fine center">Every break, tool and SOS is free, always. Nothing leaves your phone.</p>
         <button id="gift-go" class="btn btn-sun" type="button">Start my first break</button>
       </section>
@@ -296,6 +300,7 @@
         <p id="result-note" class="kind-note"></p>
         <button id="plan-next" class="btn btn-sun" type="button" hidden>Next for you</button>
         <button id="result-done" class="btn btn-sun" type="button">Back to Today</button>
+        <button id="result-send" class="link-btn send-btn" type="button">Send this break to a friend</button>
       </section>
 
       <!-- Today -->
@@ -808,6 +813,7 @@
             <button id="game-again" class="btn btn-soft" type="button">Play again</button>
             <button id="game-next-game" class="btn btn-sun" type="button" hidden>Another game</button>
           </div>
+          <button id="game-send" class="link-btn send-btn" type="button">Send this game to a friend</button>
         </div>
         <button id="game-back" class="btn btn-ghost" type="button">Back</button>
       </section>
@@ -877,6 +883,11 @@
             </div>
           </details>
           <p id="plus-status" class="fine" aria-live="polite"></p>
+        </article>
+        <article class="card">
+          <h2 class="subtitle" id="me-focus-title">What brings you here?</h2>
+          <p class="muted">For you suggests breaks for what you pick.</p>
+          <div class="chips focus-chips" role="group" aria-labelledby="me-focus-title" data-focus-group></div>
         </article>
         <article class="card">
           <h2 class="subtitle">Daily reminder</h2>

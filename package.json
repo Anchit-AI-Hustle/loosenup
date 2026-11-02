@@ -1,6 +1,6 @@
 {
   "name": "loosenup",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "private": true,
   "description": "LoosenUp - 2-minute guided calm breaks with a before and after Calm gain. A wellbeing companion, not medical care.",
   "type": "module",
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.3",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/ios": "^8.5.3",

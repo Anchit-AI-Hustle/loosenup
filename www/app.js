@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.6.1';
+  var VERSION = '2.7.0';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -1674,6 +1674,7 @@
 
   function renderMe() {
     renderOrg();
+    renderFocus();
     setText('me-title', state.name ? state.name + '\'s corner' : 'Your corner');
     renderPlan();
     if (state.goldenHour) $('golden-time').value = state.goldenHour;
@@ -1689,7 +1690,7 @@
     renderTrusted(false);
   }
 
-  var RENDER = { programs: renderPrograms, program: renderProgram, learn: renderLearn, support: renderSupport, safety: renderSafety, reframe: startReframe, sounds: function () {}, wellbeing: renderWellbeing,
+  var RENDER = { gift: renderGift, programs: renderPrograms, program: renderProgram, learn: renderLearn, support: renderSupport, safety: renderSafety, reframe: startReframe, sounds: function () {}, wellbeing: renderWellbeing,
     today: renderToday, play: renderPlay, progress: renderProgress, me: renderMe, pick: renderPick, checkin: renderContextChips };
 
   /* ---------- Golden hour, sharing, install ---------- */
@@ -1705,10 +1706,15 @@
       return LN.requestPermissions().then(function (p) {
         if (p && p.display && p.display !== 'granted') { toast('Reminders are off in your settings. The in-app note still works.'); return false; }
         var hm = state.goldenHour.split(':');
-        return LN.schedule({ notifications: [{
-          id: 1, title: 'LoosenUp', body: tr('Two calm minutes are here for you whenever you like.'),
-          schedule: { on: { hour: +hm[0], minute: +hm[1] }, allowWhileIdle: true }
-        }] }).then(function () { return true; });
+        // Two buttons on the reminder go straight to a breath or the mood check-in.
+        var types = LN.registerActionTypes ? LN.registerActionTypes({ types: [{ id: 'LU_DAILY', actions: [
+          { id: 'breathe', title: tr('Breathe now') }, { id: 'checkin', title: tr('How are you?') }] }] }).catch(function () {}) : Promise.resolve();
+        return types.then(function () {
+          return LN.schedule({ notifications: [{
+            id: 1, title: 'LoosenUp', body: tr('Two calm minutes are here for you whenever you like.'), actionTypeId: 'LU_DAILY',
+            schedule: { on: { hour: +hm[0], minute: +hm[1] }, allowWhileIdle: true }
+          }] });
+        }).then(function () { return true; });
       });
     }).catch(function () { return false; });
   }
@@ -1755,6 +1761,129 @@
       });
     }
     return copy();
+  }
+
+  /* ---------- Links into the app: shared breaks, reminder buttons and home-screen shortcuts ---------- */
+  // ?go=breathe | checkin | sos | ex:<id> | game:<id> on the web, or loosenup://go/<target> in the Android app.
+  function linkTarget(url) {
+    var m = /[?&]go=([^&#]+)/.exec(url || '') || /^loosenup:\/\/go\/([^?#]+)/.exec(url || '');
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+  function targetName(t) {
+    var p = String(t || '').split(':');
+    if (p[0] === 'ex' && TECH[p[1]]) return TECH[p[1]].name;
+    if (p[0] === 'game' && GAMES[p[1]]) return GAMES[p[1]].name;
+    if (t === 'game:trace') return 'Trace the square';
+    return '';
+  }
+  function goTarget(t) {
+    t = String(t || '').trim();
+    if (!t) return false;
+    // Someone new arriving from a shared link meets the welcome first, then lands on what was shared.
+    if (!state.onboarded) { state.pendingGo = t; save(); return false; }
+    var p = t.split(':');
+    if (t === 'breathe') breatheNow();
+    else if (t === 'checkin') {
+      go('today');
+      var m = $('mood-card');
+      if (m) { if (m.scrollIntoView) m.scrollIntoView({ block: 'center' }); m.classList.remove('glow'); void m.offsetWidth; m.classList.add('glow'); }
+    } else if (t === 'sos') openSupport();
+    else if (p[0] === 'ex' && TECH[p[1]]) startNow(p[1]);
+    else if (t === 'game:trace') go('trace');
+    else if (p[0] === 'game' && GAMES[p[1]]) openGame(p[1]);
+    else return false;
+    return true;
+  }
+  function openFromLink() {
+    var t = linkTarget(location.search);
+    if (t && window.history && history.replaceState) {
+      var rest = location.search.replace(/([?&])go=[^&#]*&?/, '$1').replace(/[?&]$/, '');
+      try { history.replaceState(null, '', location.pathname + rest + location.hash); } catch (e) { /* the link still opens */ }
+    }
+    if (t) goTarget(t);
+    var App = isNative() && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if (App) {
+      if (App.getLaunchUrl) App.getLaunchUrl().then(function (r) { var x = r && linkTarget(r.url); if (x) goTarget(x); }).catch(function () {});
+      if (App.addListener) App.addListener('appUrlOpen', function (e) { var x = linkTarget(e && e.url); if (x) goTarget(x); });
+    }
+    var LN = nativeNotifications();
+    if (LN && LN.addListener) LN.addListener('localNotificationActionPerformed', function (e) {
+      var a = e && e.actionId;
+      if (a === 'breathe' || a === 'checkin') goTarget(a);
+    });
+  }
+  // Send one exercise or game to a friend: the link opens straight into it.
+  function shareBreak(target) {
+    var name = targetName(target);
+    if (!name) return Promise.resolve(false);
+    var url = PUBLIC_URL + '/?go=' + encodeURIComponent(target);
+    var text = tr('This helped me feel lighter: ' + name + ', two calm minutes on LoosenUp. Free to try.');
+    var done = function () { addBadge('sharer'); save(); toast('Thank you for sharing.'); return true; };
+    var copy = function () {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text + ' ' + url).then(function () { toast('Link copied. Paste it to a friend.'); return true; },
+          function () { toast('Share this link: ' + url); return false; });
+      }
+      toast('Share this link: ' + url);
+      return Promise.resolve(false);
+    };
+    if (navigator.share) {
+      return navigator.share({ title: 'LoosenUp', text: text, url: url }).then(done, function (e) {
+        if (e && e.name === 'AbortError') return false;
+        return copy();
+      });
+    }
+    return copy();
+  }
+
+  /* ---------- What brings you here: a few taps on first open shape For you ---------- */
+  var FOCUS = [['sleep', '🌙', 'Better sleep'], ['work', '💼', 'Calmer workdays'], ['people', '💞', 'Relationships'],
+    ['heavy', '☁️', 'Heavy days'], ['exams', '📚', 'Exams'], ['calm', '🍃', 'Just some calm']];
+  var FOCUS_PLANS = {
+    sleep: [['tech:breeze', 'Soft, even breathing tells your body it can slow down.'], ['tech:tomorrow', 'Set tomorrow down on paper, so your mind can rest tonight.']],
+    work: [['tech:desk', 'Let the workday go from your shoulders without leaving your chair.'], ['game:pairs', 'A calm memory game for a short break.']],
+    people: [['tech:cooldown', 'Long breaths out help you answer from care.'], ['tech:warmth', 'Send kind wishes to someone you care about.']],
+    heavy: [['tech:kind', 'A hand on your heart and a few kind words, with nothing to fix.'], ['game:bloom', 'Slow breaths with the ring, at your own pace.']],
+    exams: [['tech:square', 'Steady breathing before a study round.'], ['game:sort', 'Sort the stones for a tidy, calm break.']]
+  };
+  function focusPlan() {
+    var fs = (state.focus || []).filter(function (k) { return FOCUS_PLANS[k]; });
+    if (!fs.length) return null;
+    if (isNight()) return fs.indexOf('sleep') !== -1 ? FOCUS_PLANS.sleep : null;
+    return FOCUS_PLANS[fs[dayNum(dayKey(now())) % fs.length]];
+  }
+  function renderFocus() {
+    var groups = document.querySelectorAll('[data-focus-group]');
+    for (var g = 0; g < groups.length; g++) {
+      var box = groups[g];
+      if (!box.children.length) FOCUS.forEach(function (f) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'chip focus-chip';
+        b.setAttribute('data-focus', f[0]);
+        var ic = document.createElement('span'); ic.setAttribute('aria-hidden', 'true'); ic.textContent = f[1] + ' ';
+        b.appendChild(ic);
+        b.appendChild(document.createTextNode(f[2]));
+        box.appendChild(b);
+      });
+      var chips = box.querySelectorAll('[data-focus]');
+      for (var i = 0; i < chips.length; i++) chips[i].setAttribute('aria-pressed', String((state.focus || []).indexOf(chips[i].getAttribute('data-focus')) !== -1));
+    }
+  }
+  function toggleFocus(k) {
+    var f = (state.focus || []).slice();
+    var i = f.indexOf(k);
+    if (i === -1) f.push(k); else f.splice(i, 1);
+    state.focus = f;
+    save();
+    renderFocus();
+    haptic('light');
+    return f;
+  }
+  function renderGift() {
+    renderFocus();
+    var name = targetName(state.pendingGo);
+    setText('gift-go', name ? 'Try ' + name : state.pendingGo === 'breathe' ? 'Breathe now' : 'Start my first break');
   }
 
   var installEvt = null;
@@ -2332,7 +2461,7 @@
     var dk = dayKey(now());
     var st = state.feelPlan;
     if (!st || st.day !== dk || st.key !== key) st = state.feelPlan = { day: dk, key: key, alt: false, done: [] };
-    var steps = (f.plan ? (st.alt && f.alt ? f.alt : f.plan) : FEEL.byTime[bucketOf(now().getTime())]) || [];
+    var steps = (f.plan ? (st.alt && f.alt ? f.alt : f.plan) : focusPlan() || FEEL.byTime[bucketOf(now().getTime())]) || [];
     // Nothing bright or fast at night.
     if (isNight()) steps = steps.map(function (x) { return x[0] === 'game:catch' ? ['game:bloom', 'Six slow breaths with the ring.'] : x; });
     var next = -1;
@@ -3519,7 +3648,7 @@
     });
   }
   function pickKind(b) {
-    if (typeof b === 'number') b = document.querySelectorAll('#kind-cloud .kind-word')[b];
+    if (typeof b === 'number') b = document.querySelectorAll('#kind-cloud .kind-word:not([disabled])')[b];
     if (!b || !game || game.id !== 'kind' || game.done || b.disabled || game.kept.length >= KIND_PICK) return false;
     var w = KIND_WORDS[+b.getAttribute('data-kind-word')];
     game.kept.push(w);
@@ -4264,6 +4393,8 @@
     var tab = el.getAttribute('data-tab');
     var plusPlan = el.getAttribute('data-plus-plan');
     if (plusPlan) { buyPlus(plusPlan); return; }
+    var focusK = el.getAttribute('data-focus');
+    if (focusK) { toggleFocus(focusK); return; }
     var gameId = el.getAttribute('data-game');
     var card = el.getAttribute('data-card');
     var guide = el.getAttribute('data-guide');
@@ -4339,7 +4470,12 @@
     }
     if (tab) { go(tab); return; }
     switch (id) {
-      case 'gift-go': startCheckin('guided'); break;
+      case 'gift-go':
+        if (state.pendingGo) { var pg = state.pendingGo; state.pendingGo = null; save(); go('today'); goTarget(pg); }
+        else startCheckin('guided');
+        break;
+      case 'game-send': if (game) shareBreak('game:' + game.id); break;
+      case 'result-send': if (flow && flow.technique) shareBreak('ex:' + flow.technique); break;
       case 'checkin-next':
         flow.before = clampScore($('calm-before').value);
         if (!flow.context) { flow.context = 'Just a quick lift'; flow.contexts = [flow.context]; }
@@ -4503,6 +4639,7 @@
     go(state.onboarded ? 'today' : 'welcome');
     registerSW();
     if (state.goldenHour) scheduleGoldenHour();
+    openFromLink();
     liveUpdate();
     document.addEventListener('visibilitychange', function () { if (!document.hidden) liveUpdate(); });
     sendPulse();
@@ -4615,6 +4752,11 @@
     spawnBeam: spawnBeam,
     finishCurrentGame: finishCurrentGame,
     pickStone: pickStone,
+    goTarget: goTarget,
+    linkTarget: linkTarget,
+    shareBreak: shareBreak,
+    toggleFocus: toggleFocus,
+    openFromLink: openFromLink,
     sortStone: sortStone,
     sandStroke: sandStroke,
     setSandTool: setSandTool,

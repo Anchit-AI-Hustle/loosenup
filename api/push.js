@@ -90,7 +90,7 @@ async function send(req) {
     const day = new Date(now + r.tz_minutes * 60000).toISOString().slice(0, 10);
     try {
       await webpush.sendNotification({ endpoint: r.endpoint, keys: { p256dh: r.p256dh, auth: r.auth } },
-        JSON.stringify({ ...TEXT[r.lang] || TEXT.en, url: '/' }), { TTL: 3600 });
+        JSON.stringify({ ...TEXT[r.lang] || TEXT.en, url: '/', lang: r.lang === 'hi' ? 'hi' : 'en' }), { TTL: 3600 });
       await sql('UPDATE lu_push SET last_sent = $2 WHERE id = $1', [r.id, day]);
       sent++;
     } catch (e) {

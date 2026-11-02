@@ -1,5 +1,5 @@
 /* LoosenUp service worker: precache the shell, cache-first for same-origin GET. */
-var CACHE = 'loosenup-v2.6.1';
+var CACHE = 'loosenup-v2.7.0';
 var SHELL = [
   '/',
   '/index.html',
@@ -87,16 +87,24 @@ self.addEventListener('fetch', function (event) {
 self.addEventListener('push', function (event) {
   var d = {};
   try { d = event.data ? event.data.json() : {}; } catch (e) { d = {}; }
+  var acts = d.lang === 'hi' ? [['breathe', 'अभी साँस लें'], ['checkin', 'आप कैसे हैं?']] : [['breathe', 'Breathe now'], ['checkin', 'How are you?']];
   event.waitUntil(self.registration.showNotification(d.title || 'LoosenUp', {
     body: d.body || 'Two calm minutes are here for you whenever you like.',
-    icon: '/icons/icon-192.png', badge: '/icons/icon-192.png', tag: 'loosenup-daily', data: { url: d.url || '/' }
+    icon: '/icons/icon-192.png', badge: '/icons/icon-192.png', tag: 'loosenup-daily', data: { url: d.url || '/' },
+    actions: acts.map(function (a) { return { action: a[0], title: a[1] }; })
   }));
 });
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
   var url = (event.notification.data && event.notification.data.url) || '/';
+  // A reminder button opens straight to a breath or the mood check-in.
+  if (event.action === 'breathe' || event.action === 'checkin') url = '/?go=' + event.action;
   event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
-    for (var i = 0; i < list.length; i++) if ('focus' in list[i]) return list[i].focus();
+    for (var i = 0; i < list.length; i++) {
+      if (!('focus' in list[i])) continue;
+      if (url !== '/' && list[i].navigate) return list[i].navigate(url).then(function (w) { return w ? w.focus() : null; });
+      return list[i].focus();
+    }
     return self.clients.openWindow ? self.clients.openWindow(url) : null;
   }));
 });

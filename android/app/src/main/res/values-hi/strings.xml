@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="shortcut_breathe">अभी साँस लें</string>
+    <string name="shortcut_checkin">चेक इन</string>
+    <string name="shortcut_checkin_long">आप कैसे हैं?</string>
+    <string name="shortcut_sos">SOS</string>
+    <string name="shortcut_sos_long">SOS सहायता</string>
+</resources>
