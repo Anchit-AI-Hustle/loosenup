@@ -40,7 +40,7 @@
     if (body && country) body.country = country;
     return fetch(API + (body ? '' : '?action=' + action + (country ? '&country=' + country : '')), body
       ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ action: action }, body)) }
-      : {}).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Please try again.'); return j; }); });
+      : {}).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Please try again.'); return j; }, function () { throw new Error('The payment service did not answer. Nothing was charged. Please try again in a moment.'); }); });
   }
   function load(src) {
     return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = function () { no(new Error('The payment page could not load. Check your connection and try again.')); }; document.head.appendChild(s); });

@@ -183,6 +183,7 @@
     'Send this game to a friend': 'यह खेल किसी दोस्त को भेजें', 'Send this break to a friend': 'यह ब्रेक किसी दोस्त को भेजें',
     'Thank you for sharing.': 'शेयर करने के लिए धन्यवाद।', 'Link copied. Paste it to a friend.': 'लिंक कॉपी हो गया। इसे किसी दोस्त को भेजें।',
     'How are you?': 'आप कैसे हैं?',
+    'The payment service did not answer. Nothing was charged. Please try again in a moment.': 'भुगतान सेवा से जवाब नहीं मिला। कोई पैसा नहीं कटा। कृपया कुछ पल बाद फिर कोशिश करें।',
     // Games 2.6: short hints, five new games and their words.
     'Turn two cards. Find the pairs.': 'दो कार्ड पलटें। जोड़े ढूँढें।', 'Tap the drifting light.': 'तैरती रोशनी पर टैप करें।',
     'Hold to breathe in. Let go to breathe out.': 'साँस अंदर लेने के लिए दबाकर रखें। साँस छोड़ने के लिए छोड़ दें।', 'Pop every bubble. No timer.': 'हर बुलबुला फोड़ें। कोई टाइमर नहीं।',

@@ -111,7 +111,8 @@ async function razorpay(path, body, method = 'POST') {
     method, headers: { Authorization: 'Basic ' + auth, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined
   });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw problem(502, (j.error && j.error.description) || 'The payment service did not answer. Please try again.');
+  // 424, not 502: Cloudflare in front of the site swaps 502 replies for its own text, hiding the reason.
+  if (!r.ok) throw problem(424, (j.error && j.error.description) || 'The payment service did not answer. Please try again.');
   return j;
 }
 async function paddle(path, body, method = 'POST') {
@@ -119,7 +120,7 @@ async function paddle(path, body, method = 'POST') {
     method, headers: { Authorization: 'Bearer ' + env('PADDLE_API_KEY'), 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined
   });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw problem(502, (j.error && j.error.detail) || 'The payment service did not answer. Please try again.');
+  if (!r.ok) throw problem(424, (j.error && j.error.detail) || 'The payment service did not answer. Please try again.');
   return j.data || j;
 }
 

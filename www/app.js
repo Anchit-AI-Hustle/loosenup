@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.7.0';
+  var VERSION = '2.7.1';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -551,7 +551,7 @@
     if (typeof fetch !== 'function') return Promise.reject(new Error('offline'));
     return fetch(plusApi() + (body ? '' : '?action=' + action), body
       ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ action: action }, body)) } : {})
-      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Please try again.'); return j; }); });
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Please try again.'); return j; }, function () { throw new Error('The payment service did not answer. Nothing was charged. Please try again in a moment.'); }); });
   }
   // Plus is on while the paid period lasts (with a few days' grace for a renewal that is still going through).
   function isPlus() {
@@ -2132,7 +2132,7 @@
   function orgCall(body) {
     if (typeof fetch !== 'function') return Promise.reject(new Error('offline'));
     return fetch(ORG_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Please try again.'); return j; }); });
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Please try again.'); return j; }, function () { throw new Error('The payment service did not answer. Nothing was charged. Please try again in a moment.'); }); });
   }
   function randomId() {
     var a = new Uint8Array(18);
