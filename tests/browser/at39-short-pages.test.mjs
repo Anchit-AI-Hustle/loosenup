@@ -24,7 +24,7 @@ const wordsAboveFold = (page, sel) => page.evaluate((s) => {
     if (fold && !el.closest('summary')) continue; // folded: not on screen
     range.selectNodeContents(n);
     const r = range.getBoundingClientRect();
-    if (!r.width || !r.height || r.top >= H || r.bottom <= 0) continue;
+    if (!r.width || !r.height || r.top >= H || r.bottom <= 0 || r.left >= window.innerWidth || r.right <= 0) continue;
     words += n.data.trim().split(/\s+/).filter((x) => /[\p{L}\p{N}]/u.test(x)).length;
   }
   return words;
@@ -54,7 +54,7 @@ for (const scheme of ['light', 'dark']) {
     assert.ok(await page.isVisible('#breathe-now'));
     assert.ok(await page.isVisible('#mood-card .moods'));
     const gamesTop = await page.evaluate(() => document.querySelector('.game-row').getBoundingClientRect().top);
-    assert.ok(gamesTop < 844, 'the games row starts on the first screen');
+    assert.ok(gamesTop < 844, 'the games row starts on the first screen, at ' + gamesTop);
     await page.evaluate(() => window.LoosenUp.go('support'));
     await page.waitForTimeout(300);
     const support = await wordsAboveFold(page, '#screen-support');

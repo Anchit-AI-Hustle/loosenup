@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.7.1';
+  var VERSION = '2.8.0';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -169,6 +169,40 @@
       steps: ['Picture it going well. What do you see?', 'Name the best part of that picture.', 'Name one thing that might get in the way.',
         'Choose one small step that helps, and when you will take it.', 'Picture the good part once more, and smile at it.']
     },
+    // More to try: breathing from Indian practice, rest for screen-tired eyes, a slow cup and a morning stretch.
+    hum: {
+      id: 'hum', name: 'Humming breath', seconds: 120, unlockAt: 0, color: '#B9A3F0', kind: 'breath',
+      desc: 'Bhramari: breathe in, then hum softly all the way out, like a bee. A gentle way to quieten a busy head.',
+      pattern: [['Breathe in', 4, 1], ['Hum softly out', 7, 0.6]]
+    },
+    nadi: {
+      id: 'nadi', name: 'Alternate breath', seconds: 120, unlockAt: 0, color: '#9ED3C4', kind: 'breath',
+      desc: 'Nadi shodhana: breathe in one side of the nose and out the other, slowly, in turns.',
+      pattern: [['In through the left', 4, 1], ['Out through the right', 6, 0.6], ['In through the right', 4, 1], ['Out through the left', 6, 0.6]]
+    },
+    night: {
+      id: 'night', name: 'Night breath', seconds: 120, unlockAt: 0, color: '#8CA9F0', kind: 'breath', space: 'sleep',
+      desc: 'In for four, a soft hold for seven, out for eight. Slow and sleepy.',
+      pattern: [['Breathe in', 4, 1], ['Hold softly', 7, 1], ['Breathe out', 8, 0.6]]
+    },
+    eyes: {
+      id: 'eyes', name: 'Eye rest', seconds: 120, unlockAt: 0, color: '#6FB3E0', kind: 'steps', space: 'work',
+      desc: 'Two minutes away from the screen for tired eyes: warm palms, far looks and slow blinks.',
+      steps: ['Rub your palms together until they feel warm.', 'Cup them gently over your closed eyes. Rest in the dark for a few breaths.',
+        'Open your eyes and look at something far away.', 'Blink slowly ten times, like waking up.', 'Look up, down, left and right, slowly, then close your eyes for one breath.']
+    },
+    chai: {
+      id: 'chai', name: 'Mindful chai', seconds: 120, unlockAt: 0, color: '#D9A066', kind: 'steps',
+      desc: 'Turn your next cup of chai, coffee or water into two calm minutes.',
+      steps: ['Hold the cup in both hands. Feel its warmth.', 'Breathe in the smell. Notice what you can pick out.',
+        'Take one small sip and let it rest on your tongue.', 'Swallow slowly and feel the warmth move down.', 'Take the next sips without your phone, just the cup and you.']
+    },
+    stretch: {
+      id: 'stretch', name: 'Morning stretch', seconds: 120, unlockAt: 0, color: '#FFC857', kind: 'steps',
+      desc: 'Wake your body gently: reach, fold, twist and roll, at your own pace.',
+      steps: ['Reach both arms up high and stretch tall.', 'Let your arms float down and fold forward softly, knees loose.',
+        'Come up slowly and twist gently to the left, then the right.', 'Roll your neck in slow half circles.', 'Stand tall, hands on your belly, and take three deep breaths.']
+    },
     quick: {
       id: 'quick', name: 'Quick breeze', seconds: 60, unlockAt: 0, color: '#CFE8FF', kind: 'breath', free: true,
       desc: 'Sixty seconds of slow, easy breathing. Always free.',
@@ -256,7 +290,9 @@
     sharer: ['Shared LoosenUp', 'Shared LoosenUp with someone'],
     golden: ['Daily reminder', 'Set a daily reminder'],
     playful: ['Playful', 'Played a calm game'],
-    programme: ['Finisher', 'Finished a guided programme']
+    programme: ['Finisher', 'Finished a guided programme'],
+    daily7: ['Seven days of play', 'Played today\'s game on seven days'],
+    collector: ['Game shelf', 'Played every calm game']
   };
 
   var NOTES = [
@@ -315,7 +351,7 @@
       sessions: [], streak: { count: 0, lastDay: null, best: 0 }, rainDayWeek: null,
       rewardSeeds: { week: null, count: 0 }, milestones: [], sunbeamDay: null, referralDay: null,
       nudges: { day: null, count: 0, shown: [] }, goldenHour: null, voice: false, badges: [], purchases: [],
-      games: { day: null, count: 0 }, gameBest: { pairs: null, catch: 0, bloom: 0 },
+      games: { day: null, count: 0 }, gameBest: { pairs: null, catch: 0, bloom: 0 }, gamePlays: {}, gameLevel: {}, daily: { day: null, days: 0 },
       moods: [], smallSteps: [], goodThings: [], trusted: null, sosLocation: false, jarXp: { day: null, count: 0 },
       careTeam: null, safetyPlan: null, wellbeing: [], toolXp: { day: null, count: 0 }, reframes: 0, theme: 'auto', lang: 'en', programs: {}, org: null, emotions: [], safetyAskedDay: null, lessonsDone: [], chime: true, bed: 'none',
       lengthMin: 2, weeklyGoal: 3, hapticBreath: false, textSize: 'normal', journal: [], sleepAfter: 15, plus: null, payConfig: null,
@@ -837,10 +873,16 @@
     kind: ['Find a quiet moment, even a short one.', 'Say each line slowly, out loud or in your head.', 'Let your hand rest where it feels comforting.'],
     desk: ['Stay seated, feet flat on the floor.', 'Move gently. Stop if anything feels sore.', 'Follow the timer for each move.'],
     pause: ['Use this before you reply to a message or a person.', 'Take your time on each question.', 'You can always come back to the conversation later.'],
-    warmth: ['Close your eyes if that feels okay.', 'Picture each person clearly before you wish them well.', 'Say each wish slowly, in your head.']
+    warmth: ['Close your eyes if that feels okay.', 'Picture each person clearly before you wish them well.', 'Say each wish slowly, in your head.'],
+    hum: ['Sit tall and close your eyes if that feels okay.', 'Breathe in through your nose as the circle grows.', 'Hum with your lips closed as it shrinks. Feel the gentle buzz.'],
+    nadi: ['Rest your right thumb by your right nostril and your ring finger by the left.', 'Close one side gently and breathe through the other, as the words say.', 'No hand free? Just picture the breath moving side to side.'],
+    night: ['Lie down or sit back comfortably.', 'Hold only as long as feels easy. Never strain.', 'Let each breath out be long and slow.']
   };
   // Step exercises: an icon, seconds for each step, tap-to-count dots, or a two-part cue (like tense, then let go).
   var STEP_GUIDE = {
+    eyes: [{ icon: '🙌', secs: 24 }, { icon: '🫣', secs: 24 }, { icon: '🔭', secs: 24 }, { icon: '😌', secs: 24, count: 10 }, { icon: '👀', secs: 24 }],
+    chai: [{ icon: '☕', secs: 24 }, { icon: '👃', secs: 24 }, { icon: '👅', secs: 24 }, { icon: '🌡️', secs: 24 }, { icon: '📵', secs: 24 }],
+    stretch: [{ icon: '🙆', secs: 24 }, { icon: '🙇', secs: 24 }, { icon: '↔️', secs: 24, sub: [['Left side', 6], ['Right side', 6]] }, { icon: '🔄', secs: 24 }, { icon: '🌬️', secs: 24, sub: [['Breathe in', 4], ['Breathe out', 6]] }],
     here: [{ icon: '👀', secs: 24, count: 5 }, { icon: '✋', secs: 24, count: 4 }, { icon: '👂', secs: 24, count: 3 }, { icon: '👃', secs: 24, count: 2 }, { icon: '👅', secs: 24, count: 1 }],
     release: [{ icon: '🤷', secs: 24, sub: [['Tense', 5], ['Let go', 7]] }, { icon: '✊', secs: 24, sub: [['Squeeze', 5], ['Open wide', 7]] },
       { icon: '😖', secs: 24, sub: [['Scrunch', 5], ['Let go', 7]] }, { icon: '🦶', secs: 24, sub: [['Press down', 5], ['Rest', 7]] }, { icon: '🌬️', secs: 24, sub: [['Breathe in', 4], ['Long breath out', 8]] }],
@@ -1344,6 +1386,8 @@
 
   function renderToday() {
     renderProgramCard();
+    renderDaily();
+    renderNewTags();
     renderSky();
     setText('today-title', greeting());
     var ul = $('today-recent');
@@ -1583,6 +1627,7 @@
     });
   }
   function renderProgress() {
+    renderShelf();
     var all = state.sessions;
     var gp = weekGoal();
     setText('prog-streak', gp.days + ' / ' + gp.goal);
@@ -1840,10 +1885,10 @@
   var FOCUS = [['sleep', '🌙', 'Better sleep'], ['work', '💼', 'Calmer workdays'], ['people', '💞', 'Relationships'],
     ['heavy', '☁️', 'Heavy days'], ['exams', '📚', 'Exams'], ['calm', '🍃', 'Just some calm']];
   var FOCUS_PLANS = {
-    sleep: [['tech:breeze', 'Soft, even breathing tells your body it can slow down.'], ['tech:tomorrow', 'Set tomorrow down on paper, so your mind can rest tonight.']],
-    work: [['tech:desk', 'Let the workday go from your shoulders without leaving your chair.'], ['game:pairs', 'A calm memory game for a short break.']],
+    sleep: [['tech:night', 'Slow, sleepy breaths with long breaths out tell your body it can slow down.'], ['tech:tomorrow', 'Set tomorrow down on paper, so your mind can rest tonight.']],
+    work: [['tech:desk', 'Let the workday go from your shoulders without leaving your chair.'], ['tech:eyes', 'Give your eyes two minutes away from the screen.']],
     people: [['tech:cooldown', 'Long breaths out help you answer from care.'], ['tech:warmth', 'Send kind wishes to someone you care about.']],
-    heavy: [['tech:kind', 'A hand on your heart and a few kind words, with nothing to fix.'], ['game:bloom', 'Slow breaths with the ring, at your own pace.']],
+    heavy: [['tech:kind', 'A hand on your heart and a few kind words, with nothing to fix.'], ['game:lantern', 'Light a lantern with each slow breath in, and watch it float away.']],
     exams: [['tech:square', 'Steady breathing before a study round.'], ['game:sort', 'Sort the stones for a tidy, calm break.']]
   };
   function focusPlan() {
@@ -1925,7 +1970,15 @@
     sand: { name: 'Zen Sand', help: 'Draw slow lines. Watch them soften.' },
     stars: { name: 'Star Connect', help: 'Tap the glowing star.' },
     stack: { name: 'Gentle Stack', help: 'Tap to set each block down. Every block lands.' },
-    kind: { name: 'Kind Notes', help: 'Tap three kind words for yourself.' }
+    kind: { name: 'Kind Notes', help: 'Tap three kind words for yourself.' },
+    rangoli: { name: 'Rangoli Colours', help: 'Pick a colour, then tap a ring to fill it.' },
+    tiles: { name: 'Picture Tiles', help: 'Tap two tiles to swap them. Make the picture whole.' },
+    chimes: { name: 'Wind Chimes', help: 'Listen to the chimes, then tap the tune back.' },
+    spot: { name: 'Spot the Odd One', help: 'One shape is a little different. Tap it.' },
+    count: { name: 'Calm Count', help: 'Tap the numbers in order, from 1 to 16.' },
+    lantern: { name: 'Sky Lanterns', help: 'Hold a lantern as you breathe in. It rises when fully lit.' },
+    pond: { name: 'Ripple Pond', help: 'Tap the water and watch the ripples fade.' },
+    mandala: { name: 'Mirror Mandala', help: 'Draw slow lines. Each one is mirrored all the way round.' }
   };
   var FLOWERS = [['Bright sun', '#FFC857'], ['Moon', '#B9A3F0'], ['Cloud', '#8CC8F0'], ['Wave', '#4FA9C8'], ['Star', '#FFB088'], ['Heart', '#F28FA0']];
   var game = null;
@@ -2427,7 +2480,7 @@
   // Acknowledge first, settle the body (or lift it gently when energy is low), shift attention or
   // meaning, then end on a small win. Progress is kept for the day, so each step leads to the next.
   var FEEL = window.LoosenUpFeelings || { feelings: {}, byTime: {}, order: [], nightAsRacing: [] };
-  var GAME_MIN = { pairs: 2, catch: 1, bloom: 1, pop: 1, sort: 1, sand: 1, stars: 2, stack: 1, kind: 1 };
+  var GAME_MIN = { pairs: 2, catch: 1, bloom: 1, pop: 1, sort: 1, sand: 1, stars: 2, stack: 1, kind: 1, rangoli: 2, tiles: 2, chimes: 2, spot: 1, count: 1, lantern: 1, pond: 1, mandala: 1 };
   var EMO_BY_KEY = {};
   EMOTIONS.forEach(function (em) { EMO_BY_KEY[em[0]] = em; });
   function isNight() { return bucketOf(now().getTime()) === 'Quiet nights'; }
@@ -2525,7 +2578,7 @@
     renderGameRow(p);
   }
   // Every game, in the order that suits the feeling, without the ones that tend to work against it.
-  var ALL_GAMES = ['pairs', 'pop', 'bloom', 'sort', 'sand', 'stars', 'stack', 'kind', 'catch', 'trace'];
+  var ALL_GAMES = ['pairs', 'pop', 'bloom', 'sort', 'sand', 'stars', 'stack', 'kind', 'rangoli', 'tiles', 'chimes', 'spot', 'count', 'lantern', 'pond', 'mandala', 'catch', 'trace'];
   function gameRank(p) {
     p = p || feelPlan();
     var never = (p.f.never || []).concat(isNight() ? ['catch'] : []);
@@ -2658,8 +2711,8 @@
   /* ---------- Calm: breathing, games and sounds in one screen ---------- */
   var SEGS = ['breathe', 'games', 'sounds'];
   var calmSeg = 'breathe';
-  var BREATH_LIST = ['quick', 'sigh', 'breeze', 'wave', 'square', 'cooldown'];
-  var MIND_LIST = ['here', 'name', 'release', 'shake', 'letitout', 'park', 'tomorrow', 'kind', 'friend', 'savour', 'lift', 'hope', 'reach', 'desk', 'pause', 'warmth'];
+  var BREATH_LIST = ['quick', 'sigh', 'breeze', 'wave', 'square', 'cooldown', 'hum', 'nadi', 'night'];
+  var MIND_LIST = ['here', 'name', 'release', 'shake', 'eyes', 'chai', 'stretch', 'letitout', 'park', 'tomorrow', 'kind', 'friend', 'savour', 'lift', 'hope', 'reach', 'desk', 'pause', 'warmth'];
   function setSeg(seg, focus) {
     if (SEGS.indexOf(seg) === -1) seg = 'breathe';
     calmSeg = seg;
@@ -2734,6 +2787,7 @@
 
   function renderPlay() {
     renderPractice();
+    renderNewTags();
     setSeg(calmSeg);
     var dk = dayKey(now());
     var played = state.games.day === dk ? state.games.count : 0;
@@ -2745,19 +2799,26 @@
     return a;
   }
 
-  function openGame(id) {
+  function openGame(id, opts) {
+    if (!GAMES[id]) return false;
+    opts = opts || {};
     stopGame();
-    game = { id: id, timers: [], done: false };
+    game = { id: id, timers: [], done: false, daily: !!opts.daily };
+    if (GAME_SETS[id]) game.set = opts.set != null ? opts.set % GAME_SETS[id] : nextSet(id);
     if (playedGames.indexOf(id) === -1) playedGames.push(id);
     setText('game-title', GAMES[id].name);
     setText('game-help', GAMES[id].help);
     gameProgress('', null);
     $('game-done').hidden = true;
     $('game-keep').hidden = true;
+    $('game-plus').hidden = true;
+    setText('game-kicker', game.daily ? 'Today\'s game' : 'Play');
     var stage = $('game-stage');
     stage.textContent = '';
     go('game');
-    ({ pairs: startPairs, catch: startCatch, bloom: startBloom, pop: startPop, sort: startSort, sand: startSand, stars: startStars, stack: startStack, kind: startKind })[id](stage);
+    ({ pairs: startPairs, catch: startCatch, bloom: startBloom, pop: startPop, sort: startSort, sand: startSand, stars: startStars, stack: startStack, kind: startKind,
+      rangoli: startRangoli, tiles: startTiles, chimes: startChimes, spot: startSpot, count: startCount, lantern: startLantern, pond: startPond, mandala: startMandala })[id](stage);
+    return true;
   }
 
   function stopGame() {
@@ -2778,6 +2839,11 @@
     var nb = [];
     addBadge('playful', nb);
     if (best) best();
+    if (!state.gamePlays) state.gamePlays = {};
+    state.gamePlays[game.id] = (state.gamePlays[game.id] || 0) + 1;
+    if (SHELF_GAMES.every(function (k) { return state.gamePlays[k]; })) addBadge('collector', nb);
+    if (GAME_SETS[game.id] && !game.daily) { if (!state.gameLevel) state.gameLevel = {}; state.gameLevel[game.id] = (game.set + 1) % openSets(game.id); }
+    var dailyNow = game.daily && game.id === dailyGame().id && markDaily(nb);
     save();
     renderSeedPill();
     setText('game-done-title', title);
@@ -2785,6 +2851,8 @@
     var close = renderPlanNext('game-plan-next', planDone('game:' + game.id));
     if (close) setText('game-done-text', close);
     renderNextGame(game.id);
+    renderGamePlus();
+    if (dailyNow) toast('Today\'s game is done. ' + plural(state.daily.days, 'day', 'days') + ' played so far.');
     $('game-done').hidden = false;
     var again = $('game-again');
     if (again && again.focus) again.focus();
@@ -3685,6 +3753,759 @@
     return true;
   }
 
+  /* ---------- More calm games: Rangoli Colours, Picture Tiles, Wind Chimes, Spot the Odd One, Calm Count,
+     Sky Lanterns, Ripple Pond and Mirror Mandala. Nothing is timed against you and every round ends kindly. ---------- */
+
+  // Three games come with several designs. Two of each are free; LoosenUp Plus opens the rest.
+  // Today's game can be any design, so everyone gets to try the Plus ones now and then.
+  var GAME_SETS = { rangoli: 6, tiles: 6, chimes: 6 };
+  var GAME_FREE_SETS = 2;
+  var SET_WORDS = { rangoli: ['design', 'designs'], tiles: ['picture', 'pictures'], chimes: ['tune', 'tunes'] };
+  function openSets(id) { return plusRequired() ? GAME_FREE_SETS : GAME_SETS[id]; }
+  function nextSet(id) { return ((state.gameLevel || {})[id] || 0) % openSets(id); }
+  function setLabel(id, n) { return SET_WORDS[id][0].charAt(0).toUpperCase() + SET_WORDS[id][0].slice(1) + ' ' + (n + 1) + ' of ' + GAME_SETS[id]; }
+  function renderGamePlus() {
+    var b = $('game-plus');
+    if (!b || !game) return;
+    var id = game.id, show = !!GAME_SETS[id] && plusRequired();
+    b.hidden = !show;
+    if (show) setText('game-plus', (GAME_SETS[id] - GAME_FREE_SETS) + ' more ' + SET_WORDS[id][1] + ' with LoosenUp Plus');
+  }
+  function openGamePlus() {
+    openShop('More rangoli designs, picture puzzles and chime tunes are part of LoosenUp Plus. Every game stays free to play.');
+  }
+
+  // Today's game: the same one for everyone each day, so it can be shared and talked about.
+  var DAILY_GAMES = ['rangoli', 'tiles', 'chimes', 'count', 'lantern', 'spot', 'mandala', 'pond', 'stars', 'sort', 'pairs', 'stack', 'kind', 'sand'];
+  function dailyGame() {
+    var d = dayNum(dayKey(now()));
+    var id = DAILY_GAMES[d % DAILY_GAMES.length];
+    var set = GAME_SETS[id] ? Math.floor(d / DAILY_GAMES.length) % GAME_SETS[id] : null;
+    return { id: id, set: set, plusTaste: set != null && set >= GAME_FREE_SETS && plusRequired() };
+  }
+  function dailyDone() { return !!state.daily && state.daily.day === dayKey(now()); }
+  function openDaily() {
+    var d = dailyGame();
+    openGame(d.id, { daily: true, set: d.set });
+    return d.id;
+  }
+  // A running count of days played. Like the weekly goal, a quiet day never takes anything away.
+  function markDaily(nb) {
+    var dk = dayKey(now()), dl = state.daily || (state.daily = { day: null, days: 0 });
+    if (dl.day === dk) return false;
+    dl.day = dk;
+    dl.days = (dl.days || 0) + 1;
+    if (dl.days >= 7) addBadge('daily7', nb);
+    return true;
+  }
+  function renderDaily() {
+    var card = $('daily-game');
+    if (!card) return;
+    var d = dailyGame(), done = dailyDone(), days = (state.daily || {}).days || 0;
+    setText('daily-name', GAMES[d.id].name + (d.set != null ? ', ' + SET_WORDS[d.id][0] + ' ' + (d.set + 1) : ''));
+    setText('daily-sub', done ? 'Done for today. A new one comes tomorrow.' : d.plusTaste ? 'A Plus ' + SET_WORDS[d.id][0] + ', free for you today.' : GAMES[d.id].help);
+    setText('daily-streak', days ? plural(days, 'day', 'days') + ' played so far' : 'A new game every day');
+    setText('daily-play', done ? 'Play again' : 'Play');
+    card.classList.toggle('done', done);
+    var ic = $('daily-ic'), src = document.querySelector('#screen-today .game-tile[data-game="' + d.id + '"] .gt-ic');
+    if (ic && src && ic.getAttribute('data-for') !== d.id) { ic.innerHTML = src.innerHTML; ic.setAttribute('data-for', d.id); }
+  }
+
+  // Your game shelf (Progress): every game, how often you played it, and which ones are still new to you.
+  var SHELF_GAMES = ['pairs', 'pop', 'bloom', 'sort', 'sand', 'stars', 'stack', 'kind', 'catch', 'rangoli', 'tiles', 'chimes', 'spot', 'count', 'lantern', 'pond', 'mandala'];
+  function renderShelf() {
+    var grid = $('shelf-grid');
+    if (!grid) return;
+    var plays = state.gamePlays || {}, played = 0;
+    grid.textContent = '';
+    SHELF_GAMES.forEach(function (id) {
+      var n = plays[id] || 0;
+      if (n) played++;
+      var b = gameButton('shelf-item' + (n ? '' : ' fresh'));
+      b.setAttribute('data-game', id);
+      b.appendChild(mkEl('strong', null, GAMES[id].name));
+      b.appendChild(mkEl('span', null, n ? (n === 1 ? 'Played once' : 'Played ' + n + ' times') : 'New'));
+      grid.appendChild(b);
+    });
+    setText('shelf-count', played + ' of ' + SHELF_GAMES.length + ' games played');
+    var bar = $('shelf-bar-fill');
+    if (bar) bar.style.width = Math.round(played / SHELF_GAMES.length * 100) + '%';
+  }
+  // A small "New" tag on games you have not played yet (in Calm, so Today stays short).
+  function renderNewTags() {
+    var plays = state.gamePlays || {};
+    var cards = document.querySelectorAll('#panel-games .game-card[data-game]');
+    for (var i = 0; i < cards.length; i++) {
+      var id = cards[i].getAttribute('data-game'), tag = cards[i].querySelector('.new-tag');
+      if (!plays[id] && !tag) { tag = mkEl('em', 'new-tag', 'New'); cards[i].appendChild(tag); if (isHindi()) translateDom(tag); }
+      else if (plays[id] && tag) tag.parentNode.removeChild(tag);
+    }
+  }
+
+  // Rangoli Colours: tap a ring of the pattern to fill all of it with the chosen colour.
+  // A design is a list of rings: [shape, count, radius, size, turn]. Shapes: petal, dot, leaf, diamond, centre.
+  var RANGOLI_COLOURS = [['Marigold', '#F2A72B'], ['Kumkum', '#D9465A'], ['Rose', '#F28FA0'], ['Leaf', '#4FA67C'], ['Sky', '#6FB3E0'], ['Lilac', '#B9A3F0'], ['Rice', '#FFF8EC']];
+  var RANGOLI = [
+    [['centre', 1, 0, 7, 0], ['petal', 8, 16, 9, 0], ['dot', 8, 27, 3.2, 22.5], ['petal', 16, 36, 7, 0], ['dot', 16, 45, 2.6, 11.25]],
+    [['centre', 1, 0, 6, 0], ['diamond', 6, 14, 7, 0], ['petal', 12, 26, 8, 15], ['leaf', 12, 38, 7, 0], ['dot', 24, 46, 2.2, 7.5]],
+    [['centre', 1, 0, 8, 0], ['dot', 10, 14, 3.4, 0], ['petal', 10, 25, 10, 18], ['diamond', 10, 37, 6, 0], ['petal', 20, 45, 5, 9]],
+    [['centre', 1, 0, 5, 0], ['leaf', 8, 13, 7, 0], ['petal', 8, 24, 9, 22.5], ['dot', 16, 33, 3, 0], ['leaf', 16, 42, 6, 11.25], ['dot', 32, 48, 1.6, 0]],
+    [['centre', 1, 0, 9, 0], ['petal', 12, 20, 9, 0], ['diamond', 12, 32, 6, 15], ['petal', 24, 42, 5.5, 0]],
+    [['centre', 1, 0, 6, 0], ['diamond', 4, 13, 8, 45], ['petal', 8, 22, 8, 0], ['dot', 8, 31, 3.4, 22.5], ['leaf', 16, 38, 6.5, 0], ['diamond', 16, 46, 3.2, 11.25]]
+  ];
+  function rangoliShape(kind, a, r, s) {
+    var c = Math.cos(a), sn = Math.sin(a), px = -sn, py = c;
+    var P = function (d, w) { return (50 + c * d + px * w).toFixed(2) + ' ' + (50 + sn * d + py * w).toFixed(2); };
+    if (kind === 'petal') return 'M' + P(r - s, 0) + ' Q' + P(r, s * 0.75) + ' ' + P(r + s, 0) + ' Q' + P(r, -s * 0.75) + ' ' + P(r - s, 0) + 'Z';
+    if (kind === 'leaf') return 'M' + P(r - s, 0) + ' C' + P(r - s * 0.2, s * 0.9) + ' ' + P(r + s * 0.6, s * 0.4) + ' ' + P(r + s, 0) + ' C' + P(r + s * 0.6, -s * 0.4) + ' ' + P(r - s * 0.2, -s * 0.9) + ' ' + P(r - s, 0) + 'Z';
+    if (kind === 'diamond') return 'M' + P(r - s, 0) + ' L' + P(r, s * 0.6) + ' L' + P(r + s, 0) + ' L' + P(r, -s * 0.6) + 'Z';
+    return null;
+  }
+  function startRangoli(stage) {
+    var design = RANGOLI[game.set || 0];
+    var wrap = mkEl('div', 'rangoli-stage');
+    var art = document.createElementNS(SVGNS, 'svg');
+    art.setAttribute('viewBox', '0 0 100 100');
+    art.setAttribute('class', 'rangoli-art');
+    art.id = 'rangoli-art';
+    art.setAttribute('role', 'group');
+    art.setAttribute('aria-label', 'Rangoli');
+    svg('circle', { cx: 50, cy: 50, r: 49, class: 'rangoli-floor' }, art);
+    game.rings = design.map(function () { return null; });
+    game.colour = 0;
+    design.forEach(function (ring, ri) {
+      var g = svg('g', { class: 'rangoli-ring', 'data-ring': ri, tabindex: '0', role: 'button', 'aria-label': 'Ring ' + (ri + 1) }, art);
+      for (var k = 0; k < ring[1]; k++) {
+        var a = (ring[4] + k * 360 / ring[1]) * Math.PI / 180;
+        if (ring[0] === 'centre') svg('circle', { cx: 50, cy: 50, r: ring[3] }, g);
+        else if (ring[0] === 'dot') svg('circle', { cx: (50 + Math.cos(a) * ring[2]).toFixed(2), cy: (50 + Math.sin(a) * ring[2]).toFixed(2), r: ring[3] }, g);
+        else svg('path', { d: rangoliShape(ring[0], a, ring[2], ring[3]) }, g);
+      }
+      g.addEventListener('click', function () { colourRing(ri); });
+      g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); colourRing(ri); } });
+    });
+    var pal = mkEl('div', 'rangoli-palette');
+    pal.setAttribute('role', 'group');
+    pal.setAttribute('aria-label', 'Colours');
+    RANGOLI_COLOURS.forEach(function (c, i) {
+      var b = gameButton('swatch', null, c[0]);
+      b.style.setProperty('--sw', c[1]);
+      b.setAttribute('data-colour', String(i));
+      b.setAttribute('aria-pressed', String(i === 0));
+      b.addEventListener('click', function () { pickColour(i); });
+      pal.appendChild(b);
+    });
+    wrap.appendChild(art);
+    wrap.appendChild(pal);
+    stage.appendChild(wrap);
+    setText('game-help', setLabel('rangoli', game.set) + '. ' + GAMES.rangoli.help);
+    updateRangoli();
+  }
+  function pickColour(i) {
+    if (!game || game.id !== 'rangoli') return false;
+    game.colour = i;
+    var sw = document.querySelectorAll('.rangoli-palette .swatch');
+    for (var k = 0; k < sw.length; k++) sw[k].setAttribute('aria-pressed', String(k === i));
+    haptic('light');
+    return true;
+  }
+  function colourRing(ri) {
+    if (!game || game.id !== 'rangoli' || game.done) return false;
+    var g = document.querySelector('#rangoli-art [data-ring="' + ri + '"]');
+    if (!g) return false;
+    var first = game.rings[ri] == null;
+    game.rings[ri] = game.colour;
+    g.style.fill = RANGOLI_COLOURS[game.colour][1];
+    g.classList.add('filled');
+    tone(440 + ri * 70, 560 + ri * 70, 0.4, 0.04);
+    haptic('light');
+    updateRangoli();
+    if (first && game.rings.every(function (x) { return x != null; })) {
+      game.timers.push(setTimeout(function () {
+        $('rangoli-art').classList.add('complete');
+        finishGame('Your rangoli is ready', 'Every ring has its colour. Take a slow breath and enjoy what you made.');
+      }, 700));
+    }
+    return true;
+  }
+  function updateRangoli() {
+    var n = game.rings.filter(function (x) { return x != null; }).length;
+    gameProgress(n + ' of ' + game.rings.length + ' rings', n / game.rings.length);
+  }
+
+  // Picture Tiles: tap two tiles to swap them until the picture is whole. Peek shows the finished picture.
+  // Pictures are simple layers drawn in a 90 by 90 box: [shape, colour, ...numbers].
+  var TILE_PICS = [
+    { name: 'Sea at sunset', layers: [['rect', '#FFB088', 0, 0, 90, 30], ['rect', '#FFC857', 0, 30, 90, 18], ['circle', '#FFF1C9', 45, 48, 14], ['rect', '#4FA9C8', 0, 48, 90, 22], ['rect', '#2F7FA6', 0, 70, 90, 20], ['rect', '#FFE9A8', 30, 54, 30, 2], ['rect', '#FFE9A8', 36, 62, 18, 2], ['path', '#24557A', 'M8 80 L22 74 L36 80 Z'], ['line', '#24557A', 'M8 14 q3 -3 6 0 q3 -3 6 0'], ['line', '#24557A', 'M44 22 q3 -3 6 0 q3 -3 6 0'], ['ellipse', '#FFE3D3', 74, 12, 10, 3.5]] },
+    { name: 'Hills at dawn', layers: [['rect', '#DCEFFF', 0, 0, 90, 90], ['circle', '#FFC857', 66, 26, 10], ['path', '#9ED3C4', 'M0 60 Q20 30 45 55 T90 45 V90 H0 Z'], ['path', '#4FA67C', 'M0 75 Q30 50 60 70 T90 66 V90 H0 Z'], ['path', '#2E7D5B', 'M0 86 Q40 72 90 84 V90 H0 Z'], ['path', '#FFFFFF', 'M14 20 q6 -6 12 0 q6 -4 10 2 H14 Z'], ['line', '#4A5A63', 'M38 12 q3 -3 6 0 q3 -3 6 0']] },
+    { name: 'Lotus pond', layers: [['rect', '#BFE3FF', 0, 0, 90, 90], ['rect', '#7CC0EE', 0, 40, 90, 50], ['ellipse', '#4FA67C', 22, 70, 14, 5], ['ellipse', '#4FA67C', 66, 78, 12, 4], ['path', '#F28FA0', 'M45 58 Q38 44 45 34 Q52 44 45 58 Z'], ['path', '#F7A8B6', 'M45 58 Q30 50 32 40 Q42 46 45 58 Z'], ['path', '#F7A8B6', 'M45 58 Q60 50 58 40 Q48 46 45 58 Z'], ['ellipse', '#3E8E6A', 45, 60, 16, 4], ['ellipse', '#FFFFFF', 14, 14, 9, 3.5], ['line', '#4A5A63', 'M40 18 q3 -3 6 0 q3 -3 6 0'], ['ellipse', '#FFFFFF', 76, 24, 8, 3], ['ellipse', '#4FA67C', 12, 50, 7, 2.5]] },
+    { name: 'Kites in the sky', layers: [['rect', '#8CC8F0', 0, 0, 90, 90], ['path', '#FFFFFF', 'M10 70 q8 -8 16 0 q8 -6 14 2 H10 Z'], ['path', '#F2A72B', 'M24 10 L34 22 L24 34 L14 22 Z'], ['path', '#D9465A', 'M62 28 L72 40 L62 52 L52 40 Z'], ['path', '#B9A3F0', 'M44 56 L52 66 L44 76 L36 66 Z'], ['path', 'none', 'M24 34 Q30 50 22 64'], ['path', '#FFFFFF', 'M58 78 q8 -8 16 0 q8 -6 14 2 H58 Z'], ['path', '#4FA67C', 'M76 6 L82 13 L76 20 L70 13 Z']] },
+    { name: 'Night village', layers: [['rect', '#2B3A67', 0, 0, 90, 90], ['circle', '#FFF1C9', 70, 18, 8], ['circle', '#2B3A67', 74, 15, 7], ['circle', '#FFE9A8', 16, 14, 1.4], ['circle', '#FFE9A8', 40, 24, 1.2], ['circle', '#FFE9A8', 52, 10, 1.4], ['rect', '#3B4E85', 0, 60, 90, 30], ['rect', '#C98B5A', 12, 50, 20, 18], ['path', '#8E5A3C', 'M8 52 L22 40 L36 52 Z'], ['rect', '#C98B5A', 54, 46, 24, 22], ['path', '#8E5A3C', 'M50 48 L66 34 L82 48 Z'], ['rect', '#FFC857', 19, 56, 6, 6], ['rect', '#FFC857', 62, 54, 7, 7]] },
+    { name: 'Boat on the backwaters', layers: [['rect', '#FFE3D3', 0, 0, 90, 46], ['circle', '#FFB088', 20, 30, 9], ['rect', '#9ED3C4', 0, 46, 90, 44], ['path', '#4FA67C', 'M60 46 L64 14 L66 46 Z'], ['path', '#2E7D5B', 'M64 16 q-12 -2 -18 6 q10 -2 18 -4 q8 -6 18 -2 q-10 -4 -18 0 Z'], ['path', '#8E5A3C', 'M26 62 Q45 72 64 62 Z'], ['path', '#C98B5A', 'M34 62 Q45 52 56 62 Z'], ['rect', '#6FB3E0', 10, 76, 30, 2], ['rect', '#6FB3E0', 50, 82, 30, 2], ['line', '#8E5A3C', 'M38 12 q3 -3 6 0 q3 -3 6 0'], ['rect', '#FFFFFF', 4, 52, 16, 1.5]] }
+  ];
+  function tilePicture(pic, box) {
+    var s0 = document.createElementNS(SVGNS, 'svg');
+    s0.setAttribute('viewBox', box);
+    s0.setAttribute('aria-hidden', 'true');
+    s0.setAttribute('preserveAspectRatio', 'none');
+    pic.layers.forEach(function (l) {
+      if (l[0] === 'rect') svg('rect', { x: l[2], y: l[3], width: l[4], height: l[5], fill: l[1] }, s0);
+      else if (l[0] === 'circle') svg('circle', { cx: l[2], cy: l[3], r: l[4], fill: l[1] }, s0);
+      else if (l[0] === 'ellipse') svg('ellipse', { cx: l[2], cy: l[3], rx: l[4], ry: l[5], fill: l[1] }, s0);
+      else if (l[0] === 'line') svg('path', { d: l[2], fill: 'none', stroke: l[1], 'stroke-width': 1.4, 'stroke-linecap': 'round' }, s0);
+      else svg('path', { d: l[2], fill: l[1], stroke: l[1] === 'none' ? '#FFFFFF' : 'none', 'stroke-width': 1 }, s0);
+    });
+    // Soft light from the left and shade towards the bottom, so no two tiles look the same.
+    var n = ++tileShadeN, defs = svg('defs', {}, s0);
+    var lx = svg('linearGradient', { id: 'tl' + n, gradientUnits: 'userSpaceOnUse', x1: 0, y1: 0, x2: 90, y2: 0 }, defs);
+    svg('stop', { offset: 0, 'stop-color': '#FFFFFF', 'stop-opacity': 0.5 }, lx);
+    svg('stop', { offset: 1, 'stop-color': '#FFFFFF', 'stop-opacity': 0 }, lx);
+    var ly = svg('linearGradient', { id: 'ts' + n, gradientUnits: 'userSpaceOnUse', x1: 0, y1: 0, x2: 0, y2: 90 }, defs);
+    svg('stop', { offset: 0, 'stop-color': '#10233A', 'stop-opacity': 0 }, ly);
+    svg('stop', { offset: 1, 'stop-color': '#10233A', 'stop-opacity': 0.42 }, ly);
+    svg('rect', { x: 0, y: 0, width: 90, height: 90, fill: 'url(#tl' + n + ')' }, s0);
+    svg('rect', { x: 0, y: 0, width: 90, height: 90, fill: 'url(#ts' + n + ')' }, s0);
+    return s0;
+  }
+  var tileShadeN = 0;
+  function startTiles(stage) {
+    var pic = TILE_PICS[game.set || 0];
+    var grid = mkEl('div', 'tiles-grid');
+    grid.id = 'tiles-grid';
+    var order;
+    // Shuffle until at least six tiles are away from home, so there is something to do.
+    do { order = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]); } while (order.filter(function (p, i) { return p !== i; }).length < 6);
+    game.order = order;
+    game.pick = null;
+    game.moves = 0;
+    for (var i = 0; i < 9; i++) {
+      var b = gameButton('tile', null);
+      b.setAttribute('data-tile', String(i));
+      b.addEventListener('click', (function (k) { return function () { tapTile(k); }; })(i));
+      grid.appendChild(b);
+    }
+    var peek = gameButton('btn btn-ghost btn-small', 'Peek at the picture');
+    peek.id = 'tiles-peek';
+    peek.addEventListener('click', function () { peekTiles(); });
+    stage.appendChild(grid);
+    stage.appendChild(peek);
+    setText('game-help', setLabel('tiles', game.set) + ': ' + pic.name + '. ' + GAMES.tiles.help);
+    paintTiles();
+  }
+  function paintTiles() {
+    var pic = TILE_PICS[game.set || 0];
+    var tiles = document.querySelectorAll('#tiles-grid .tile');
+    for (var i = 0; i < tiles.length; i++) {
+      var p = game.order[i];
+      tiles[i].textContent = '';
+      tiles[i].appendChild(tilePicture(pic, (p % 3) * 30 + ' ' + Math.floor(p / 3) * 30 + ' 30 30'));
+      tiles[i].classList.toggle('home', p === i);
+      tiles[i].setAttribute('aria-pressed', String(game.pick === i));
+      tiles[i].setAttribute('aria-label', 'Tile ' + (i + 1) + (p === i ? ', in place' : ''));
+    }
+    var n = game.order.filter(function (q, j) { return q === j; }).length;
+    gameProgress(n + ' of 9 in place', n / 9);
+  }
+  function tapTile(i) {
+    if (!game || game.id !== 'tiles' || game.done) return false;
+    if (game.pick === null) { game.pick = i; haptic('light'); paintTiles(); return true; }
+    if (game.pick === i) { game.pick = null; paintTiles(); return true; }
+    var a = game.pick, t = game.order[a];
+    game.order[a] = game.order[i];
+    game.order[i] = t;
+    game.pick = null;
+    game.moves++;
+    var home = (game.order[a] === a ? 1 : 0) + (game.order[i] === i ? 1 : 0);
+    tone(home ? 600 : 420, home ? 760 : 380, 0.3, 0.04);
+    haptic('light');
+    paintTiles();
+    if (game.order.every(function (q, j) { return q === j; })) {
+      $('tiles-grid').classList.add('whole');
+      $('tiles-peek').hidden = true;
+      var moves = game.moves;
+      game.timers.push(setTimeout(function () {
+        finishGame('The picture is whole', 'Put together in ' + plural(moves, 'swap', 'swaps') + ', at your own pace. Look at it for a breath or two.');
+      }, 600));
+    }
+    return true;
+  }
+  function peekTiles() {
+    if (!game || game.id !== 'tiles' || game.done) return false;
+    var grid = $('tiles-grid');
+    grid.classList.add('peek');
+    var over = mkEl('div', 'tiles-peek-pic');
+    over.appendChild(tilePicture(TILE_PICS[game.set || 0], '0 0 90 90'));
+    grid.appendChild(over);
+    game.timers.push(setTimeout(function () { if (over.parentNode) over.parentNode.removeChild(over); grid.classList.remove('peek'); }, 1800));
+    return true;
+  }
+  function solveTiles() {
+    if (!game || game.id !== 'tiles') return;
+    game.pick = null;
+    for (var i = 0; i < 9; i++) {
+      if (game.done) return;
+      if (game.order[i] === i) continue;
+      tapTile(i);
+      tapTile(game.order.indexOf(i));
+    }
+  }
+
+  // Wind Chimes: the chimes play a short tune; tap it back. Each round adds a note. A slip just plays it again.
+  var CHIME_NOTES = [[523, '#F2A72B'], [587, '#F28FA0'], [659, '#B9A3F0'], [784, '#6FB3E0'], [880, '#4FA67C']];
+  var CHIME_TUNES = [[0, 2, 4, 2, 0], [4, 3, 2, 1, 0], [0, 1, 2, 4, 3], [2, 0, 3, 1, 4], [0, 4, 3, 4, 2], [1, 3, 2, 0, 2]];
+  var CHIME_ROUNDS = [3, 4, 5];
+  function startChimes(stage) {
+    var row = mkEl('div', 'chimes');
+    row.id = 'chimes';
+    CHIME_NOTES.forEach(function (n, i) {
+      var b = gameButton('chime', null, 'Chime ' + (i + 1));
+      b.setAttribute('data-chime', String(i));
+      b.style.setProperty('--ch', n[1]);
+      b.style.setProperty('--len', (150 - i * 18) + 'px');
+      b.addEventListener('click', function () { tapChime(i); });
+      row.appendChild(b);
+    });
+    var say = mkEl('p', 'chimes-say');
+    say.id = 'chimes-say';
+    say.setAttribute('aria-live', 'polite');
+    var again = gameButton('btn btn-ghost btn-small', 'Hear it again');
+    again.id = 'chimes-again';
+    again.addEventListener('click', function () { playTune(); });
+    stage.appendChild(row);
+    stage.appendChild(say);
+    stage.appendChild(again);
+    game.tune = CHIME_TUNES[game.set || 0];
+    game.round = 0;
+    game.input = [];
+    setText('game-help', setLabel('chimes', game.set) + '. ' + GAMES.chimes.help);
+    game.timers.push(setTimeout(playTune, 600));
+    updateChimes();
+  }
+  function ringChime(i, quiet) {
+    var b = document.querySelector('#chimes [data-chime="' + i + '"]');
+    if (b) { b.classList.remove('ring'); void b.offsetWidth; b.classList.add('ring'); }
+    if (!quiet) tone(CHIME_NOTES[i][0], CHIME_NOTES[i][0] * 1.002, 1.1, 0.06);
+  }
+  function playTune() {
+    if (!game || game.id !== 'chimes' || game.done) return false;
+    var len = CHIME_ROUNDS[game.round];
+    game.input = [];
+    game.listening = true;
+    setText('chimes-say', 'Listen...');
+    for (var k = 0; k < len; k++) {
+      game.timers.push(setTimeout((function (n) { return function () { if (game && game.id === 'chimes' && game.listening) ringChime(game.tune[n]); }; })(k), k * 650));
+    }
+    game.timers.push(setTimeout(function () { if (game && game.id === 'chimes' && game.listening) { game.listening = false; setText('chimes-say', 'Your turn. Tap the tune.'); } }, len * 650));
+    return true;
+  }
+  function tapChime(i) {
+    if (!game || game.id !== 'chimes' || game.done) return false;
+    game.listening = false; // tapping during the tune means you have it already
+    ringChime(i);
+    haptic('light');
+    var len = CHIME_ROUNDS[game.round], want = game.tune[game.input.length];
+    if (i !== want) {
+      game.input = [];
+      setText('chimes-say', 'Close. Listen once more.');
+      game.timers.push(setTimeout(playTune, 1100));
+      return false;
+    }
+    game.input.push(i);
+    if (game.input.length < len) return true;
+    game.round++;
+    game.input = [];
+    updateChimes();
+    if (game.round >= CHIME_ROUNDS.length) {
+      setText('chimes-say', 'The whole tune.');
+      game.timers.push(setTimeout(function () {
+        finishGame('A tune of your own', 'You played the whole tune. Hum it once more, slowly, if you like.');
+      }, 900));
+    } else {
+      setText('chimes-say', 'Lovely. One more note this time.');
+      game.timers.push(setTimeout(playTune, 1300));
+    }
+    return true;
+  }
+  function updateChimes() { gameProgress('Round ' + Math.min(game.round + 1, CHIME_ROUNDS.length) + ' of ' + CHIME_ROUNDS.length, game.round / CHIME_ROUNDS.length); }
+  function endChimes() {
+    while (game && game.id === 'chimes' && game.round < CHIME_ROUNDS.length) tapChime(game.tune[game.input.length]);
+  }
+
+  // Spot the Odd One: one shape is a little different. Find it, round by round. Tapping another shape just fades it.
+  var SPOT_ROUNDS = 8;
+  var SPOT_SHAPES = [
+    'M20 6a14 14 0 1 1 0 28 14 14 0 0 1 0-28z',
+    'M20 34S6 25 6 15a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z',
+    'M20 4l4.7 10 10.8 1.2-8 7.3 2.3 10.6L20 27.6l-9.8 5.5 2.3-10.6-8-7.3 10.8-1.2z',
+    'M20 4C28 14 32 20 32 25a12 12 0 0 1-24 0c0-5 4-11 12-21z',
+    'M8 32C8 16 18 6 34 6c0 16-10 26-26 26z'
+  ];
+  var SPOT_HUES = [36, 350, 200, 150, 265];
+  function startSpot(stage) {
+    var grid = mkEl('div', 'spot-grid');
+    grid.id = 'spot-grid';
+    stage.appendChild(grid);
+    game.round = 0;
+    spotRound();
+  }
+  function spotRound() {
+    var r = game.round, side = r < 2 ? 3 : r < 5 ? 4 : 5, n = side * side;
+    var grid = $('spot-grid');
+    grid.textContent = '';
+    grid.style.setProperty('--side', side);
+    game.odd = Math.floor(rng() * n);
+    var shape = r % SPOT_SHAPES.length, hue = SPOT_HUES[(r * 2) % SPOT_HUES.length];
+    var way = ['light', 'turn', 'size'][r % 3];
+    var step = Math.max(8, 20 - r * 1.6);
+    for (var i = 0; i < n; i++) {
+      var b = gameButton('spot', null, 'Shape ' + (i + 1));
+      b.setAttribute('data-spot', String(i));
+      var s0 = document.createElementNS(SVGNS, 'svg');
+      s0.setAttribute('viewBox', '0 0 40 40');
+      s0.setAttribute('aria-hidden', 'true');
+      var odd = i === game.odd;
+      var light = 62 - (odd && way === 'light' ? step : 0);
+      var p = svg('path', { d: SPOT_SHAPES[shape], fill: 'hsl(' + hue + ', 62%, ' + light + '%)' }, s0);
+      if (odd && way === 'turn') p.setAttribute('transform', 'rotate(' + (step * 2.2).toFixed(0) + ' 20 20)');
+      if (odd && way === 'size') p.setAttribute('transform', 'translate(20 20) scale(' + (1 - step / 70).toFixed(2) + ') translate(-20 -20)');
+      b.appendChild(s0);
+      b.addEventListener('click', (function (k) { return function () { tapSpot(k); }; })(i));
+      grid.appendChild(b);
+    }
+    gameProgress('Round ' + (r + 1) + ' of ' + SPOT_ROUNDS, r / SPOT_ROUNDS);
+  }
+  function tapSpot(i) {
+    if (!game || game.id !== 'spot' || game.done) return false;
+    var b = document.querySelector('#spot-grid [data-spot="' + i + '"]');
+    if (i !== game.odd) {
+      if (b) { b.classList.add('faded'); b.disabled = true; }
+      haptic('light');
+      return false;
+    }
+    if (b) b.classList.add('found');
+    tone(520 + game.round * 40, 700 + game.round * 40, 0.35, 0.05);
+    haptic('light');
+    game.round++;
+    if (game.round >= SPOT_ROUNDS) {
+      gameProgress('Round ' + SPOT_ROUNDS + ' of ' + SPOT_ROUNDS, 1);
+      game.timers.push(setTimeout(function () {
+        finishGame('Well spotted', 'Eight rounds of quiet focus. Notice how your mind feels now.');
+      }, 600));
+    } else game.timers.push(setTimeout(function () { if (game && game.id === 'spot' && !game.done) spotRound(); }, 550));
+    return true;
+  }
+  function endSpot() {
+    while (game && game.id === 'spot' && game.round < SPOT_ROUNDS) { tapSpot(game.odd); if (game.round < SPOT_ROUNDS) spotRound(); }
+  }
+
+  // Calm Count: tap the numbers in order. Another number just wobbles, and you carry on.
+  var COUNT_TO = 16;
+  function startCount(stage) {
+    var grid = mkEl('div', 'count-grid');
+    grid.id = 'count-grid';
+    var nums = [];
+    for (var i = 1; i <= COUNT_TO; i++) nums.push(i);
+    shuffle(nums).forEach(function (n, j) {
+      var b = gameButton('count-num', String(n));
+      b.setAttribute('data-num', String(n));
+      b.style.setProperty('--tint', ['#FFF0C4', '#DCEFFF', '#FFE3EA', '#E2F3E8'][j % 4]);
+      b.addEventListener('click', function () { tapCount(n); });
+      grid.appendChild(b);
+    });
+    stage.appendChild(grid);
+    game.next = 1;
+    game.started = Date.now();
+    updateCount();
+  }
+  function tapCount(n) {
+    if (!game || game.id !== 'count' || game.done) return false;
+    var b = document.querySelector('#count-grid [data-num="' + n + '"]');
+    if (n !== game.next) {
+      if (b) { b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble'); }
+      return false;
+    }
+    if (b) { b.classList.add('found'); b.disabled = true; }
+    tone(330 + n * 22, 340 + n * 22, 0.25, 0.04);
+    haptic('light');
+    game.next++;
+    updateCount();
+    if (game.next > COUNT_TO) {
+      var secs = Math.max(1, Math.round((Date.now() - game.started) / 1000)), prev = (state.gameBest || {}).count || 0;
+      game.timers.push(setTimeout(function () {
+        finishGame('All sixteen, in order', 'You found every number in ' + plural(secs, 'second', 'seconds') + (prev && secs < prev ? ', your quickest yet.' : '.') + ' Let your eyes rest for a breath.',
+          function () { if (!prev || secs < prev) state.gameBest.count = secs; });
+      }, 400));
+    }
+    return true;
+  }
+  function updateCount() {
+    var found = game.next - 1;
+    gameProgress(found < COUNT_TO ? 'Find ' + game.next : COUNT_TO + ' of ' + COUNT_TO + ' found', found / COUNT_TO);
+  }
+
+  // Sky Lanterns: press and hold a lantern while you breathe in. When it is fully lit, it floats away.
+  var LANTERN_WORDS = ['Rush', 'Noise', 'That email', 'Overthinking', 'Hurry', 'Tiredness', 'Clutter', 'Doubt', 'Old hurt', 'Too much to do', 'Scrolling', 'Hard words'];
+  var LANTERN_COUNT = 6, LANTERN_MS = 3000;
+  function startLantern(stage) {
+    var sky = mkEl('div', 'lantern-sky');
+    sky.id = 'lantern-sky';
+    var words = shuffle(LANTERN_WORDS.slice()).slice(0, LANTERN_COUNT);
+    game.lit = 0;
+    game.held = {};
+    words.forEach(function (w, i) {
+      var b = gameButton('lantern', null, 'Lantern: ' + w);
+      b.setAttribute('data-lantern', String(i));
+      // Two staggered rows of three, so each lantern has room on a small phone.
+      b.style.left = [18, 50, 82][i % 3] + '%';
+      b.style.bottom = (i < 3 ? 22 : 128) + 'px';
+      b.style.setProperty('--glow', '0');
+      b.appendChild(mkEl('span', 'lantern-word', w));
+      var start = function (e) { if (e) e.preventDefault(); holdLantern(i); };
+      var stop = function () { letLantern(i); };
+      b.addEventListener('pointerdown', start);
+      b.addEventListener('pointerup', stop);
+      b.addEventListener('pointerleave', stop);
+      b.addEventListener('pointercancel', stop);
+      b.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) start(e); });
+      b.addEventListener('keyup', function (e) { if (e.key === 'Enter' || e.key === ' ') stop(); });
+      sky.appendChild(b);
+    });
+    stage.appendChild(sky);
+    game.timers.push(setInterval(lanternTick, 50));
+    updateLantern();
+  }
+  function holdLantern(i) {
+    if (!game || game.id !== 'lantern' || game.done) return false;
+    var h = game.held[i] || (game.held[i] = { glow: 0, holding: false, gone: false });
+    if (h.gone) return false;
+    h.holding = true;
+    return true;
+  }
+  function letLantern(i) {
+    var h = game && game.id === 'lantern' && game.held[i];
+    if (h) h.holding = false;
+  }
+  function lanternTick() {
+    if (!game || game.id !== 'lantern' || game.done) return;
+    Object.keys(game.held).forEach(function (k) {
+      var h = game.held[k];
+      if (h.gone) return;
+      h.glow = Math.max(0, Math.min(1, h.glow + (h.holding ? 50 / LANTERN_MS : -50 / 1200)));
+      var b = document.querySelector('#lantern-sky [data-lantern="' + k + '"]');
+      if (b) b.style.setProperty('--glow', h.glow.toFixed(2));
+      if (h.glow >= 1) releaseLantern(+k);
+    });
+  }
+  // Fully lit: up it goes.
+  function releaseLantern(i) {
+    if (!game || game.id !== 'lantern' || game.done) return false;
+    var h = game.held[i] || (game.held[i] = { glow: 1, holding: false, gone: false });
+    if (h.gone) return false;
+    h.gone = true;
+    h.holding = false;
+    var b = document.querySelector('#lantern-sky [data-lantern="' + i + '"]');
+    if (b) { b.classList.add('away'); b.disabled = true; b.style.setProperty('--glow', '1'); }
+    tone(392, 523, 1.2, 0.05);
+    haptic('light');
+    game.lit++;
+    updateLantern();
+    if (game.lit >= LANTERN_COUNT) {
+      game.timers.push(setTimeout(function () {
+        finishGame('The sky holds them now', 'Six lanterns, six slow breaths. Let your shoulders drop as you watch them go.');
+      }, 1200));
+    }
+    return true;
+  }
+  function updateLantern() { gameProgress(game.lit + ' of ' + LANTERN_COUNT + ' released', game.lit / LANTERN_COUNT); }
+  function endLantern() { for (var i = 0; i < LANTERN_COUNT; i++) releaseLantern(i); }
+
+  // Ripple Pond: tap the water. Rings spread out and fade; the fish drift by.
+  var POND_TAPS = 15;
+  function startPond(stage) {
+    var pond = mkEl('div', 'pond');
+    pond.id = 'pond';
+    pond.setAttribute('role', 'button');
+    pond.setAttribute('tabindex', '0');
+    pond.setAttribute('aria-label', 'Pond. Tap the water.');
+    [['#F2A72B', 0], ['#FFFFFF', 1], ['#D9465A', 2]].forEach(function (f) {
+      var fish = document.createElementNS(SVGNS, 'svg');
+      fish.setAttribute('viewBox', '0 0 40 20');
+      fish.setAttribute('class', 'koi koi-' + f[1]);
+      fish.setAttribute('aria-hidden', 'true');
+      svg('path', { d: 'M4 10 Q14 2 26 10 Q14 18 4 10 Z', fill: f[0] }, fish);
+      svg('path', { d: 'M26 10 L36 4 L34 10 L36 16 Z', fill: f[0] }, fish);
+      pond.appendChild(fish);
+    });
+    pond.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      var r = pond.getBoundingClientRect();
+      rippleAt(r.width ? (e.clientX - r.left) / r.width * 100 : 50, r.height ? (e.clientY - r.top) / r.height * 100 : 50);
+    });
+    pond.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); rippleAt(20 + rng() * 60, 20 + rng() * 60); } });
+    stage.appendChild(pond);
+    game.ripples = 0;
+    updatePond();
+  }
+  function rippleAt(x, y) {
+    if (!game || game.id !== 'pond' || game.done) return false;
+    var pond = $('pond');
+    for (var k = 0; k < 3; k++) {
+      var r = mkEl('i', 'ripple');
+      r.style.left = x + '%';
+      r.style.top = y + '%';
+      r.style.animationDelay = (k * 0.35) + 's';
+      pond.appendChild(r);
+      game.timers.push(setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(r), 3200));
+    }
+    if (game.ripples % 4 === 3) {
+      var pad = mkEl('i', 'lily');
+      pad.style.left = x + '%';
+      pad.style.top = y + '%';
+      pond.appendChild(pad);
+    }
+    tone(700 - y * 3, 500 - y * 2, 0.6, 0.04);
+    haptic('light');
+    game.ripples++;
+    updatePond();
+    if (game.ripples >= POND_TAPS) {
+      game.timers.push(setTimeout(function () {
+        finishGame('Still water', 'Fifteen ripples, each one fading into stillness. Rest your eyes on the water for a moment.');
+      }, 1500));
+    }
+    return true;
+  }
+  function updatePond() { gameProgress(Math.min(game.ripples, POND_TAPS) + ' of ' + POND_TAPS + ' ripples', game.ripples / POND_TAPS); }
+  function endPond() { while (game && game.id === 'pond' && !game.done && game.ripples < POND_TAPS) rippleAt(50, 50); }
+
+  // Mirror Mandala: every line you draw is mirrored around the centre, sixteen times.
+  var MANDALA_SIZE = 360, MANDALA_LINES = 8;
+  var MANDALA_INKS = [['Marigold', '#F2A72B'], ['Rose', '#F28FA0'], ['Sky', '#6FB3E0'], ['Leaf', '#4FA67C'], ['Lilac', '#B9A3F0'], ['Moon', '#FFF8EC']];
+  function startMandala(stage) {
+    var wrap = mkEl('div', 'mandala-stage');
+    var cv = mkEl('canvas', 'mandala-canvas');
+    cv.id = 'mandala-canvas';
+    cv.width = MANDALA_SIZE;
+    cv.height = MANDALA_SIZE;
+    cv.setAttribute('role', 'img');
+    cv.setAttribute('aria-label', 'Mandala');
+    var inks = mkEl('div', 'rangoli-palette');
+    inks.setAttribute('role', 'group');
+    inks.setAttribute('aria-label', 'Colours');
+    MANDALA_INKS.forEach(function (c, i) {
+      var b = gameButton('swatch', null, c[0]);
+      b.style.setProperty('--sw', c[1]);
+      b.setAttribute('data-ink', String(i));
+      b.setAttribute('aria-pressed', String(i === 0));
+      b.addEventListener('click', function () {
+        game.ink = i;
+        var all = inks.querySelectorAll('.swatch');
+        for (var k = 0; k < all.length; k++) all[k].setAttribute('aria-pressed', String(k === i));
+      });
+      inks.appendChild(b);
+    });
+    var clear = gameButton('btn btn-ghost btn-small', 'Start fresh');
+    clear.id = 'mandala-clear';
+    clear.addEventListener('click', function () { paintMandalaBase(); });
+    wrap.appendChild(cv);
+    wrap.appendChild(inks);
+    wrap.appendChild(clear);
+    stage.appendChild(wrap);
+    game.ink = 0;
+    game.lines = 0;
+    game.stroke = null;
+    try { game.ctx = cv.getContext ? cv.getContext('2d') : null; } catch (e) { game.ctx = null; }
+    paintMandalaBase();
+    var at = function (e) {
+      var r = cv.getBoundingClientRect();
+      return { x: r.width ? (e.clientX - r.left) * MANDALA_SIZE / r.width : 0, y: r.height ? (e.clientY - r.top) * MANDALA_SIZE / r.height : 0 };
+    };
+    cv.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      if (cv.setPointerCapture) { try { cv.setPointerCapture(e.pointerId); } catch (x) { /* optional */ } }
+      game.stroke = [at(e)];
+    });
+    cv.addEventListener('pointermove', function (e) {
+      if (!game || !game.stroke) return;
+      var p = at(e), q = game.stroke[game.stroke.length - 1];
+      mandalaSegment(q, p);
+      game.stroke.push(p);
+    });
+    var end = function () { if (game && game.stroke) { var s = game.stroke; game.stroke = null; mandalaCount(s); } };
+    cv.addEventListener('pointerup', end);
+    cv.addEventListener('pointercancel', end);
+    updateMandala();
+  }
+  function paintMandalaBase() {
+    var c = game && game.ctx;
+    if (!c) return;
+    c.fillStyle = '#1E2A4A';
+    c.fillRect(0, 0, MANDALA_SIZE, MANDALA_SIZE);
+    c.strokeStyle = 'rgba(255,255,255,0.08)';
+    c.lineWidth = 1;
+    for (var k = 0; k < 8; k++) {
+      var a = k * Math.PI / 4;
+      c.beginPath();
+      c.moveTo(MANDALA_SIZE / 2, MANDALA_SIZE / 2);
+      c.lineTo(MANDALA_SIZE / 2 + Math.cos(a) * MANDALA_SIZE, MANDALA_SIZE / 2 + Math.sin(a) * MANDALA_SIZE);
+      c.stroke();
+    }
+  }
+  function mandalaSegment(p, q) {
+    var c = game && game.ctx;
+    if (!c) return;
+    var h = MANDALA_SIZE / 2;
+    c.strokeStyle = MANDALA_INKS[game.ink][1];
+    c.lineWidth = 3;
+    c.lineCap = 'round';
+    for (var k = 0; k < 8; k++) {
+      for (var m = 0; m < 2; m++) {
+        c.save();
+        c.translate(h, h);
+        c.rotate(k * Math.PI / 4);
+        if (m) c.scale(1, -1);
+        c.beginPath();
+        c.moveTo(p.x - h, p.y - h);
+        c.lineTo(q.x - h, q.y - h);
+        c.stroke();
+        c.restore();
+      }
+    }
+  }
+  // A line counts once it has some length; taps alone do not.
+  function mandalaCount(points) {
+    if (!game || game.id !== 'mandala' || game.done) return false;
+    var len = 0;
+    for (var i = 1; i < points.length; i++) len += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+    if (len < 30) return false;
+    game.lines++;
+    tone(480 + game.lines * 30, 520 + game.lines * 30, 0.4, 0.035);
+    updateMandala();
+    if (game.lines >= MANDALA_LINES) {
+      game.timers.push(setTimeout(function () {
+        finishGame('A mandala of your own', 'Look at it for a few slow breaths. Every line came from you.');
+      }, 600));
+    }
+    return true;
+  }
+  // Draws a whole line at once (used by tests and the keyboard).
+  function mandalaStroke(points) {
+    if (!game || game.id !== 'mandala' || game.done || !points || points.length < 1) return false;
+    for (var i = 1; i < points.length; i++) mandalaSegment(points[i - 1], points[i]);
+    return mandalaCount(points);
+  }
+  function updateMandala() { gameProgress(Math.min(game.lines, MANDALA_LINES) + ' of ' + MANDALA_LINES + ' lines', game.lines / MANDALA_LINES); }
+  function endMandala() {
+    var k = 0;
+    while (game && game.id === 'mandala' && !game.done && k < MANDALA_LINES) {
+      var a = k * 0.4;
+      mandalaStroke([{ x: 180 + Math.cos(a) * 30, y: 180 + Math.sin(a) * 30 }, { x: 180 + Math.cos(a) * 140, y: 180 + Math.sin(a + 0.5) * 140 }]);
+      k++;
+    }
+  }
+
+  function endRangoli() { if (game && game.id === 'rangoli') game.rings.forEach(function (c, i) { if (c == null) colourRing(i); }); }
+  function endCount() { while (game && game.id === 'count' && game.next <= COUNT_TO) tapCount(game.next); }
+
   function finishCurrentGame() {
     if (!game) return;
     if (game.id === 'pairs') {
@@ -3698,6 +4519,14 @@
     else if (game.id === 'stars') endStars();
     else if (game.id === 'stack') { while (game && !game.done && game.moving) dropBlock(); }
     else if (game.id === 'kind') { while (game && game.kept.length < KIND_PICK && pickKind(0)) { /* the first free word each time */ } }
+    else if (game.id === 'rangoli') endRangoli();
+    else if (game.id === 'tiles') solveTiles();
+    else if (game.id === 'chimes') endChimes();
+    else if (game.id === 'spot') endSpot();
+    else if (game.id === 'count') endCount();
+    else if (game.id === 'lantern') endLantern();
+    else if (game.id === 'pond') endPond();
+    else if (game.id === 'mandala') endMandala();
     else endBloom();
   }
 
@@ -4501,6 +5330,8 @@
       case 'game-again': if (game) openGame(game.id); break;
       case 'game-keep': keepKindNote(); break;
       case 'games-all': go('play'); setSeg('games'); break;
+      case 'daily-play': openDaily(); break;
+      case 'game-plus': openGamePlus(); break;
       case 'start-break': startCheckin('guided'); break;
       case 'breathe-now': breatheNow(); break;
       case 'open-shop': openShop(); break;
@@ -4764,6 +5595,23 @@
     dropBlock: dropBlock,
     pickKind: pickKind,
     keepKindNote: keepKindNote,
+    openDaily: openDaily,
+    dailyGame: dailyGame,
+    gameSets: GAME_SETS,
+    colourRing: colourRing,
+    pickColour: pickColour,
+    tapTile: tapTile,
+    peekTiles: peekTiles,
+    tapChime: tapChime,
+    playTune: playTune,
+    chimeTunes: CHIME_TUNES,
+    tapSpot: tapSpot,
+    tapCount: tapCount,
+    holdLantern: holdLantern,
+    letLantern: letLantern,
+    releaseLantern: releaseLantern,
+    rippleAt: rippleAt,
+    mandalaStroke: mandalaStroke,
     gameRank: function () { return gameRank(); },
     skies: SKIES,
     feelPlan: function () { var p = feelPlan(); return JSON.parse(JSON.stringify({ key: p.key, steps: p.steps, next: p.next, alt: p.alt, hear: p.hear, close: p.f.close })); },

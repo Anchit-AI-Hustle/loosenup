@@ -116,7 +116,7 @@ test('Choose a calm break: pick feelings, get a recommendation, change it, then 
 test('Every exercise starts and guides: breathing cues, step-by-step steps, tap dots, and Let it out', async () => {
   const { ctx, page, errors } = await phone();
   const tech = await page.evaluate(() => Object.keys(window.LoosenUp.techniques));
-  assert.equal(tech.length, 22, 'every exercise, including the ten feeling-led ones');
+  assert.equal(tech.length, 28, 'every exercise, including the feeling-led ones and the six added in 2.8');
   for (const id of tech) {
     await go(page, 'today');
     const kind = await page.evaluate((t) => { const r = window.LoosenUp.startNow(t); return [r, window.LoosenUp.techniques[t].kind]; }, id);
@@ -265,7 +265,7 @@ test('Emotion meter: 17 feelings, three levels each, a fourth tap clears, and Pr
 
 test('Today layout: games, Sleep journal and more, season card, and the More help fold with every tool', async () => {
   const { ctx, page, errors } = await phone();
-  assert.deepEqual((await page.locator('#screen-today .game-row .game-tile strong').allInnerTexts()).sort(), ['Breathing Ring', 'Bubble Pop', 'Calm Pairs', 'Colour Sort', 'Gentle Stack', 'Kind Notes', 'Star Connect', 'Sunbeam Catch', 'Trace the square', 'Zen Sand']);
+  assert.deepEqual((await page.locator('#screen-today .game-row .game-tile strong').allInnerTexts()).sort(), ['Breathing Ring', 'Bubble Pop', 'Calm Count', 'Calm Pairs', 'Colour Sort', 'Gentle Stack', 'Kind Notes', 'Mirror Mandala', 'Picture Tiles', 'Rangoli Colours', 'Ripple Pond', 'Sky Lanterns', 'Spot the Odd One', 'Star Connect', 'Sunbeam Catch', 'Trace the square', 'Wind Chimes', 'Zen Sand']);
   // Every game that suits the moment (Sunbeam Catch rests at night), best fit first, in one swipeable row.
   const fit = await page.evaluate(() => window.LoosenUp.gameRank());
   assert.ok(fit.length >= 9);

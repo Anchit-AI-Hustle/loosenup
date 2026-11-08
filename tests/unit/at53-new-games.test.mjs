@@ -133,7 +133,7 @@ test('AT53 after a game: one tap into another that suits the feeling, and See al
   app.click('#games-all');
   assert.equal(app.B.currentScreen(), 'play');
   assert.equal(app.visible('#panel-games'), true);
-  assert.equal(app.document.querySelectorAll('#panel-games .game-card').length, 10);
+  assert.equal(app.document.querySelectorAll('#panel-games .game-card').length, 18);
 });
 
 test('AT53 feelings: the new games show where they help and stay away where they do not', () => {

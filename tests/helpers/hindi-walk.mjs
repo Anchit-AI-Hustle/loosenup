@@ -8,6 +8,8 @@ export const KEEP_EN = [
   'Breath Bloom', 'Petal Pairs', 'Trace the square', 'Plus', 'UPI', 'LU...', 'Sunbeam Catch', 'Calm Pairs', 'Breathing Ring', 'LoosenUp Plus', 'Sigh of relief', 'Slow breeze', 'Here and now', 'Soft release', 'Let it out',
   'Kind words', 'Desk reset', 'Steady square', 'Pause before replying', 'Cool down', 'Warm wishes', 'Quick breeze',
   'Gentle wave', 'Name it', 'Park the worry', 'Tomorrow list', 'Shake it out', 'Kind friend voice', 'Reach out', 'Gentle lift', 'Savour it', 'Hope and a first step', 'Bubble Pop', 'Colour Sort', 'Zen Sand', 'Star Connect', 'Gentle Stack', 'Kind Notes',
+  'Rangoli Colours', 'Picture Tiles', 'Wind Chimes', 'Spot the Odd One', 'Calm Count', 'Sky Lanterns', 'Ripple Pond', 'Mirror Mandala',
+  'Humming breath', 'Alternate breath', 'Night breath', 'Eye rest', 'Mindful chai', 'Morning stretch',
   'findahelpline.com', 'Vandrevala Foundation', 'iCall (TISS)', 'iCall', 'Stanley-Brown', 'WHO-5', 'RCI', 'NMC', 'MBBS', 'MD', 'CBT', 'OPD',
   'USD', 'Android', 'iPhone', 'Safari', 'Chrome', 'Share', 'Add to Home Screen', 'Install app', 'loosenup.anchit-tandon.com',
   'English', 'Asha', 'Rao', 'Dr', 'Meera', 'Seed shop', 'x7', 'LUAB12CD', 'Amaha', 'Mpower', 'BMC', 'NCR', 'AI', 'WhatsApp', 'NGO', 'OPD', 'Anchit'
@@ -54,10 +56,11 @@ export async function walkAll({ lang = 'hi' } = {}) {
   B.go('support'); B.useLocation({ lat: 28.6, lon: 77.2 }); await grab();
   for (const c of ['Mumbai', 'Bengaluru', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow', 'Chandigarh', 'Kochi']) { B.setCity(c); await grab(); }
   for (const l of B.lessons) { B.openLesson(l.id); await grab(); }
-  for (const g of ['pairs', 'catch', 'bloom', 'pop', 'sort', 'sand', 'stars', 'stack', 'kind']) { B.openGame(g); await grab(); B.finishCurrentGame(); await grab(); }
+  for (const g of ['pairs', 'catch', 'bloom', 'pop', 'sort', 'sand', 'stars', 'stack', 'kind', 'rangoli', 'tiles', 'chimes', 'spot', 'count', 'lantern', 'pond', 'mandala']) { B.openGame(g); await grab(); B.finishCurrentGame(); await grab(); }
   for (let m = 1; m <= 5; m++) { B.go('today'); app.click(`[data-mood="${m}"]`); await grab(); }
   B.go('today'); app.click('#sos-btn'); await grab();
   app.click('#support-close');
+  B.openDaily(); await grab(); B.finishCurrentGame(); await new Promise((r) => setTimeout(r, 1600)); await grab(); B.go('progress'); await grab();
   B.go('today'); app.click('#breathe-now'); await grab(); app.click('#session-audio'); await grab();
   app.click('#session-finish'); await grab(); app.click('#after-next'); await grab(); app.click('#result-done');
   B.setState({ trusted: { name: 'Meera', phone: '+919876543210' } }); B.go('me'); await grab(); app.click('#trusted-edit'); await grab();

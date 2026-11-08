@@ -287,3 +287,124 @@ html[data-theme="dark"] #screen-support .fine a, html[data-theme="dark"] #screen
 .glow { animation: glow 1.6s ease-out 1; }
 @keyframes glow { 0% { box-shadow: 0 0 0 0 rgba(255, 200, 87, .9); } 100% { box-shadow: 0 0 0 18px rgba(255, 200, 87, 0); } }
 @media (prefers-reduced-motion: reduce) { .glow { animation: none; } }
+
+/* ---------- More calm games ---------- */
+.gt-rangoli { background: linear-gradient(160deg, #FFEBCB, #FFFFFF 75%); }
+.gt-tiles { background: linear-gradient(160deg, #FFE3D3, #FFFFFF 75%); }
+.gt-chimes { background: linear-gradient(160deg, #EFE6FF, #FFFFFF 75%); }
+.gt-spot { background: linear-gradient(160deg, #DCEFFF, #FFFFFF 75%); }
+.gt-count { background: linear-gradient(160deg, #FFF0C4, #FFFFFF 75%); }
+.gt-lantern { background: linear-gradient(160deg, #DCE0F5, #FFFFFF 75%); }
+.gt-pond { background: linear-gradient(160deg, #D3ECFA, #FFFFFF 75%); }
+.gt-mandala { background: linear-gradient(160deg, #E3E2F7, #FFFFFF 75%); }
+html[data-theme="dark"] .gt-rangoli, html[data-theme="dark"] .gt-count { background: linear-gradient(160deg, #4A3F26, #1A2436 75%); }
+html[data-theme="dark"] .gt-tiles { background: linear-gradient(160deg, #4A3026, #1A2436 75%); }
+html[data-theme="dark"] .gt-chimes, html[data-theme="dark"] .gt-mandala, html[data-theme="dark"] .gt-lantern { background: linear-gradient(160deg, #2B3A67, #1A2436 75%); }
+html[data-theme="dark"] .gt-spot, html[data-theme="dark"] .gt-pond { background: linear-gradient(160deg, #1E3A55, #1A2436 75%); }
+.game-tile, .game-card { position: relative; }
+.new-tag { position: absolute; top: 6px; right: 6px; padding: 1px 7px; border-radius: 999px; background: var(--sun); color: #3A2A00; font: 800 11px/1.5 var(--ui); font-style: normal; letter-spacing: .02em; pointer-events: none; }
+
+/* Today's game */
+.daily-game { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 12px; padding: 12px 14px; margin: 12px 0 0; border-radius: 22px;
+  background: linear-gradient(120deg, #FFF3D6, #FFFFFF 70%); border: 1px solid var(--glass-line); box-shadow: var(--shadow); }
+html[data-theme="dark"] .daily-game { background: linear-gradient(120deg, #3A3220, #1A2436 70%); }
+.daily-ic { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 16px; background: rgba(255, 255, 255, .7); }
+html[data-theme="dark"] .daily-ic { background: rgba(255, 255, 255, .08); }
+.daily-ic svg { width: 40px; height: 40px; }
+.daily-body { display: grid; gap: 1px; min-width: 0; }
+.daily-kicker { font: 800 12px/1.3 var(--ui); letter-spacing: .06em; text-transform: uppercase; color: #8A4E00; }
+html[data-theme="dark"] .daily-kicker { color: var(--sun); }
+.daily-body strong { font: 650 17px/1.25 var(--display); }
+.daily-sub { font-size: 14px; color: var(--ink-2); }
+.daily-streak { font: 800 13px/1.4 var(--ui); color: var(--leaf-2); }
+html[data-theme="dark"] .daily-streak { color: #8FD3B0; }
+.daily-game.done #daily-play { background: var(--glass); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.plus-more { display: block; margin: 4px auto 0; }
+
+/* Game shelf */
+.shelf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; }
+.shelf-item { display: grid; gap: 2px; text-align: left; min-height: 48px; padding: 9px 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--glass); color: var(--ink); font: inherit; cursor: pointer; }
+.shelf-item strong { font-size: 15px; }
+.shelf-item span { font-size: 13px; color: var(--leaf-2); font-weight: 700; }
+html[data-theme="dark"] .shelf-item span { color: #8FD3B0; }
+.shelf-item.fresh { border-style: dashed; }
+.shelf-item.fresh span { color: #8A4E00; }
+html[data-theme="dark"] .shelf-item.fresh span { color: var(--sun); }
+
+/* Rangoli Colours and Mirror Mandala */
+.rangoli-stage, .mandala-stage { display: grid; gap: 14px; justify-items: center; }
+.rangoli-art { width: min(100%, 360px); aspect-ratio: 1; display: block; }
+.rangoli-floor { fill: #3B2A1E; }
+html[data-theme="dark"] .rangoli-floor { fill: #2A1E16; }
+.rangoli-ring { fill: rgba(255, 248, 236, .14); stroke: rgba(255, 248, 236, .55); stroke-width: .5; cursor: pointer; transition: fill .4s ease; }
+.rangoli-ring:focus-visible { outline: none; stroke: #FFC857; stroke-width: 1.2; }
+.rangoli-ring.filled { stroke: rgba(255, 255, 255, .5); }
+.rangoli-art.complete { animation: rangoli-glow 1.6s ease; }
+@keyframes rangoli-glow { 50% { filter: drop-shadow(0 0 10px rgba(255, 200, 87, .8)); } }
+.rangoli-palette { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.swatch { width: 44px; height: 44px; border-radius: 50%; border: 3px solid #FFFFFF; background: var(--sw); box-shadow: 0 0 0 1px var(--line), 0 4px 10px -4px rgba(0, 0, 0, .3); cursor: pointer; }
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--leaf-2), 0 4px 10px -4px rgba(0, 0, 0, .3); transform: scale(1.08); }
+.mandala-canvas { width: min(100%, 360px); aspect-ratio: 1; border-radius: 50%; touch-action: none; cursor: crosshair; background: #1E2A4A; box-shadow: var(--shadow); }
+
+/* Picture Tiles */
+.tiles-grid { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: min(100%, 340px); margin: 0 auto 12px; }
+.tile { aspect-ratio: 1; padding: 0; border: 0; border-radius: 10px; overflow: hidden; cursor: pointer; background: #EEE; transition: transform .2s ease, box-shadow .2s ease; }
+.tile svg { width: 100%; height: 100%; display: block; }
+.tile[aria-pressed="true"] { transform: scale(.92); box-shadow: 0 0 0 4px var(--sun-2); }
+.tile { position: relative; }
+.tile.home::after { content: ''; position: absolute; right: 6px; bottom: 6px; width: 10px; height: 10px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 2px var(--leaf); }
+.tiles-grid.whole .tile.home::after { display: none; }
+.tiles-grid.whole { gap: 0; transition: gap .5s ease; }
+.tiles-grid.whole .tile { border-radius: 0; box-shadow: none; }
+.tiles-peek-pic { position: absolute; inset: 0; border-radius: 10px; overflow: hidden; animation: fade-in .25s ease; }
+.tiles-peek-pic svg { width: 100%; height: 100%; display: block; }
+@keyframes fade-in { from { opacity: 0; } }
+
+/* Wind Chimes */
+.chimes { display: flex; justify-content: center; align-items: flex-start; gap: 14px; height: 200px; padding-top: 10px; border-top: 6px solid #8E5A3C; border-radius: 4px; margin: 6px auto 8px; max-width: 340px; }
+.chime { width: 44px; height: var(--len); border: 0; border-radius: 0 0 22px 22px; background: linear-gradient(90deg, rgba(255, 255, 255, .45), transparent 40%), var(--ch); cursor: pointer; transform-origin: top center; box-shadow: 0 6px 14px -8px rgba(0, 0, 0, .4); }
+.chime.ring { animation: chime-swing .9s ease; }
+@keyframes chime-swing { 0% { filter: brightness(1.35) drop-shadow(0 0 12px var(--ch)); transform: rotate(5deg); } 40% { transform: rotate(-4deg); } 70% { transform: rotate(2deg); } 100% { transform: none; } }
+.chimes-say { text-align: center; font-weight: 800; min-height: 1.5em; }
+
+/* Spot the Odd One */
+.spot-grid { display: grid; grid-template-columns: repeat(var(--side, 3), 1fr); gap: 8px; width: min(100%, 360px); margin: 0 auto; }
+.spot { aspect-ratio: 1; padding: 6px; border: 0; border-radius: 16px; background: var(--glass); box-shadow: inset 0 0 0 1px var(--line); cursor: pointer; transition: opacity .3s ease, transform .2s ease; }
+.spot svg { width: 100%; height: 100%; display: block; }
+.spot.faded { opacity: .1; transform: scale(.82); }
+.spot.found { transform: scale(1.12); box-shadow: 0 0 0 3px var(--leaf); }
+
+/* Calm Count */
+.count-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: min(100%, 340px); margin: 0 auto; }
+.count-num { aspect-ratio: 1; border: 0; border-radius: 18px; background: var(--tint); color: #223038; font: 800 26px/1 var(--ui); cursor: pointer; transition: opacity .3s ease, transform .2s ease; }
+.count-num.found { opacity: .3; transform: scale(.9); }
+.count-num.wobble { animation: wobble .4s ease; }
+@keyframes wobble { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+/* Sky Lanterns */
+.lantern-sky { position: relative; height: 340px; border-radius: 28px; overflow: hidden; background: linear-gradient(#1B2547, #2B3A67 60%, #47507F); box-shadow: var(--shadow); }
+.lantern { --glow: 0; position: absolute; width: 64px; height: 80px; margin-left: -32px; border: 0; padding: 6px 4px 0; border-radius: 14px 14px 22px 22px; cursor: pointer; touch-action: none;
+  display: grid; place-items: center; color: #4A2A08; font: 800 11px/1.15 var(--ui); text-align: center;
+  background: radial-gradient(circle at 50% 58%, rgba(255, 246, 214, var(--glow)), rgba(255, 246, 214, 0) 72%), linear-gradient(#E9A55A, #C9752B);
+  filter: brightness(calc(.9 + var(--glow) * .3));
+  box-shadow: 0 0 calc(var(--glow) * 36px) calc(var(--glow) * 10px) rgba(255, 200, 87, .65); transition: bottom 3.5s ease-in, opacity 3.5s ease-in; }
+.lantern::before { content: ''; position: absolute; top: -6px; left: 10px; right: 10px; height: 6px; border-radius: 3px; background: #8E5A3C; }
+.lantern-word { pointer-events: none; overflow-wrap: anywhere; }
+.lantern.away { bottom: 120% !important; opacity: 0; animation: lantern-sway 3.5s ease-in-out; }
+@keyframes lantern-sway { 33% { margin-left: -22px; } 66% { margin-left: -42px; } }
+
+/* Ripple Pond */
+.pond { position: relative; height: 360px; border-radius: 32px; overflow: hidden; cursor: pointer; touch-action: none; background: radial-gradient(circle at 30% 30%, #9AD3F3, #4FA9C8 60%, #2F7FA6); box-shadow: var(--shadow); }
+.ripple { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .85); pointer-events: none; animation: ripple 2.8s ease-out forwards; }
+@keyframes ripple { from { transform: scale(.2); opacity: 1; } to { transform: scale(9); opacity: 0; } }
+.lily { position: absolute; width: 34px; height: 30px; margin: -15px 0 0 -17px; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #F7A8B6 18%, #4FA67C 20%); pointer-events: none; animation: fade-in 1s ease; }
+.koi { position: absolute; width: 46px; height: 23px; pointer-events: none; opacity: .9; }
+.koi-0 { top: 22%; animation: koi-swim 16s linear infinite; }
+.koi-1 { top: 58%; animation: koi-swim 21s linear infinite reverse; }
+.koi-2 { top: 78%; animation: koi-swim 26s linear -8s infinite; }
+@keyframes koi-swim { from { left: 105%; } to { left: -15%; } }
+@media (prefers-reduced-motion: reduce) {
+  .koi { animation: none; left: 40%; }
+  .ripple { animation-duration: 1.2s; }
+  .lantern { transition-duration: 1.2s; }
+}

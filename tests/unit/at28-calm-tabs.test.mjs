@@ -17,7 +17,7 @@ test('AT28 Calm holds breathing exercises, games and sounds as tabs in one scree
   assert.equal(app.visible('#panel-breathe'), false);
   assert.equal(app.$('#seg-games').getAttribute('aria-selected'), 'true');
   assert.equal(app.$('#screen-play .seg').getAttribute('data-active'), 'games');
-  assert.equal(app.document.querySelectorAll('#panel-games [data-game]').length, 9);
+  assert.equal(app.document.querySelectorAll('#panel-games [data-game]').length, 17);
   app.click('[data-seg="sounds"]');
   assert.equal(app.visible('#panel-sounds'), true);
   assert.equal(app.document.querySelectorAll('#panel-sounds [data-sound]').length, 4);
@@ -32,9 +32,9 @@ test('AT28 every exercise has a card, all open from day one', () => {
   app.B.go('play');
   const ids = [...app.document.querySelectorAll('#panel-breathe [data-practice]')].map((b) => b.getAttribute('data-practice'));
   assert.deepEqual(ids.sort(), Object.keys(app.B.techniques).sort(), 'every exercise, including the ones For you suggests');
-  assert.equal(ids.length, 22);
+  assert.equal(ids.length, 28);
   const breath = [...app.document.querySelectorAll('#practice-breath [data-practice]')].map((b) => b.getAttribute('data-practice'));
-  assert.deepEqual(breath, ['quick', 'sigh', 'breeze', 'wave', 'square', 'cooldown']);
+  assert.deepEqual(breath, ['quick', 'sigh', 'breeze', 'wave', 'square', 'cooldown', 'hum', 'nadi', 'night']);
   assert.equal(app.document.querySelectorAll('#panel-breathe [data-practice][disabled]').length, 0, 'nothing locked');
   assert.match(app.$('[data-practice="quick"]').textContent, /Always free/);
   assert.match(app.$('[data-practice="square"]').textContent, /2 min · Work/);
