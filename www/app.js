@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '2.8.0';
+  var VERSION = '2.9.0';
   var KEY = 'loosenup.v1';
   // One home for the website, the mobile website and every app download.
   var PUBLIC_URL = 'https://loosenup.anchit-tandon.com';
@@ -169,6 +169,16 @@
       steps: ['Picture it going well. What do you see?', 'Name the best part of that picture.', 'Name one thing that might get in the way.',
         'Choose one small step that helps, and when you will take it.', 'Picture the good part once more, and smile at it.']
     },
+    // For a sudden rush of panic: steady the breath, feel the ground, cool down, and wait for the wave to pass.
+    panic: {
+      id: 'panic', name: 'Ride the wave', seconds: 120, unlockAt: 0, color: '#6FB3E0', kind: 'steps',
+      desc: 'For a sudden rush of panic. It feels huge, and it passes. Stay with these five steps.',
+      steps: ['This is a wave of panic. It feels huge, and it rises, peaks and passes. You do not have to fight it.',
+        'Breathe out slowly, longer than you breathe in. In for four, out for six.',
+        'Press your feet into the floor. Name five things you can see, slowly, one by one.',
+        'Hold something cold, or splash cool water on your face if you can.',
+        'Hand on your chest. Say to yourself: I am safe right now. This will pass.']
+    },
     // More to try: breathing from Indian practice, rest for screen-tired eyes, a slow cup and a morning stretch.
     hum: {
       id: 'hum', name: 'Humming breath', seconds: 120, unlockAt: 0, color: '#B9A3F0', kind: 'breath',
@@ -219,7 +229,7 @@
 
   // Spaces group feelings by what people are carrying: everyday, work, relationships, low days and sleep.
   var SPACES = {
-    everyday: { name: 'Everyday', contexts: ['Busy mind', 'Tight shoulders', 'Big moment ahead', 'Hard to focus', 'Just a quick lift'] },
+    everyday: { name: 'Everyday', contexts: ['Feeling anxious', 'Busy mind', 'Tight shoulders', 'Big moment ahead', 'Hard to focus', 'Just a quick lift'] },
     work: { name: 'Work', contexts: ['Work pile-up', 'Before a meeting', 'After a tough call', 'Hard to switch off'] },
     relationships: { name: 'Relationships', contexts: ['Tense with someone', 'After a disagreement', 'Before a hard talk', 'Feeling disconnected'] },
     lowdays: { name: 'Low days', contexts: ['Feeling low', 'Low energy', 'Hard on myself'] },
@@ -233,6 +243,8 @@
     return 'everyday';
   }
   var RULES = {
+    'Feeling anxious': [['sigh', 'A long, slow breath out is one of the quickest ways to tell an anxious body it can settle.'],
+      ['here', 'Noticing what is around you, one sense at a time, brings an anxious mind back to now.']],
     'Busy mind': [['letitout', 'Putting thoughts into words can make a busy mind feel roomier.'],
       ['here', 'Noticing what is around you gently brings a busy mind back to now.']],
     'Tight shoulders': [['release', 'Tensing and softening helps shoulders let go.'],
@@ -815,6 +827,12 @@
 
   function renderPick() {
     var rec = flow.picked ? null : recommendFor(flow.contexts);
+    // When calm is very low, the body comes first: a long breath out before any thinking or writing.
+    if (rec && flow.before != null && +flow.before <= 3 && TECH[rec.id].kind !== 'breath') {
+      var many = (flow.contexts || []).filter(Boolean);
+      rec = { id: 'sigh', reason: 'When everything feels like a lot, the body comes first. A long, slow breath out helps it settle, and your mind can follow.' +
+        (many.length > 1 ? ' Picked for ' + joinNames(many) + '.' : '') };
+    }
     if (rec) { flow.technique = rec.id; flow.reason = rec.reason; }
     var t = TECH[flow.technique];
     setText('pick-name', t.name);
@@ -880,6 +898,7 @@
   };
   // Step exercises: an icon, seconds for each step, tap-to-count dots, or a two-part cue (like tense, then let go).
   var STEP_GUIDE = {
+    panic: [{ icon: '🌊', secs: 24 }, { icon: '🌬️', secs: 24, sub: [['Breathe in', 4], ['Breathe out', 6]] }, { icon: '👣', secs: 24, count: 5 }, { icon: '🧊', secs: 24 }, { icon: '🤲', secs: 24 }],
     eyes: [{ icon: '🙌', secs: 24 }, { icon: '🫣', secs: 24 }, { icon: '🔭', secs: 24 }, { icon: '😌', secs: 24, count: 10 }, { icon: '👀', secs: 24 }],
     chai: [{ icon: '☕', secs: 24 }, { icon: '👃', secs: 24 }, { icon: '👅', secs: 24 }, { icon: '🌡️', secs: 24 }, { icon: '📵', secs: 24 }],
     stretch: [{ icon: '🙆', secs: 24 }, { icon: '🙇', secs: 24 }, { icon: '↔️', secs: 24, sub: [['Left side', 6], ['Right side', 6]] }, { icon: '🔄', secs: 24 }, { icon: '🌬️', secs: 24, sub: [['Breathe in', 4], ['Breathe out', 6]] }],
@@ -1322,6 +1341,18 @@
     var ses = state.sessions.filter(function (x) { return weekKey(new Date(x.ts)) === wk; });
     return { n: ses.length, avg: avgGain(ses) };
   }
+  // Still feeling it? When calm is still low, or a break did not help, offer something different and someone to talk to.
+  function renderStillFeeling(r) {
+    var box = $('still-feeling');
+    if (!box) return false;
+    var show = r.after <= 3 || (r.rated && r.gain <= 0 && r.after <= 5);
+    box.hidden = !show;
+    if (!show) return false;
+    var next = flow && flow.technique === 'panic' ? 'sigh' : 'panic';
+    setText('still-try', 'Try ' + TECH[next].name);
+    $('still-try').setAttribute('data-now', next);
+    return true;
+  }
   function renderResult(r) {
     var name = state.name || 'friend';
     setText('result-headline', r.gain > 0 ? 'Lovely, ' + name + '!' : 'You showed up, ' + name + '.');
@@ -1345,6 +1376,7 @@
     items.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
     ul.hidden = !items.length;
     var note = r.rated && r.gain <= 0 ? 'You made time for yourself today, and that is what matters most.' : NOTES[(breaksDone() - 1) % NOTES.length];
+    renderStillFeeling(r);
     setText('result-note', note);
     // Restart the sunrise animation.
     var rise = document.querySelector('.rs-rise');
@@ -1882,14 +1914,16 @@
   }
 
   /* ---------- What brings you here: a few taps on first open shape For you ---------- */
-  var FOCUS = [['sleep', '🌙', 'Better sleep'], ['work', '💼', 'Calmer workdays'], ['people', '💞', 'Relationships'],
-    ['heavy', '☁️', 'Heavy days'], ['exams', '📚', 'Exams'], ['calm', '🍃', 'Just some calm']];
+  var FOCUS = [['anxious', '🌊', 'Feeling anxious'], ['sleep', '🌙', 'Better sleep'], ['work', '💼', 'Calmer workdays'], ['people', '💞', 'Relationships'],
+    ['heavy', '☁️', 'Heavy days'], ['exams', '📚', 'Exams'], ['calm', '🍃', 'Just some calm'], ['panic', '🫀', 'Sudden panic']];
   var FOCUS_PLANS = {
     sleep: [['tech:night', 'Slow, sleepy breaths with long breaths out tell your body it can slow down.'], ['tech:tomorrow', 'Set tomorrow down on paper, so your mind can rest tonight.']],
     work: [['tech:desk', 'Let the workday go from your shoulders without leaving your chair.'], ['tech:eyes', 'Give your eyes two minutes away from the screen.']],
     people: [['tech:cooldown', 'Long breaths out help you answer from care.'], ['tech:warmth', 'Send kind wishes to someone you care about.']],
     heavy: [['tech:kind', 'A hand on your heart and a few kind words, with nothing to fix.'], ['game:lantern', 'Light a lantern with each slow breath in, and watch it float away.']],
-    exams: [['tech:square', 'Steady breathing before a study round.'], ['game:sort', 'Sort the stones for a tidy, calm break.']]
+    exams: [['tech:square', 'Steady breathing before a study round.'], ['game:sort', 'Sort the stones for a tidy, calm break.']],
+    anxious: [['tech:sigh', 'A long breath out first, so your body can start to settle.'], ['tech:park', 'Write the worry down and give it a time, so it can wait.']],
+    panic: [['tech:panic', 'Five steps for a sudden wave: breathe out slowly, feel the ground, let it pass.'], ['game:pond', 'Tap the water and watch the ripples fade, while your breath slows.']]
   };
   function focusPlan() {
     var fs = (state.focus || []).filter(function (k) { return FOCUS_PLANS[k]; });
@@ -2421,7 +2455,7 @@
   // Each tap cycles the intensity: a little (1), quite (2), very (3), then off.
   var EMOTIONS = [
     ['angry', 'Angry', '😠', 'cooldown', 'Long breaths out help anger cool.'],
-    ['worried', 'Worried', '😟', 'square', 'A steady square breath settles a worried mind.'],
+    ['worried', 'Anxious', '😟', 'square', 'A steady square breath settles an anxious mind.'],
     ['sad', 'Sad', '😢', 'kind', 'Kind words help on a sad day.'],
     ['tired', 'Tired', '🥱', 'sigh', 'Two quick sighs can lift low energy.'],
     ['lonely', 'Lonely', '🥺', 'warmth', 'Warm wishes help you feel closer to others.'],
@@ -2711,7 +2745,7 @@
   /* ---------- Calm: breathing, games and sounds in one screen ---------- */
   var SEGS = ['breathe', 'games', 'sounds'];
   var calmSeg = 'breathe';
-  var BREATH_LIST = ['quick', 'sigh', 'breeze', 'wave', 'square', 'cooldown', 'hum', 'nadi', 'night'];
+  var BREATH_LIST = ['quick', 'panic', 'sigh', 'breeze', 'wave', 'square', 'cooldown', 'hum', 'nadi', 'night'];
   var MIND_LIST = ['here', 'name', 'release', 'shake', 'eyes', 'chai', 'stretch', 'letitout', 'park', 'tomorrow', 'kind', 'friend', 'savour', 'lift', 'hope', 'reach', 'desk', 'pause', 'warmth'];
   function setSeg(seg, focus) {
     if (SEGS.indexOf(seg) === -1) seg = 'breathe';
@@ -2735,7 +2769,7 @@
     var t = TECH[id];
     var b = document.createElement('button');
     b.type = 'button';
-    b.className = 'practice' + (id === 'quick' ? ' featured' : '');
+    b.className = 'practice' + (id === 'quick' || id === 'panic' ? ' featured' : '');
     b.setAttribute('data-practice', id);
     b.style.setProperty('--c', t.color);
     var orb = document.createElement('span'); orb.className = 'practice-orb'; orb.setAttribute('aria-hidden', 'true');
@@ -5083,6 +5117,11 @@
         'Many people notice their heartbeat ease a little and their shoulders drop after a few long breaths out. That is why Sigh of relief and Cool down stretch the out-breath.',
         'You can use this anywhere: in a meeting, in traffic, before a hard talk. Nobody needs to know.'],
       takeaway: 'Make the out-breath longer than the in-breath.', tryLabel: 'Try Sigh of relief', tryTech: 'sigh' },
+    { id: 'anxious', title: 'When you feel anxious: what your body is doing', min: 1,
+      body: ['Feeling anxious is your body getting ready to protect you: a faster heart, quick breaths, tight muscles, a busy mind. It is uncomfortable, and it is not harmful.',
+        'A sudden wave of panic rises, peaks and passes, usually within minutes. Fighting it tends to make it bigger. Breathing out slowly and feeling the ground under you helps it pass.',
+        'If anxious feelings come often, stay for weeks, or stop you doing everyday things, talking to a professional really helps. Tele-MANAS (14416) is free, any time.'],
+      takeaway: 'It rises, peaks and passes. Breathe out slowly and let it.', tryLabel: 'Try Ride the wave', tryTech: 'panic' },
     { id: 'thoughts', title: 'Thoughts are guesses, not facts', min: 1,
       body: ['A thought like "I always mess things up" can feel completely true in the moment. It is really a guess your mind makes, often on a tired or heavy day.',
         'Thoughts, feelings and actions move together. When you look at a thought from a little distance, the feeling often softens too.',
@@ -5325,7 +5364,10 @@
       case 'voice-toggle': toggleVoice(); break;
       case 'step-next': if (run && TECH[run.id].steps && run.step < TECH[run.id].steps.length - 1) { run.ready = 0; showStep(run.step + 1); } break;
       case 'after-next': finishAfter(); break;
-      case 'result-done': go('today'); break;
+      case 'result-done': go(state.onboarded ? 'today' : 'welcome'); break;
+      case 'still-talk': openSupport(); break;
+      case 'welcome-breathe': breatheNow(); break;
+      case 'sos-panic': startNow('panic'); break;
       case 'game-back': go(lastTab || 'play'); break;
       case 'game-again': if (game) openGame(game.id); break;
       case 'game-keep': keepKindNote(); break;

@@ -116,7 +116,7 @@ test('Choose a calm break: pick feelings, get a recommendation, change it, then 
 test('Every exercise starts and guides: breathing cues, step-by-step steps, tap dots, and Let it out', async () => {
   const { ctx, page, errors } = await phone();
   const tech = await page.evaluate(() => Object.keys(window.LoosenUp.techniques));
-  assert.equal(tech.length, 28, 'every exercise, including the feeling-led ones and the six added in 2.8');
+  assert.equal(tech.length, 29, 'every exercise, including the feeling-led ones and the six added in 2.8');
   for (const id of tech) {
     await go(page, 'today');
     const kind = await page.evaluate((t) => { const r = window.LoosenUp.startNow(t); return [r, window.LoosenUp.techniques[t].kind]; }, id);
@@ -427,11 +427,11 @@ test('Wellbeing check: five WHO-5 questions give a score out of 100 and show on 
 
 /* ---------- Learn and programmes ---------- */
 
-test('Learn: all nine lessons open, and Try it starts the matching exercise or space', async () => {
+test('Learn: all ten lessons open, and Try it starts the matching exercise or space', async () => {
   const { ctx, page, errors } = await phone();
   await go(page, 'learn');
   const ids = await page.locator('[data-lesson]').evaluateAll((b) => b.map((x) => x.getAttribute('data-lesson')));
-  assert.equal(new Set(ids).size, 9);
+  assert.equal(new Set(ids).size, 10);
   for (const id of new Set(ids)) {
     await go(page, 'learn');
     await page.click(`[data-lesson="${id}"]`);

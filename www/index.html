@@ -111,6 +111,7 @@
           <button class="chip" type="button" data-lang-choice="hi" aria-pressed="false" lang="hi">हिन्दी</button>
         </div>
         <h1 id="welcome-title" class="display">Welcome. Take a breath.</h1>
+        <button id="welcome-breathe" class="btn btn-soft btn-small welcome-breathe" type="button">Anxious right now? Breathe first</button>
         <p class="lead">Two calm minutes to loosen up and feel lighter. Ease a tense workday, soften a heavy mood, and see your Calm gain grow over the weeks.</p>
         <form id="welcome-form" class="stack" novalidate>
           <label class="field-label" for="name-input">What should we call you?</label>
@@ -298,6 +299,14 @@
         </div>
         <ul id="result-rewards" class="rewards"></ul>
         <p id="result-note" class="kind-note"></p>
+        <article id="still-feeling" class="card still-feeling" hidden>
+          <h2 class="subtitle">Still feeling it?</h2>
+          <p class="muted">That is okay. Some moments need more than one try. Try something different, or talk to someone now.</p>
+          <div class="row">
+            <button id="still-try" class="btn btn-soft btn-small" type="button" data-now="panic">Try Ride the wave</button>
+            <button id="still-talk" class="btn btn-ghost btn-small" type="button">Talk to someone</button>
+          </div>
+        </article>
         <button id="plan-next" class="btn btn-sun" type="button" hidden>Next for you</button>
         <button id="result-done" class="btn btn-sun" type="button">Back to Today</button>
         <button id="result-send" class="link-btn send-btn" type="button">Send this break to a friend</button>
@@ -1089,6 +1098,7 @@
     <details id="sos-more" class="fold sos-more">
       <summary>More options</summary>
       <div class="fold-body">
+        <button id="sos-panic" class="btn btn-soft" type="button">Panic help: Ride the wave</button>
         <button id="sos-location" class="btn btn-ghost" type="button" aria-pressed="false" hidden>Add my location to the message: off</button>
         <a id="sos-org" class="btn btn-soft" href="#" hidden></a>
         <a id="sos-whatsapp" class="btn btn-soft" href="https://wa.me/919999666555" data-hl="vandrevala.whatsapp" target="_blank" rel="noopener" hidden>Text Vandrevala on WhatsApp</a>

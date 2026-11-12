@@ -7,7 +7,7 @@ const ready = (d = day(3)) => { const app = makeApp({ now: d, rng: () => 0.99 })
 test('AT34 every kind of emotion can be logged, with an intensity of 1 to 3', () => {
   const app = ready();
   const names = [...app.document.querySelectorAll('#emotions .emo-name')].map((e) => e.textContent);
-  for (const n of ['Angry', 'Worried', 'Sad', 'Tired', 'Lonely', 'Overwhelmed', 'Frustrated', 'Restless', 'Hard on myself', 'Flat', 'Mind racing', 'Calm', 'Happy', 'Grateful', 'Hopeful', 'Loved', 'Energetic']) assert.ok(names.includes(n), n);
+  for (const n of ['Angry', 'Anxious', 'Sad', 'Tired', 'Lonely', 'Overwhelmed', 'Frustrated', 'Restless', 'Hard on myself', 'Flat', 'Mind racing', 'Calm', 'Happy', 'Grateful', 'Hopeful', 'Loved', 'Energetic']) assert.ok(names.includes(n), n);
   app.click('[data-emotion="angry"]');
   app.click('[data-emotion="angry"]');
   const b = app.$('[data-emotion="angry"]');

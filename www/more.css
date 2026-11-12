@@ -408,3 +408,9 @@ html[data-theme="dark"] .rangoli-floor { fill: #2A1E16; }
   .ripple { animation-duration: 1.2s; }
   .lantern { transition-duration: 1.2s; }
 }
+
+/* Help for anxious moments */
+.welcome-breathe { display: block; width: 100%; margin: 4px 0 6px; font-size: 16px; }
+.sos-ground-row { gap: 8px; flex-wrap: wrap; justify-content: center; }
+.still-feeling { margin-top: 12px; border: 2px solid rgba(111, 179, 224, .45); }
+.still-feeling .row { gap: 8px; flex-wrap: wrap; }

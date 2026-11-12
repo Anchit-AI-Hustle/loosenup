@@ -9,7 +9,7 @@ export const KEEP_EN = [
   'Kind words', 'Desk reset', 'Steady square', 'Pause before replying', 'Cool down', 'Warm wishes', 'Quick breeze',
   'Gentle wave', 'Name it', 'Park the worry', 'Tomorrow list', 'Shake it out', 'Kind friend voice', 'Reach out', 'Gentle lift', 'Savour it', 'Hope and a first step', 'Bubble Pop', 'Colour Sort', 'Zen Sand', 'Star Connect', 'Gentle Stack', 'Kind Notes',
   'Rangoli Colours', 'Picture Tiles', 'Wind Chimes', 'Spot the Odd One', 'Calm Count', 'Sky Lanterns', 'Ripple Pond', 'Mirror Mandala',
-  'Humming breath', 'Alternate breath', 'Night breath', 'Eye rest', 'Mindful chai', 'Morning stretch',
+  'Ride the wave', 'Humming breath', 'Alternate breath', 'Night breath', 'Eye rest', 'Mindful chai', 'Morning stretch',
   'findahelpline.com', 'Vandrevala Foundation', 'iCall (TISS)', 'iCall', 'Stanley-Brown', 'WHO-5', 'RCI', 'NMC', 'MBBS', 'MD', 'CBT', 'OPD',
   'USD', 'Android', 'iPhone', 'Safari', 'Chrome', 'Share', 'Add to Home Screen', 'Install app', 'loosenup.anchit-tandon.com',
   'English', 'Asha', 'Rao', 'Dr', 'Meera', 'Seed shop', 'x7', 'LUAB12CD', 'Amaha', 'Mpower', 'BMC', 'NCR', 'AI', 'WhatsApp', 'NGO', 'OPD', 'Anchit'

@@ -63,7 +63,7 @@ test('AT54 What brings you here: chips on first open and in Me shape For you', (
   app.setValue('#name-input', 'Asha');
   app.click('#welcome-go');
   const chips = [...app.document.querySelectorAll('#screen-gift [data-focus]')];
-  assert.equal(chips.length, 6);
+  assert.equal(chips.length, 8);
   assert.equal(app.$('#gift-go').textContent, 'Start my first break', 'choosing is optional');
   app.click('#screen-gift [data-focus="exams"]');
   assert.equal(app.$('#screen-gift [data-focus="exams"]').getAttribute('aria-pressed'), 'true');

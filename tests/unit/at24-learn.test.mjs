@@ -5,11 +5,11 @@ import { makeApp, onboard, day } from '../helpers/app.mjs';
 const BANNED = /\b(stress|anxiety|danger|fail|lose|lost|wilt|miss|guilt|pressure|late|bad|wrong)\b/i;
 const ready = () => { const app = makeApp({ now: day(1), rng: () => 0.99 }); onboard(app); app.B.go('today'); return app; };
 
-test('AT24 Learn lists nine one-minute lessons from the toolkit', () => {
+test('AT24 Learn lists ten one-minute lessons from the toolkit', () => {
   const app = ready();
   app.click('.toolkit [data-tool="learn"]');
   assert.equal(app.B.currentScreen(), 'learn');
-  assert.equal(app.document.querySelectorAll('[data-lesson]').length, 9);
+  assert.equal(app.document.querySelectorAll('[data-lesson]').length, 10);
 });
 
 test('AT24 lesson copy is kind, free of banned words and makes no medical promises', () => {
